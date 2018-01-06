@@ -1,7 +1,7 @@
 package orderbook
 
 import (
-	"github.com/decanus/orderbook/order"
+	"github.com/DexyProject/dexy-go/types"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -25,7 +25,7 @@ func NewMongoDataProvider(connection string) (mgo.Session, error) {
 	return *session, err
 
 }
-func (ob *MongoOrderBook) InsertOrder(NewOrder order.Order) error {
+func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	// Connect to Mongo session
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
@@ -63,9 +63,9 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 }
 
 
-func (ob *MongoOrderBook) Bids(token common.Address, limit int, connection string) ([]order.Order) {
+func (ob *MongoOrderBook) Bids(token common.Address, limit int, connection string) ([]types.Order) {
 
-	var orders []order.Order
+	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
 	c.Find(bson.M{"token":token}).Sort("-price").Limit(limit).All(&orders)
@@ -73,9 +73,9 @@ func (ob *MongoOrderBook) Bids(token common.Address, limit int, connection strin
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, limit int) ([]order.Order) {
+func (ob *MongoOrderBook) Asks(token common.Address, limit int) ([]types.Order) {
 
-	var orders []order.Order
+	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
 	c.Find(bson.M{"token":token}).Sort("price").Limit(limit).All(&orders)
@@ -83,8 +83,8 @@ func (ob *MongoOrderBook) Asks(token common.Address, limit int) ([]order.Order) 
 	return orders
 }
 
-func (ob *MongoOrderBook) GetOrderByHash(hash string) (*order.Order) {
-	order := order.Order{}
+func (ob *MongoOrderBook) GetOrderByHash(hash string) (*types.Order) {
+	order := types.Order{}
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
 	err := c.Find(bson.M{"hash":hash}).One(&order)
