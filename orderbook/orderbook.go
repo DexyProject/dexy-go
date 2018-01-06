@@ -8,7 +8,7 @@ import (
 type OrderBook interface {
 	InsertOrder(order types.Order) error
 	RemoveOrder(hash string) bool
-	Bids(address common.Address, limit int) []types.Order
-	Asks(address common.Address, limit int) []types.Order
+	Bids(token common.Address, user *common.Address, limit int) []types.Order
+	Asks(token common.Address, user *common.Address, limit int) []types.Order
 	GetOrderByHash(hash string) *types.Order
 }
