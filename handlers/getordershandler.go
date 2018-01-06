@@ -31,20 +31,35 @@ func (handler *GetOrdersHandler) Handle(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	limit := 100
-	if query.Get("limit") != "0" {
+	limit := getLimit(query.Get("limit"))
+	user := getUser(query.Get("user"))
 
-		u, err := strconv.Atoi(query.Get("limit"))
+	o := Orders{}
+	address := common.HexToAddress(token)
+
+	o.Asks = handler.OrderBook.Asks(address, user, limit)
+	o.Bids = handler.OrderBook.Bids(address, user, limit)
+
+	json.NewEncoder(rw).Encode(o)
+}
+
+func getLimit(limit string) int {
+	if len(limit) != 0 && limit != "0" {
+
+		u, err := strconv.Atoi(limit)
 		if err == nil {
-			limit = u
+			return u
 		}
 	}
 
-	o := Orders{}
+	return 100
+}
 
-	address := common.HexToAddress(token)
-	o.Asks = handler.OrderBook.Asks(address, limit)
-	o.Bids = handler.OrderBook.Bids(address, limit)
+func getUser(user string) *common.Address {
+	if user == "" || !common.IsHexAddress(user) {
+		return nil
+	}
 
-	json.NewEncoder(rw).Encode(o)
+	addr := common.HexToAddress(user)
+	return &addr
 }

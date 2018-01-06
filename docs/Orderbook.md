@@ -7,6 +7,7 @@ Returns Asks and Bids for a specified ```token```
 ### Parameters
 * **token [string]** ```required``` - Returns all orders where ```token``` in either side of the book is equal to the address. 
 * **limit [int]** ```Default: 100``` - Amount of orders to return for both sides of the book. 
+* **user [string]** ```optional``` - Returns all orders where ```user``` equals to specified address
 
 ```json
 {
