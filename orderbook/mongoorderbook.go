@@ -63,7 +63,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Address) []types.Order {
+func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
@@ -77,7 +77,7 @@ func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Add
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, limit int, user *common.Address) []types.Order {
+func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
