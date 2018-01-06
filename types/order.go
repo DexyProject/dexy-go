@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
-
 type Trade struct {
 	Token  common.Address `json:"token" bson:"token"`
 	Amount string         `json:"amount" bson:"amount"`
@@ -22,8 +21,6 @@ type Order struct {
 	Exchange  common.Address `json:"exchange" bson:"exchange"`
 	Signature EC             `json:"signature" bson:"signature"`
 }
-
-
 
 func (order *Order) OrderHash() ([]byte, error) {
 	sha := sha3.NewKeccak256()

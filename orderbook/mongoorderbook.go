@@ -11,6 +11,7 @@ import (
 
 type MongoOrderBook struct {
 	connection string
+	session *mgo.Session
 }
 
 const (
@@ -18,17 +19,19 @@ const (
 	FileName = "Orders"
 )
 
-func NewMongoDataProvider(connection string) (mgo.Session, error) {
+func NewMongoOrderBook(connection string) (MongoOrderBook) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
-		return *session, fmt.Errorf("connection to db could not be established")
+		return MongoOrderBook{connection:connection, session:nil}
 	}
-	return *session, err
+	return MongoOrderBook{connection:connection, session:session}
 
 }
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	// Connect to Mongo session
-	session, _ := NewMongoDataProvider(ob.connection)
+	session := ob.session.Clone()
+	defer session.Close()
+
 	c := session.DB(DBName).C(FileName)
 
 	if ob.GetOrderByHash(NewOrder.Hash) != nil { // Check if Hash exists
@@ -48,12 +51,13 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	if err != nil {
 		return fmt.Errorf("order could not be added to database")
 	}
-	defer session.Close()
 	return nil
 }
 
 func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
-	session, _ := NewMongoDataProvider(ob.connection)
+	session := ob.session.Clone()
+	defer session.Close()
+
 	c := session.DB(DBName).C(FileName)
 	err := c.Remove(bson.M{"hash": hash})
 	if err != nil {
@@ -64,37 +68,39 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 }
 
 func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
-
 	var orders []types.Order
-	session, _ := NewMongoDataProvider(ob.connection)
+	session := ob.session.Clone()
+	defer session.Close()
+
 	c := session.DB(DBName).C(FileName)
 	if user != nil {
-		c.Find(bson.M{"user": user}).Sort("-price").Limit(limit).All(&orders)
+		c.Find(bson.M{"token":token, "user": user}).Sort("-price").Limit(limit).All(&orders)
 	} else {
-		c.Find(bson.M{"token": token}).Sort("-price").Limit(limit).All(&orders)
+		c.Find(bson.M{"get.token": token}).Sort("-price").Limit(limit).All(&orders)
 	}
-	defer session.Close()
 	return orders
 }
 
 func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
-
 	var orders []types.Order
-	session, _ := NewMongoDataProvider(ob.connection)
+	session := ob.session.Clone()
+	defer session.Close()
+
 	c := session.DB(DBName).C(FileName)
 	if user != nil {
-		c.Find(bson.M{"user": user}).Sort("price").Limit(limit).All(&orders)
+		c.Find(bson.M{"token":token, "user": user}).Sort("price").Limit(limit).All(&orders)
 	} else {
-		c.Find(bson.M{"token": token}).Sort("price").Limit(limit).All(&orders)
+		c.Find(bson.M{"give.token": token}).Sort("price").Limit(limit).All(&orders)
 	}
-	defer session.Close()
 	return orders
 }
 
 func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	order := types.Order{}
-	session, _ := NewMongoDataProvider(ob.connection)
+	session := ob.session.Clone()
+	defer session.Close()
 	c := session.DB(DBName).C(FileName)
+
 	err := c.Find(bson.M{"hash": hash}).One(&order)
 	if err != nil {
 		return nil
