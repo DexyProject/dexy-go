@@ -1,11 +1,12 @@
 package orderbook
 
 import (
-	"github.com/DexyProject/dexy-go/types"
 	"fmt"
+
+	"github.com/DexyProject/dexy-go/types"
+	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 type MongoOrderBook struct {
@@ -13,13 +14,13 @@ type MongoOrderBook struct {
 }
 
 const (
-	DBName = "OrderBook"
+	DBName   = "OrderBook"
 	FileName = "Orders"
 )
 
 func NewMongoDataProvider(connection string) (mgo.Session, error) {
 	session, err := mgo.Dial(connection)
-	if err !=  nil {
+	if err != nil {
 		return *session, fmt.Errorf("connection to db could not be established")
 	}
 	return *session, err
@@ -62,14 +63,13 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	return true
 }
 
-
-func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Address) ([]types.Order) {
+func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Address) []types.Order {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
 	if user != nil {
-		c.Find(bson.M{"user":user}).Sort("-price").Limit(limit).All(&orders)
+		c.Find(bson.M{"user": user}).Sort("-price").Limit(limit).All(&orders)
 	} else {
 		c.Find(bson.M{"token": token}).Sort("-price").Limit(limit).All(&orders)
 	}
@@ -77,13 +77,13 @@ func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Add
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, limit int, user *common.Address) ([]types.Order) {
+func (ob *MongoOrderBook) Asks(token common.Address, limit int, user *common.Address) []types.Order {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
 	if user != nil {
-		c.Find(bson.M{"user":user}).Sort("price").Limit(limit).All(&orders)
+		c.Find(bson.M{"user": user}).Sort("price").Limit(limit).All(&orders)
 	} else {
 		c.Find(bson.M{"token": token}).Sort("price").Limit(limit).All(&orders)
 	}
@@ -91,11 +91,11 @@ func (ob *MongoOrderBook) Asks(token common.Address, limit int, user *common.Add
 	return orders
 }
 
-func (ob *MongoOrderBook) GetOrderByHash(hash string) (*types.Order) {
+func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	order := types.Order{}
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
-	err := c.Find(bson.M{"hash":hash}).One(&order)
+	err := c.Find(bson.M{"hash": hash}).One(&order)
 	if err != nil {
 		return nil
 	}
