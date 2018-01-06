@@ -1,0 +1,32 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/decanus/dexy-go/orderbook"
+	"github.com/decanus/dexy-go/handlers"
+	"github.com/gorilla/mux"
+)
+
+func main() {
+
+	r := mux.NewRouter()
+
+	ob := &orderbook.MemoryOrderBook{}
+
+	getorders := handlers.GetOrdersHandler{OrderBook: ob}
+	getorder := handlers.GetOrderHandler{OrderBook: ob}
+	createorder := handlers.CreateOrderHandler{OrderBook: ob}
+
+	r.HandleFunc("/orders", getorders.Handle).Methods("GET").Queries("token", "")
+	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
+	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET")
+
+	//http.Handle("/", r)
+
+	err := http.ListenAndServe(":12312", r)
+	if err != nil {
+		log.Fatal("Listen:", err)
+	}
+}
