@@ -6,5 +6,5 @@ import (
 )
 
 type History interface {
-	GetHistory(token common.Address) ([]types.Transaction)
+	GetHistory(token common.Address, user *common.Address, limit int) ([]types.Transaction)
 }
