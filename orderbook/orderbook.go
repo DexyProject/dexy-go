@@ -1,7 +1,7 @@
 package orderbook
 
 import (
-	"github.com/decanus/dexy-go/types"
+	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/decanus/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/gorilla/mux"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/decanus/dexy-go/orderbook"
-	"github.com/decanus/dexy-go/types"
+	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

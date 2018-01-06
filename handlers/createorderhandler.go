@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/decanus/dexy-go/orderbook"
-	"github.com/decanus/dexy-go/types"
+	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/types"
 )
 
 type CreateOrderHandler struct {
