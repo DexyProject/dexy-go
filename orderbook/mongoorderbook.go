@@ -63,22 +63,30 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 }
 
 
-func (ob *MongoOrderBook) Bids(token common.Address, limit int, connection string) ([]types.Order) {
+func (ob *MongoOrderBook) Bids(token common.Address, limit int, user *common.Address) ([]types.Order) {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
-	c.Find(bson.M{"token":token}).Sort("-price").Limit(limit).All(&orders)
+	if user != nil {
+		c.Find(bson.M{"user":user}).Sort("-price").Limit(limit).All(&orders)
+	} else {
+		c.Find(bson.M{"token": token}).Sort("-price").Limit(limit).All(&orders)
+	}
 	defer session.Close()
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, limit int) ([]types.Order) {
+func (ob *MongoOrderBook) Asks(token common.Address, limit int, user *common.Address) ([]types.Order) {
 
 	var orders []types.Order
 	session, _ := NewMongoDataProvider(ob.connection)
 	c := session.DB(DBName).C(FileName)
-	c.Find(bson.M{"token":token}).Sort("price").Limit(limit).All(&orders)
+	if user != nil {
+		c.Find(bson.M{"user":user}).Sort("price").Limit(limit).All(&orders)
+	} else {
+		c.Find(bson.M{"token": token}).Sort("price").Limit(limit).All(&orders)
+	}
 	defer session.Close()
 	return orders
 }
