@@ -60,7 +60,6 @@ func getUser(user string) *common.Address {
 		return nil
 	}
 
-
 	addr := common.HexToAddress(user)
 	return &addr
 }
