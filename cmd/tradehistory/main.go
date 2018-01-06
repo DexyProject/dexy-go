@@ -13,7 +13,7 @@ func main() {
 	r := mux.NewRouter()
 
 	get := &history.GetTradeHistoryHandler{}
-	r.HandleFunc("/trades/{token}", get.Handle).Methods("GET")
+	r.HandleFunc("/trades", get.Handle).Methods("GET").Queries("token", "")
 
 	err := http.ListenAndServe(":12312", r)
 	if err != nil {

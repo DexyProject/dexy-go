@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -31,8 +30,8 @@ func (handler *GetOrdersHandler) Handle(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	limit := getLimit(query.Get("limit"))
-	user := getUser(query.Get("user"))
+	limit := GetLimit(query.Get("limit"))
+	user := GetUser(query.Get("user"))
 
 	o := Orders{}
 	address := common.HexToAddress(token)
@@ -41,25 +40,4 @@ func (handler *GetOrdersHandler) Handle(rw http.ResponseWriter, r *http.Request)
 	o.Bids = handler.OrderBook.Bids(address, user, limit)
 
 	json.NewEncoder(rw).Encode(o)
-}
-
-func getLimit(limit string) int {
-	if len(limit) != 0 && limit != "0" {
-
-		u, err := strconv.Atoi(limit)
-		if err == nil {
-			return u
-		}
-	}
-
-	return 100
-}
-
-func getUser(user string) *common.Address {
-	if user == "" || !common.IsHexAddress(user) {
-		return nil
-	}
-
-	addr := common.HexToAddress(user)
-	return &addr
 }
