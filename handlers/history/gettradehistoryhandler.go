@@ -20,7 +20,7 @@ func (handler *GetTradeHistoryHandler) Handle(rw http.ResponseWriter, r *http.Re
 
 	addr := common.HexToAddress(params["token"])
 
-	h := handler.History.GetHistory(addr)
+	h := handler.History.GetHistory(addr, nil, 10)
 	json.NewEncoder(rw).Encode(h)
 
 }
