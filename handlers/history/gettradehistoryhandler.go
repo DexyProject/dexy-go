@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/DexyProject/dexy-go/handlers"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/gorilla/mux"
 )
 
 type GetTradeHistoryHandler struct {
@@ -16,11 +16,20 @@ type GetTradeHistoryHandler struct {
 func (handler *GetTradeHistoryHandler) Handle(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	params := mux.Vars(r)
+	query := r.URL.Query()
+	token := query.Get("token")
 
-	addr := common.HexToAddress(params["token"])
+	if token == "0x0000000000000000000000000000000000000000" || !common.IsHexAddress(token) {
+		// @todo error body
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	h := handler.History.GetHistory(addr, nil, 10)
+	limit := handlers.GetLimit(query.Get("limit"))
+	user := handlers.GetUser(query.Get("user"))
+
+	addr := common.HexToAddress(token)
+
+	h := handler.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
-
 }
