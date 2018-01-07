@@ -24,6 +24,7 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
+
 	return &MongoOrderBook{connection:connection, session:session}, nil
 }
 
@@ -51,6 +52,7 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	if err != nil {
 		return fmt.Errorf("order could not be added to database")
 	}
+
 	return nil
 }
 
@@ -63,6 +65,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	if err != nil {
 		return false
 	}
+
 	return true
 }
 
@@ -77,6 +80,7 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 	} else {
 		c.Find(bson.M{"get.token": token.String()}).Sort("-price").Limit(limit).All(&orders)
 	}
+
 	return orders
 }
 
@@ -91,6 +95,7 @@ func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit
 	} else {
 		c.Find(bson.M{"give.token": token.String()}).Sort("price").Limit(limit).All(&orders)
 	}
+
 	return orders
 }
 
@@ -104,5 +109,6 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	if err != nil {
 		return nil
 	}
+
 	return &order
 }
