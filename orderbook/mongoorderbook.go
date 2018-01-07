@@ -19,14 +19,14 @@ const (
 	FileName = "Orders"
 )
 
-func (ob *MongoOrderBook) NewMongoOrderBook(connection string) (MongoOrderBook MongoOrderBook, err error) {
+func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
-		return MongoOrderBook{connection:connection, session:nil}, fmt.Errorf("could not connect to mongo database")
+		return nil, fmt.Errorf("could not connect to mongo database")
 	}
-	return MongoOrderBook{connection:connection, session:session}, nil
-
+	return &MongoOrderBook{connection:connection, session:session}, nil
 }
+
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	// Connect to Mongo session
 	session := ob.session.Clone()
@@ -63,7 +63,6 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	if err != nil {
 		return false
 	}
-	defer session.Close()
 	return true
 }
 
@@ -105,6 +104,5 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	if err != nil {
 		return nil
 	}
-	defer session.Close()
 	return &order
 }
