@@ -6,20 +6,20 @@ import (
 )
 
 type Trade struct {
-	Token  common.Address `json:"token"`
-	Amount string         `json:"amount"`
+	Token  common.Address `json:"token" bson:"token"`
+	Amount string         `json:"amount" bson:"amount"`
 }
 
 type Order struct {
-	Hash      string         `json:"hash"`
-	Price     float64        `json:"price"`
-	Give      Trade          `json:"give"`
-	Get       Trade          `json:"get"`
-	Expires   string         `json:"expires"`
-	Nonce     string         `json:"nonce"`
-	User      common.Address `json:"user"`
-	Exchange  common.Address `json:"exchange"`
-	Signature EC             `json:"signature"`
+	Hash      string         `json:"hash" bson:"hash"`
+	Price     float64        `json:"price" bson:"price"`
+	Give      Trade          `json:"give" bson:"give,inline"`
+	Get       Trade          `json:"get" bson:"get,inline"`
+	Expires   string         `json:"expires" bson:"expires"`
+	Nonce     string         `json:"nonce" bson:"nonce"`
+	User      common.Address `json:"user" bson:"user"`
+	Exchange  common.Address `json:"exchange" bson:"exchange"`
+	Signature EC             `json:"signature" bson:"signature"`
 }
 
 func (order *Order) OrderHash() ([]byte, error) {
