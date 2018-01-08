@@ -1,6 +1,8 @@
 package history
 
 import (
+	"fmt"
+
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
@@ -15,6 +17,15 @@ const (
 type MongoHistory struct {
 	connection string
 	session    *mgo.Session
+}
+
+func NewMongoHistory(connection string) (*MongoHistory, error) {
+	session, err := mgo.Dial(connection)
+	if err != nil {
+		return nil, fmt.Errorf("could not connect to mongo database")
+	}
+
+	return &MongoHistory{connection: connection, session: session}, nil
 }
 
 func (history *MongoHistory) GetHistory(token common.Address, user *common.Address, limit int) []types.Transaction {
