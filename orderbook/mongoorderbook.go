@@ -11,7 +11,7 @@ import (
 
 type MongoOrderBook struct {
 	connection string
-	session *mgo.Session
+	session    *mgo.Session
 }
 
 const (
@@ -25,7 +25,7 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &MongoOrderBook{connection:connection, session:session}, nil
+	return &MongoOrderBook{connection: connection, session: session}, nil
 }
 
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
@@ -75,11 +75,13 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
+
+	q := bson.M{"get.token": token.String()}
 	if user != nil {
-		c.Find(bson.M{"get.token":token.String(), "user": user.String()}).Sort("-price").Limit(limit).All(&orders)
-	} else {
-		c.Find(bson.M{"get.token": token.String()}).Sort("-price").Limit(limit).All(&orders)
+		q["user"] = user.String()
 	}
+
+	c.Find(q).Sort("-price").Limit(limit).All(&orders)
 
 	return orders
 }
@@ -90,11 +92,13 @@ func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
+
+	q := bson.M{"give.token": token.String()}
 	if user != nil {
-		c.Find(bson.M{"give.token":token.String(), "user": user.String()}).Sort("price").Limit(limit).All(&orders)
-	} else {
-		c.Find(bson.M{"give.token": token.String()}).Sort("price").Limit(limit).All(&orders)
+		q["user"] = user.String()
 	}
+
+	c.Find(q).Sort("price").Limit(limit).All(&orders)
 
 	return orders
 }
