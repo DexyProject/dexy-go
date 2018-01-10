@@ -16,7 +16,7 @@ type MongoOrderBook struct {
 	session    *mgo.Session
 }
 
-type BalanceValidatorSession struct {
+type BalanceValidator struct {
 	contract *exchange.ExchangeInterface
 	callOpts bind.CallOpts
 	transactOpts bind.TransactOpts
@@ -123,14 +123,5 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	}
 
 	return &order
-}
-
-func (contractSession BalanceValidatorSession) CheckBalance(token common.Address, user common.Address) (*big.Int, error) {
-	balance, err:= exchange.ExchangeInterfaceSession{Contract:contractSession.contract, CallOpts:contractSession.callOpts,
-	TransactOpts:contractSession.transactOpts}.BalanceOf(token, user) //Can pass nil for CallOpts and TransactOpts
-	if err != nil {
-		return nil, fmt.Errorf("could not connect to contract session")
-	}
-	return balance, nil
 }
 
