@@ -67,6 +67,5 @@ func calculatePrice(order types.Order) (string, error) {
 		price = give / get
 	}
 
-	// @todo precision is still in discussion
-	return strconv.FormatFloat(price, 'f', 8, 64), nil
+	return strconv.FormatFloat(price, 'f', -1, 64), nil
 }
