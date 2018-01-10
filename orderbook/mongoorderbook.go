@@ -129,7 +129,7 @@ func (contractSession BalanceValidatorSession) CheckBalance(token common.Address
 	balance, err:= exchange.ExchangeInterfaceSession{Contract:contractSession.contract, CallOpts:contractSession.callOpts,
 	TransactOpts:contractSession.transactOpts}.BalanceOf(token, user) //Can pass nil for CallOpts and TransactOpts
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not connect to contract session")
 	}
 	return balance, nil
 }
