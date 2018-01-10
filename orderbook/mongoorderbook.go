@@ -16,12 +16,7 @@ type MongoOrderBook struct {
 	session    *mgo.Session
 }
 
-type BalanceValidator struct {
-	contract *exchange.ExchangeInterface
-	callOpts bind.CallOpts
-	transactOpts bind.TransactOpts
 
-}
 const (
 	DBName   = "OrderBook"
 	FileName = "Orders"
