@@ -6,6 +6,7 @@ import (
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type CreateOrderHandler struct {
@@ -22,6 +23,14 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		return
 		// @todo
 	}
+
+	hash, err := o.OrderHash()
+	if err != nil {
+		// @todo
+		return
+	}
+
+	o.Hash = common.ToHex(hash)
 
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
