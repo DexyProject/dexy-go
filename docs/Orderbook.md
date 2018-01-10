@@ -99,7 +99,6 @@ Adds a new order to the order book.
 
 ```json
 {
-  "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
   "price": "0.01",
   "get": {
     "token": "0x0000000000000000000000000000000000000000",

@@ -11,7 +11,7 @@ type Trade struct {
 }
 
 type Order struct {
-	Hash      string         `json:"hash" bson:"hash"`
+	Hash      string         `json:"hash,omitempty" bson:"hash"`
 	Price     float64        `json:"price" bson:"price"`
 	Give      Trade          `json:"give" bson:"give,inline"`
 	Get       Trade          `json:"get" bson:"get,inline"`
