@@ -2,11 +2,12 @@ package orderbook
 
 import (
 	"fmt"
-
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"math/big"
+	"github.com/DexyProject/dexy-go/types/bindings"
 )
 
 type MongoOrderBook struct {
@@ -115,4 +116,12 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	}
 
 	return &order
+}
+
+func (ob *MongoOrderBook) BalanceValidator(token common.Address, user common.Address) (*big.Int, error) {
+	balance, err:= bindings.ExchangeInterfaceSession{}.BalanceOf(token, user)
+	if err != nil {
+		return nil, err
+	}
+	return balance, nil
 }
