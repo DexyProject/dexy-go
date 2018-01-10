@@ -7,7 +7,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"math/big"
-	"github.com/DexyProject/dexy-go/types/bindings"
+	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 type MongoOrderBook struct {
@@ -15,6 +16,12 @@ type MongoOrderBook struct {
 	session    *mgo.Session
 }
 
+type BalanceValidatorSession struct {
+	contract *exchange.ExchangeInterface
+	callOpts bind.CallOpts
+	transactOpts bind.TransactOpts
+
+}
 const (
 	DBName   = "OrderBook"
 	FileName = "Orders"
@@ -118,10 +125,12 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	return &order
 }
 
-func (ob *MongoOrderBook) BalanceValidator(token common.Address, user common.Address) (*big.Int, error) {
-	balance, err:= bindings.ExchangeInterfaceSession{}.BalanceOf(token, user)
+func (contractSession BalanceValidatorSession) CheckBalance(token common.Address, user common.Address) (*big.Int, error) {
+	balance, err:= exchange.ExchangeInterfaceSession{Contract:contractSession.contract, CallOpts:contractSession.callOpts,
+	TransactOpts:contractSession.transactOpts}.BalanceOf(token, user) //Can pass nil for CallOpts and TransactOpts
 	if err != nil {
 		return nil, err
 	}
 	return balance, nil
 }
+
