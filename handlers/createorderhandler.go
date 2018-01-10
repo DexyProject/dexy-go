@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -31,6 +32,13 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	}
 
 	o.Hash = common.ToHex(hash)
+	price, err := calculatePrice(o)
+	if err != nil {
+		// @todo
+		return
+	}
+
+	o.Price = price
 
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
@@ -38,4 +46,26 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	}
 
 	// @todo response
+}
+
+func calculatePrice(order types.Order) (string, error) {
+
+	get, err := strconv.ParseFloat(order.Get.Amount, 64)
+	if err != nil {
+		return "", err
+	}
+
+	give, err := strconv.ParseFloat(order.Give.Amount, 64)
+	if err != nil {
+		return "", err
+	}
+
+	var price float64
+	if order.Get.Token.String() == "0x0000000000000000000000000000000000000000" {
+		price = get / give
+	} else {
+		price = give / get
+	}
+
+	return strconv.FormatFloat(price, 'f', -1, 64), nil
 }
