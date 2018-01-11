@@ -26,7 +26,6 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		// @todo
 	}
 
-
 	_, err = handler.BalanceValidator.CheckBalance(o)
 	hash, err := o.OrderHash()
 	if err != nil {
@@ -42,12 +41,6 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	}
 
 	o.Price = price
-
-	err = handler.OrderBook.InsertOrder(o)
-	if err != nil {
-		return
-		// @todo
-	}
 
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
