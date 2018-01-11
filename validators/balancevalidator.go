@@ -34,8 +34,10 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) error
 	if err != nil {
 		return fmt.Errorf("error parsing o.give.amount")
 	}
+
 	if balanceFloat < giveAmount {
 		return fmt.Errorf("balance too low")
 	}
+
 	return nil
 }
