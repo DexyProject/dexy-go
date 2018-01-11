@@ -4,8 +4,8 @@ import (
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 	"fmt"
+	"math/big"
 )
 
 type BalanceValidator struct {
@@ -15,12 +15,13 @@ type BalanceValidator struct {
 
 }
 func (contractSession BalanceValidator) CheckBalance(token common.Address, user common.Address) (*big.Int, error) {
-	balance, err:= exchange.ExchangeInterfaceSession{Contract: contractSession.contract, CallOpts: contractSession.callOpts,
+	balance, err:= exchange.ExchangeInterfaceSession{
+		Contract: contractSession.contract,
+		CallOpts: contractSession.callOpts,
 		TransactOpts: contractSession.transactOpts}.BalanceOf(token, user) //Can pass nil for CallOpts and TransactOpts
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to contract session")
 	}
+
 	return balance, nil
 }
-
-
