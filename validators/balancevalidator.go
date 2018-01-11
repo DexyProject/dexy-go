@@ -8,20 +8,19 @@ import (
 	"fmt"
 )
 
-type BalanceValidator struct {
-	contract *exchange.ExchangeInterface
-	callOpts bind.CallOpts
-	transactOpts bind.TransactOpts
+type BalanceValidator interface {
+	CheckBalance(tokenAddr, userAddr common.Address) (*big.Int, error)
+}
+
+type BalanceValidatorSession struct {
+	conn bind.ContractBackend
 
 }
-func (contractSession BalanceValidator) CheckBalance(token common.Address, user common.Address) (*big.Int, error) {
-	balance, err:= exchange.ExchangeInterfaceSession{
-		Contract: contractSession.contract,
-		CallOpts: contractSession.callOpts,
-		TransactOpts: contractSession.transactOpts}.BalanceOf(token, user) //Can pass nil for CallOpts and TransactOpts
+func (balanceSession *BalanceValidatorSession) CheckBalance(tokenAddr, userAddr common.Address) (*big.Int, error) {
+	token, err:= exchange.NewExchangeInterface(tokenAddr, balanceSession.conn)//Can pass nil for CallOpts and TransactOpts
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to contract session")
 	}
 
-	return balance, nil
+	return token.BalanceOf(nil,tokenAddr,userAddr)
 }
