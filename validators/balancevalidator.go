@@ -14,13 +14,13 @@ type BalanceValidator interface {
 
 type BalanceValidatorSession struct {
 	conn bind.ContractBackend
-
 }
+
 func (balanceSession *BalanceValidatorSession) CheckBalance(tokenAddr, userAddr common.Address) (*big.Int, error) {
-	exchange, err := exchange.NewExchangeInterface(tokenAddr, balanceSession.conn)
+	exchangeInterface, err := exchange.NewExchangeInterface(tokenAddr, balanceSession.conn)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to contract session")
 	}
 
-	return exchange.BalanceOf(nil, tokenAddr, userAddr) //nil passed for Opts
+	return exchangeInterface.BalanceOf(nil, tokenAddr, userAddr) //nil passed for Opts
 }
