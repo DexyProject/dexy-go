@@ -6,10 +6,12 @@ import (
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/DexyProject/dexy-go/validators"
 )
 
 type CreateOrderHandler struct {
 	OrderBook orderbook.OrderBook
+	BalanceValidator *validators.BalanceValidatorSession
 }
 
 func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Request) {
@@ -26,6 +28,12 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
 		return
+	}
+
+	_, err = handler.BalanceValidator.CheckBalance(o.Exchange, o.User)
+	if err != nil {
+		return
+		// @todo
 	}
 
 	// @todo response
