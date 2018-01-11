@@ -14,7 +14,7 @@ import (
 )
 
 // ExchangeInterfaceABI is the input ABI used to generate the binding from.
-const ExchangeInterfaceABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"canTrade\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"cancel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"filled\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"getVolume\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"Cancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"amountGive\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"amountGet\",\"type\":\"uint256\"}],\"name\":\"Traded\",\"type\":\"event\"}]"
+const ExchangeInterfaceABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"cancel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"canTrade\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"Cancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Traded\",\"type\":\"event\"}]"
 
 // ExchangeInterfaceBin is the compiled bytecode used for deploying new contracts.
 const ExchangeInterfaceBin = `0x`
@@ -185,103 +185,51 @@ func (_ExchangeInterface *ExchangeInterfaceCallerSession) BalanceOf(token common
 	return _ExchangeInterface.Contract.BalanceOf(&_ExchangeInterface.CallOpts, token, user)
 }
 
-// CanTrade is a free data retrieval call binding the contract method 0x0b98f9ad.
+// CanTrade is a free data retrieval call binding the contract method 0xd4e0b0be.
 //
-// Solidity: function canTrade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) constant returns(bool)
-func (_ExchangeInterface *ExchangeInterfaceCaller) CanTrade(opts *bind.CallOpts, addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (bool, error) {
+// Solidity: function canTrade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256, hash bytes32) constant returns(bool)
+func (_ExchangeInterface *ExchangeInterfaceCaller) CanTrade(opts *bind.CallOpts, tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int, hash [32]byte) (bool, error) {
 	var (
 		ret0 = new(bool)
 	)
 	out := ret0
-	err := _ExchangeInterface.contract.Call(opts, out, "canTrade", addresses, values, v, r, s, amount, mode)
+	err := _ExchangeInterface.contract.Call(opts, out, "canTrade", tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount, hash)
 	return *ret0, err
 }
 
-// CanTrade is a free data retrieval call binding the contract method 0x0b98f9ad.
+// CanTrade is a free data retrieval call binding the contract method 0xd4e0b0be.
 //
-// Solidity: function canTrade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) constant returns(bool)
-func (_ExchangeInterface *ExchangeInterfaceSession) CanTrade(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (bool, error) {
-	return _ExchangeInterface.Contract.CanTrade(&_ExchangeInterface.CallOpts, addresses, values, v, r, s, amount, mode)
+// Solidity: function canTrade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256, hash bytes32) constant returns(bool)
+func (_ExchangeInterface *ExchangeInterfaceSession) CanTrade(tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int, hash [32]byte) (bool, error) {
+	return _ExchangeInterface.Contract.CanTrade(&_ExchangeInterface.CallOpts, tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount, hash)
 }
 
-// CanTrade is a free data retrieval call binding the contract method 0x0b98f9ad.
+// CanTrade is a free data retrieval call binding the contract method 0xd4e0b0be.
 //
-// Solidity: function canTrade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) constant returns(bool)
-func (_ExchangeInterface *ExchangeInterfaceCallerSession) CanTrade(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (bool, error) {
-	return _ExchangeInterface.Contract.CanTrade(&_ExchangeInterface.CallOpts, addresses, values, v, r, s, amount, mode)
+// Solidity: function canTrade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256, hash bytes32) constant returns(bool)
+func (_ExchangeInterface *ExchangeInterfaceCallerSession) CanTrade(tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int, hash [32]byte) (bool, error) {
+	return _ExchangeInterface.Contract.CanTrade(&_ExchangeInterface.CallOpts, tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount, hash)
 }
 
-// Filled is a free data retrieval call binding the contract method 0xa3093e0f.
+// Cancel is a paid mutator transaction binding the contract method 0x406edbd3.
 //
-// Solidity: function filled(user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceCaller) Filled(opts *bind.CallOpts, user common.Address, hash [32]byte) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ExchangeInterface.contract.Call(opts, out, "filled", user, hash)
-	return *ret0, err
+// Solidity: function cancel(expires uint256, amountGive uint256, amountGet uint256, tokenGet address, tokenGive address, nonce uint256, v uint8, r bytes32, s bytes32) returns()
+func (_ExchangeInterface *ExchangeInterfaceTransactor) Cancel(opts *bind.TransactOpts, expires *big.Int, amountGive *big.Int, amountGet *big.Int, tokenGet common.Address, tokenGive common.Address, nonce *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
+	return _ExchangeInterface.contract.Transact(opts, "cancel", expires, amountGive, amountGet, tokenGet, tokenGive, nonce, v, r, s)
 }
 
-// Filled is a free data retrieval call binding the contract method 0xa3093e0f.
+// Cancel is a paid mutator transaction binding the contract method 0x406edbd3.
 //
-// Solidity: function filled(user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceSession) Filled(user common.Address, hash [32]byte) (*big.Int, error) {
-	return _ExchangeInterface.Contract.Filled(&_ExchangeInterface.CallOpts, user, hash)
+// Solidity: function cancel(expires uint256, amountGive uint256, amountGet uint256, tokenGet address, tokenGive address, nonce uint256, v uint8, r bytes32, s bytes32) returns()
+func (_ExchangeInterface *ExchangeInterfaceSession) Cancel(expires *big.Int, amountGive *big.Int, amountGet *big.Int, tokenGet common.Address, tokenGive common.Address, nonce *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
+	return _ExchangeInterface.Contract.Cancel(&_ExchangeInterface.TransactOpts, expires, amountGive, amountGet, tokenGet, tokenGive, nonce, v, r, s)
 }
 
-// Filled is a free data retrieval call binding the contract method 0xa3093e0f.
+// Cancel is a paid mutator transaction binding the contract method 0x406edbd3.
 //
-// Solidity: function filled(user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceCallerSession) Filled(user common.Address, hash [32]byte) (*big.Int, error) {
-	return _ExchangeInterface.Contract.Filled(&_ExchangeInterface.CallOpts, user, hash)
-}
-
-// GetVolume is a free data retrieval call binding the contract method 0xa8aa5d34.
-//
-// Solidity: function getVolume(amountGet uint256, tokenGive address, amountGive uint256, user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceCaller) GetVolume(opts *bind.CallOpts, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, user common.Address, hash [32]byte) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ExchangeInterface.contract.Call(opts, out, "getVolume", amountGet, tokenGive, amountGive, user, hash)
-	return *ret0, err
-}
-
-// GetVolume is a free data retrieval call binding the contract method 0xa8aa5d34.
-//
-// Solidity: function getVolume(amountGet uint256, tokenGive address, amountGive uint256, user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceSession) GetVolume(amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, user common.Address, hash [32]byte) (*big.Int, error) {
-	return _ExchangeInterface.Contract.GetVolume(&_ExchangeInterface.CallOpts, amountGet, tokenGive, amountGive, user, hash)
-}
-
-// GetVolume is a free data retrieval call binding the contract method 0xa8aa5d34.
-//
-// Solidity: function getVolume(amountGet uint256, tokenGive address, amountGive uint256, user address, hash bytes32) constant returns(uint256)
-func (_ExchangeInterface *ExchangeInterfaceCallerSession) GetVolume(amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, user common.Address, hash [32]byte) (*big.Int, error) {
-	return _ExchangeInterface.Contract.GetVolume(&_ExchangeInterface.CallOpts, amountGet, tokenGive, amountGive, user, hash)
-}
-
-// Cancel is a paid mutator transaction binding the contract method 0x93503e36.
-//
-// Solidity: function cancel(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceTransactor) Cancel(opts *bind.TransactOpts, addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.contract.Transact(opts, "cancel", addresses, values, v, r, s, mode)
-}
-
-// Cancel is a paid mutator transaction binding the contract method 0x93503e36.
-//
-// Solidity: function cancel(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceSession) Cancel(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.Contract.Cancel(&_ExchangeInterface.TransactOpts, addresses, values, v, r, s, mode)
-}
-
-// Cancel is a paid mutator transaction binding the contract method 0x93503e36.
-//
-// Solidity: function cancel(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Cancel(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.Contract.Cancel(&_ExchangeInterface.TransactOpts, addresses, values, v, r, s, mode)
+// Solidity: function cancel(expires uint256, amountGive uint256, amountGet uint256, tokenGet address, tokenGive address, nonce uint256, v uint8, r bytes32, s bytes32) returns()
+func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Cancel(expires *big.Int, amountGive *big.Int, amountGet *big.Int, tokenGet common.Address, tokenGive common.Address, nonce *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
+	return _ExchangeInterface.Contract.Cancel(&_ExchangeInterface.TransactOpts, expires, amountGive, amountGet, tokenGet, tokenGive, nonce, v, r, s)
 }
 
 // Deposit is a paid mutator transaction binding the contract method 0x47e7ef24.
@@ -305,25 +253,25 @@ func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Deposit(token comm
 	return _ExchangeInterface.Contract.Deposit(&_ExchangeInterface.TransactOpts, token, amount)
 }
 
-// Trade is a paid mutator transaction binding the contract method 0x7e707789.
+// Trade is a paid mutator transaction binding the contract method 0x0a19b14a.
 //
-// Solidity: function trade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceTransactor) Trade(opts *bind.TransactOpts, addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.contract.Transact(opts, "trade", addresses, values, v, r, s, amount, mode)
+// Solidity: function trade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256) returns()
+func (_ExchangeInterface *ExchangeInterfaceTransactor) Trade(opts *bind.TransactOpts, tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int) (*types.Transaction, error) {
+	return _ExchangeInterface.contract.Transact(opts, "trade", tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount)
 }
 
-// Trade is a paid mutator transaction binding the contract method 0x7e707789.
+// Trade is a paid mutator transaction binding the contract method 0x0a19b14a.
 //
-// Solidity: function trade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceSession) Trade(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.Contract.Trade(&_ExchangeInterface.TransactOpts, addresses, values, v, r, s, amount, mode)
+// Solidity: function trade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256) returns()
+func (_ExchangeInterface *ExchangeInterfaceSession) Trade(tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int) (*types.Transaction, error) {
+	return _ExchangeInterface.Contract.Trade(&_ExchangeInterface.TransactOpts, tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount)
 }
 
-// Trade is a paid mutator transaction binding the contract method 0x7e707789.
+// Trade is a paid mutator transaction binding the contract method 0x0a19b14a.
 //
-// Solidity: function trade(addresses address[3], values uint256[4], v uint8, r bytes32, s bytes32, amount uint256, mode uint256) returns()
-func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Trade(addresses [3]common.Address, values [4]*big.Int, v uint8, r [32]byte, s [32]byte, amount *big.Int, mode *big.Int) (*types.Transaction, error) {
-	return _ExchangeInterface.Contract.Trade(&_ExchangeInterface.TransactOpts, addresses, values, v, r, s, amount, mode)
+// Solidity: function trade(tokenGet address, amountGet uint256, tokenGive address, amountGive uint256, expires uint256, nonce uint256, user address, v uint8, r bytes32, s bytes32, amount uint256) returns()
+func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Trade(tokenGet common.Address, amountGet *big.Int, tokenGive common.Address, amountGive *big.Int, expires *big.Int, nonce *big.Int, user common.Address, v uint8, r [32]byte, s [32]byte, amount *big.Int) (*types.Transaction, error) {
+	return _ExchangeInterface.Contract.Trade(&_ExchangeInterface.TransactOpts, tokenGet, amountGet, tokenGive, amountGive, expires, nonce, user, v, r, s, amount)
 }
 
 // Withdraw is a paid mutator transaction binding the contract method 0xf3fef3a3.
