@@ -3,24 +3,39 @@ package validators
 import (
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"math/big"
 	"fmt"
+	"github.com/DexyProject/dexy-go/types"
+	"strconv"
 )
 
 type BalanceValidator interface {
-	CheckBalance(tokenAddr, userAddr common.Address) (*big.Int, error)
+	CheckBalance(o types.Order) error
 }
 
 type BalanceValidatorSession struct {
 	conn bind.ContractBackend
 }
 
-func (balanceSession *BalanceValidatorSession) CheckBalance(tokenAddr, userAddr common.Address) (*big.Int, error) {
-	exchangeInterface, err := exchange.NewExchangeInterface(tokenAddr, balanceSession.conn)
+func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) error {
+	exchangeInterface, err := exchange.NewExchangeInterface(o.Exchange, balanceSession.conn)
+
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to contract session")
+		return fmt.Errorf("could not connect to contract session")
 	}
 
-	return exchangeInterface.BalanceOf(nil, tokenAddr, userAddr) //nil passed for Opts
+	balance, err := exchangeInterface.BalanceOf(nil, o.Exchange, o.User)
+	if err != nil {
+		return fmt.Errorf("could not get balance from contract")
+	}
+
+	balanceFloat := float64(balance.Int64()) // nasty type conversions
+	giveAmount, err := strconv.ParseFloat(o.Give.Amount, 64)
+
+	if err != nil {
+		return fmt.Errorf("error parsing o.give.amount")
+	}
+	if balanceFloat < giveAmount {
+		return fmt.Errorf("balance too low")
+	}
+	return nil
 }

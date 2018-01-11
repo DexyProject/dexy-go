@@ -25,11 +25,12 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		// @todo
 	}
 
-	_, err = handler.BalanceValidator.CheckBalance(o.Exchange, o.User)
+	_, err = handler.BalanceValidator.CheckBalance(o)
 	if err != nil {
 		return
 		// @todo
 	}
+
 
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
