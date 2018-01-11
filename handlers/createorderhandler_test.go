@@ -7,12 +7,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var pricetests = []struct{
+var pricetests = []struct {
 	expected string
-	err bool
-	give string
-	get string
-	getEth bool
+	err      bool
+	give     string
+	get      string
+	getEth   bool
 }{
 	{"", true, "fail", "fail", true},
 	{"", true, "fail", "1", true},
