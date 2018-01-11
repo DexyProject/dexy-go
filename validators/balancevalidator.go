@@ -4,8 +4,8 @@ import (
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"fmt"
 	"math/big"
+	"fmt"
 )
 
 type BalanceValidator struct {
