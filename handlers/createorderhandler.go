@@ -11,7 +11,7 @@ import (
 
 type CreateOrderHandler struct {
 	OrderBook orderbook.OrderBook
-	BalanceValidator *validators.BalanceValidatorSession
+	BalanceValidator validators.BalanceValidator
 }
 
 func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Request) {
@@ -25,16 +25,15 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		// @todo
 	}
 
-	err = handler.OrderBook.InsertOrder(o)
-	if err != nil {
-		return
-	}
-
 	_, err = handler.BalanceValidator.CheckBalance(o.Exchange, o.User)
 	if err != nil {
 		return
 		// @todo
 	}
 
+	err = handler.OrderBook.InsertOrder(o)
+	if err != nil {
+		return
+	}
 	// @todo response
 }
