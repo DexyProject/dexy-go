@@ -6,9 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"math/big"
-	"github.com/DexyProject/dexy-go/exchange"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 type MongoOrderBook struct {
