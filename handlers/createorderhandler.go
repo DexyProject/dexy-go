@@ -31,7 +31,6 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		// @todo
 	}
 
-
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
 		return
