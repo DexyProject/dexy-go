@@ -34,6 +34,11 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if err != nil {
+		// @todo
+		return
+	}
+
 	hash, err := o.OrderHash()
 	if err != nil {
 		// @todo

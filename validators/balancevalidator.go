@@ -37,7 +37,7 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool
 	}
 
 	if balanceFloat < giveAmount {
-		return false, fmt.Errorf("balance too low")
+		return balanceFloat < giveAmount, nil
 	}
 
 	return true, nil
