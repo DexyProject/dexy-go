@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type MemoryOrderBook struct {
@@ -42,11 +42,15 @@ func (ob *MemoryOrderBook) RemoveOrder(hash string) bool {
 	return false
 }
 
-func (ob *MemoryOrderBook) Bids(token common.Address, limit int) []types.Order {
+func (ob *MemoryOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
 
 	orders := []types.Order{}
 
 	for i := range ob.orders {
+		if user != nil && ob.orders[i].User != *user {
+			continue
+		}
+
 		if ob.orders[i].Get.Token == token {
 			orders = append(orders, ob.orders[i])
 		}
@@ -63,11 +67,15 @@ func (ob *MemoryOrderBook) Bids(token common.Address, limit int) []types.Order {
 	return orders[0 : limit-1]
 }
 
-func (ob *MemoryOrderBook) Asks(token common.Address, limit int) []types.Order {
+func (ob *MemoryOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
 
 	orders := []types.Order{}
 
 	for i := range ob.orders {
+		if user != nil && ob.orders[i].User != *user {
+			continue
+		}
+
 		if ob.orders[i].Give.Token == token {
 			orders = append(orders, ob.orders[i])
 		}

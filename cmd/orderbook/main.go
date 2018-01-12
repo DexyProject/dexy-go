@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/handlers"
+	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/gorilla/mux"
 )
 

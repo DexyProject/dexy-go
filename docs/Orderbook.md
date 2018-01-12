@@ -7,6 +7,7 @@ Returns Asks and Bids for a specified ```token```
 ### Parameters
 * **token [string]** ```required``` - Returns all orders where ```token``` in either side of the book is equal to the address. 
 * **limit [int]** ```Default: 100``` - Amount of orders to return for both sides of the book. 
+* **user [string]** ```optional``` - Returns all orders where ```user``` equals to specified address
 
 ```json
 {
@@ -98,8 +99,6 @@ Adds a new order to the order book.
 
 ```json
 {
-  "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
-  "price": "0.01",
   "get": {
     "token": "0x0000000000000000000000000000000000000000",
     "amount": "3000000000000000000"

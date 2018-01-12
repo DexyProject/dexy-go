@@ -8,9 +8,9 @@ import (
 )
 
 type EC struct {
-	V int    `json:"v"`
-	R string `json:"r"`
-	S string `json:"s"`
+	V int    `json:"v" bson:"v"`
+	R string `json:"r" bson:"r"`
+	S string `json:"s" bson:"s"`
 }
 
 func (ec *EC) Verify(address common.Address, hash []byte) bool {
