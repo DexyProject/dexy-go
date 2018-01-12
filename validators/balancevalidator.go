@@ -28,7 +28,7 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) error
 		return fmt.Errorf("could not get balance from contract")
 	}
 
-	balanceFloat := float64(balance.Int64()) // nasty type conversions
+	balanceFloat := float64(balance.Int64())
 	giveAmount, err := strconv.ParseFloat(o.Give.Amount, 64)
 
 	if err != nil {
