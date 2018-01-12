@@ -24,13 +24,14 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	var o types.Order
 	err := decoder.Decode(o)
 	if err != nil {
-		return
 		// @todo
+		return
 	}
 
-	err = handler.BalanceValidator.CheckBalance(o)
-	if err != nil {
-		// @todo		return
+	ok, err := handler.BalanceValidator.CheckBalance(o)
+	if !ok {
+		// @todo
+		return
 	}
 
 	hash, err := o.OrderHash()
