@@ -10,6 +10,8 @@ import (
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 
+)
+
 type CreateOrderHandler struct {
 	OrderBook orderbook.OrderBook
 	BalanceValidator validators.BalanceValidator
@@ -26,10 +28,9 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 		// @todo
 	}
 
-	_, err = handler.BalanceValidator.CheckBalance(o)
+	err = handler.BalanceValidator.CheckBalance(o)
 	if err != nil {
-		// @todo
-		return
+		// @todo		return
 	}
 
 	hash, err := o.OrderHash()
