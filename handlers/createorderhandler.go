@@ -7,11 +7,14 @@ import (
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
+
 )
 
 type CreateOrderHandler struct {
 	OrderBook orderbook.OrderBook
+	BalanceValidator validators.BalanceValidator
 }
 
 func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Request) {
@@ -21,8 +24,19 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	var o types.Order
 	err := decoder.Decode(o)
 	if err != nil {
-		return
 		// @todo
+		return
+	}
+
+	ok, err := handler.BalanceValidator.CheckBalance(o)
+	if !ok {
+		// @todo
+		return
+	}
+
+	if err != nil {
+		// @todo
+		return
 	}
 
 	hash, err := o.OrderHash()
@@ -39,12 +53,10 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	}
 
 	o.Price = price
-
 	err = handler.OrderBook.InsertOrder(o)
 	if err != nil {
 		return
 	}
-
 	// @todo response
 }
 
