@@ -31,7 +31,7 @@ func (tq *TickQueries) TickInsert(NewTick types.Tick) error {
 	return nil
 }
 
-func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) { //Aggregate query data
+func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) {
 	session := tq.session.Clone()
 	defer session.Close()
 
@@ -44,18 +44,19 @@ func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) { //Aggrega
 
 	o2 := bson.M{
 		"$group": bson.M{
-			"_id": "give.token",
-			}} //todo grouping aggregation query
+			"_id": bson.M {
+				"give_token": "$give.token", "get_token": "$get.token"},
+			"tickdata": "$$ROOT" }} //@todo verify/test queries
 
 	o3 := bson.M{
 		"$match": bson.M{
 			"give.token": bson.M{
-				"$nin": []interface{}{ ethAddress }},}} //parse out 0x0 from give tokens
+				"$nin": []interface{}{ ethAddress }},}} // parse out 0x0 from give tokens
 
 	o4 := bson.M{
 		"$match": bson.M{
 			"get.token": bson.M{
-				"$nin": []interface{}{ ethAddress }},}} // pares out 0x0 from get tokens
+				"$nin": []interface{}{ ethAddress }},}} // parse out 0x0 from get tokens
 
 
 	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4})
