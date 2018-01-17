@@ -5,7 +5,6 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"time"
 )
 
 //Tick db queries
@@ -36,8 +35,7 @@ func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) { //Aggrega
 	session := tq.session.Clone()
 	defer session.Close()
 
-	timeNow := time.Now().Unix() // already int64
-	tickRate := 3 // seconds
+	ethAddress := "0x0000000000000000000000000000000000000000"
 	c := session.DB(DBName).C(FileName)
 
 	o1 := bson.M{
@@ -46,21 +44,21 @@ func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) { //Aggrega
 
 	o2 := bson.M{
 		"$group": bson.M{
-			"_id": "$give.token" }} //aggregate by token
+			"_id": "give.token",
+			}} //todo grouping aggregation query
 
 	o3 := bson.M{
-		"$project": bson.M{
-			"_id": 1, "tx": 1, "hash": 1, "taker": 1, "maker": 1, "give": 1, "get": 1, "timeDiff": bson.M{
-				"$subtract": []interface{}{timeNow, "$opentime"}}, "closetime": 1 }}
+		"$match": bson.M{
+			"give.token": bson.M{
+				"$nin": []interface{}{ ethAddress }},}} //parse out 0x0 from give tokens
 
 	o4 := bson.M{
 		"$match": bson.M{
-			"timeDiff": bson.M{
-				"$lte": tickRate }}}
+			"get.token": bson.M{
+				"$nin": []interface{}{ ethAddress }},}} // pares out 0x0 from get tokens
 
-	o5 := bson.M {} //todo //filter 0x0
 
-	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4, o5})
+	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4})
 	response := []bson.M{}
 	err := pipeline.All(&response)
 	if err != nil {
