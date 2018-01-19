@@ -11,7 +11,6 @@ import (
 
 func main() {
 
-	r := mux.NewRouter()
 
 	ob, err := orderbook.NewMongoOrderBook("localhost") // @todo
 	if err != nil {
@@ -22,6 +21,7 @@ func main() {
 	getorder := handlers.GetOrderHandler{OrderBook: ob}
 	createorder := handlers.CreateOrderHandler{OrderBook: ob}
 
+	r := mux.NewRouter()
 	r.HandleFunc("/orders", getorders.Handle).Methods("GET").Queries("token", "")
 	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
 	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET")
