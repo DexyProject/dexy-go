@@ -8,7 +8,7 @@ import (
 )
 
 //Tick db queries
-type TickQueries struct {
+type HistoryQueries struct {
 	connection string
 	session *mgo.Session
 }
@@ -18,7 +18,7 @@ const (
 	FileName = "History"
 )
 
-func (tq *TickQueries) TickInsert(NewTick types.Tick) error {
+func (tq *HistoryQueries) InsertTick(NewTick types.Transaction) error {
 	session := tq.session.Clone()
 	defer session.Close()
 
@@ -31,7 +31,7 @@ func (tq *TickQueries) TickInsert(NewTick types.Tick) error {
 	return nil
 }
 
-func (tq *TickQueries) TickAggregate(block string) ([]bson.M, error) {
+func (tq *HistoryQueries) AggregateTick(block string) ([]bson.M, error) {
 	session := tq.session.Clone()
 	defer session.Close()
 
