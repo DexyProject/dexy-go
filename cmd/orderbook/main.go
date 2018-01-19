@@ -13,7 +13,10 @@ func main() {
 
 	r := mux.NewRouter()
 
-	ob := &orderbook.MemoryOrderBook{}
+	ob, err := orderbook.NewMongoOrderBook("localhost") // @todo
+	if err != nil {
+		log.Fatal("Mongo error", err)
+	}
 
 	getorders := handlers.GetOrdersHandler{OrderBook: ob}
 	getorder := handlers.GetOrderHandler{OrderBook: ob}
