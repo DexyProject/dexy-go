@@ -7,6 +7,7 @@ import (
 	"github.com/DexyProject/dexy-go/handlers"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/gorilla/mux"
+	"github.com/DexyProject/dexy-go/db"
 )
 
 func main() {
@@ -14,11 +15,12 @@ func main() {
 	r := mux.NewRouter()
 
 	ob := &orderbook.MemoryOrderBook{}
+	h := &db.MongoTickQueries{}
 
 	getorders := handlers.GetOrdersHandler{OrderBook: ob}
 	getorder := handlers.GetOrderHandler{OrderBook: ob}
 	createorder := handlers.CreateOrderHandler{OrderBook: ob}
-	getticks := handlers.CreateHistoryHandler
+	getticks := handlers.GetTicksHandler{TickQuery: h}
 
 	r.HandleFunc("/orders", getorders.Handle).Methods("GET").Queries("token", "")
 	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
