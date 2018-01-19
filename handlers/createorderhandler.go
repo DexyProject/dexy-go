@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -9,12 +10,10 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
-
-	"log"
 )
 
 type CreateOrderHandler struct {
-	OrderBook orderbook.OrderBook
+	OrderBook        orderbook.OrderBook
 	BalanceValidator validators.BalanceValidator
 }
 

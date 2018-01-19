@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -8,7 +9,6 @@ import (
 	"github.com/DexyProject/dexy-go/handlers"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/gorilla/mux"
-	"fmt"
 )
 
 func main() {
