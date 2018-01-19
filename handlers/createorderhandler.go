@@ -10,6 +10,7 @@ import (
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 
+	"log"
 )
 
 type CreateOrderHandler struct {
@@ -24,23 +25,29 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	var o types.Order
 	err := decoder.Decode(o)
 	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
 		// @todo
 		return
 	}
 
 	ok, err := handler.BalanceValidator.CheckBalance(o)
-	if !ok {
+	if err != nil {
+		log.Printf("checking balance failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		// @todo
 		return
 	}
 
-	if err != nil {
+	if !ok {
+		rw.WriteHeader(http.StatusBadRequest)
 		// @todo
 		return
 	}
 
 	hash, err := o.OrderHash()
 	if err != nil {
+		log.Printf("hashing order failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		// @todo
 		return
 	}
@@ -48,6 +55,8 @@ func (handler *CreateOrderHandler) Handle(rw http.ResponseWriter, r *http.Reques
 	o.Hash = common.ToHex(hash)
 	price, err := calculatePrice(o)
 	if err != nil {
+		log.Printf("price calculation failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		// @todo
 		return
 	}

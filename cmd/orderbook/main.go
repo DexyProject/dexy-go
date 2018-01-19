@@ -17,7 +17,7 @@ func main() {
 
 	ob, err := orderbook.NewMongoOrderBook(os.Args[1]) // @todo
 	if err != nil {
-		log.Fatal("Mongo error", err)
+		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
 	getorders := handlers.GetOrdersHandler{OrderBook: ob}
@@ -32,7 +32,7 @@ func main() {
 
 	err = http.ListenAndServe(":12312", r)
 	if err != nil {
-		log.Fatal("Listen:", err)
+		log.Fatalf("Listen: %s", err.Error())
 	}
 }
 

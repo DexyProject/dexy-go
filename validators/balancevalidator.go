@@ -24,7 +24,7 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool
 		return false, fmt.Errorf("could not connect to contract session")
 	}
 
-	balance, err := exchangeInterface.BalanceOf(nil, o.Exchange, o.User)
+	balance, err := exchangeInterface.BalanceOf(nil, o.Give.Token, o.User)
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
