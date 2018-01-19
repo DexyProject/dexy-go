@@ -18,10 +18,12 @@ func main() {
 	getorders := handlers.GetOrdersHandler{OrderBook: ob}
 	getorder := handlers.GetOrderHandler{OrderBook: ob}
 	createorder := handlers.CreateOrderHandler{OrderBook: ob}
+	getticks := handlers.CreateHistoryHandler
 
 	r.HandleFunc("/orders", getorders.Handle).Methods("GET").Queries("token", "")
 	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
 	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET")
+	r.HandleFunc("/charts?token={token}", getticks.Handle).Methods("POST")
 
 	//http.Handle("/", r)
 
