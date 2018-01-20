@@ -9,6 +9,7 @@ import (
 	"github.com/DexyProject/dexy-go/handlers"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/gorilla/mux"
+	muxhandlers "github.com/gorilla/handlers"
 )
 
 func main() {
@@ -30,7 +31,11 @@ func main() {
 	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET")
 	http.Handle("/", r)
 
-	err = http.ListenAndServe(":12312", r)
+	headersOk := muxhandlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := muxhandlers.AllowedOrigins([]string{"*"})
+	methodsOk := muxhandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	err = http.ListenAndServe(":12312", muxhandlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
 		log.Fatalf("Listen: %s", err.Error())
 	}
