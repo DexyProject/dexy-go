@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/DexyProject/dexy-go/handlers"
+	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	muxhandlers "github.com/gorilla/handlers"
 )
 
 func main() {
@@ -21,21 +21,19 @@ func main() {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	getorders := handlers.GetOrdersHandler{OrderBook: ob}
-	getorder := handlers.GetOrderHandler{OrderBook: ob}
-	createorder := handlers.CreateOrderHandler{OrderBook: ob}
+	orders := endpoints.Orders{OrderBook: ob} // @todo balance validator
 
 	r := mux.NewRouter()
-	r.HandleFunc("/orders", getorders.Handle).Methods("GET", "HEAD").Queries("token", "")
-	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
-	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET", "HEAD")
+	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
+	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
+	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
 	http.Handle("/", r)
 
-	headersOk := muxhandlers.AllowedHeaders([]string{"X-Requested-With"})
-	originsOk := muxhandlers.AllowedOrigins([]string{"*"})
-	methodsOk := muxhandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	err = http.ListenAndServe(":12312", muxhandlers.CORS(originsOk, headersOk, methodsOk)(r))
+	err = http.ListenAndServe(":12312", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
 		log.Fatalf("Listen: %s", err.Error())
 	}
