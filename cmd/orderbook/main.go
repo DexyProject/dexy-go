@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/DexyProject/dexy-go/handlers"
-	"github.com/DexyProject/dexy-go/orderbook"
-	"github.com/gorilla/mux"
-	muxhandlers "github.com/gorilla/handlers"
 	"github.com/DexyProject/dexy-go/endpoints"
+	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -30,11 +29,11 @@ func main() {
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
 	http.Handle("/", r)
 
-	headersOk := muxhandlers.AllowedHeaders([]string{"X-Requested-With"})
-	originsOk := muxhandlers.AllowedOrigins([]string{"*"})
-	methodsOk := muxhandlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	err = http.ListenAndServe(":12312", muxhandlers.CORS(originsOk, headersOk, methodsOk)(r))
+	err = http.ListenAndServe(":12312", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
 		log.Fatalf("Listen: %s", err.Error())
 	}
