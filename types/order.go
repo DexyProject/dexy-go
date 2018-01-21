@@ -22,8 +22,8 @@ type Order struct {
 	Get       Trade          `json:"get" bson:"get"`
 	Expires   string         `json:"expires" bson:"expires"`
 	Nonce     string         `json:"nonce" bson:"nonce"`
-	User      common.Address `json:"user" bson:"user"`
-	Exchange  common.Address `json:"exchange" bson:"exchange"`
+	User      string `json:"user" bson:"user"`
+	Exchange  string `json:"exchange" bson:"exchange"`
 	Signature EC             `json:"signature" bson:"signature"`
 }
 
@@ -52,6 +52,8 @@ func (order *Order) OrderHash() ([]byte, error) {
 
 	get := common.HexToAddress(order.Get.Token)
 	give := common.HexToAddress(order.Give.Token)
+	userAddr := common.HexToAddress(order.User)
+	exchangeAddr := common.HexToAddress(order.Exchange)
 
 	sha.Write(get[:])
 	sha.Write(amountGet[:])
@@ -59,8 +61,8 @@ func (order *Order) OrderHash() ([]byte, error) {
 	sha.Write(amountGive[:])
 	sha.Write(expires[:])
 	sha.Write(nonce[:])
-	sha.Write(order.User[:])
-	sha.Write(order.Exchange[:])
+	sha.Write(userAddr[:])
+	sha.Write(exchangeAddr[:])
 
 	return sha.Sum(nil), nil
 }

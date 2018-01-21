@@ -44,7 +44,8 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 		return fmt.Errorf("could not create order hash")
 	}
 
-	if !NewOrder.Signature.Verify(NewOrder.User, hash) {
+	user := common.HexToAddress(NewOrder.User)
+	if !NewOrder.Signature.Verify(user, hash) {
 		return fmt.Errorf("signature could not be verified")
 	}
 

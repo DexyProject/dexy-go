@@ -19,13 +19,13 @@ type BalanceValidatorSession struct {
 }
 
 func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool, error) {
-	exchangeInterface, err := exchange.NewExchangeInterface(o.Exchange, balanceSession.conn)
+	exchangeInterface, err := exchange.NewExchangeInterface(common.HexToAddress(o.Exchange), balanceSession.conn)
 
 	if err != nil {
 		return false, fmt.Errorf("could not connect to contract session")
 	}
 
-	balance, err := exchangeInterface.BalanceOf(nil, common.HexToAddress(o.Give.Token), o.User)
+	balance, err := exchangeInterface.BalanceOf(nil, common.HexToAddress(o.Give.Token), common.HexToAddress(o.User))
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
