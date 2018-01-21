@@ -127,7 +127,7 @@ func calculatePrice(order types.Order) (string, error) {
 	}
 
 	var price float64
-	if order.Get.Token.String() == "0x0000000000000000000000000000000000000000" {
+	if order.Get.Token == "0x0000000000000000000000000000000000000000" {
 		price = get / give
 	} else {
 		price = give / get

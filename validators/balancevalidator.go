@@ -7,6 +7,7 @@ import (
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type BalanceValidator interface {
@@ -24,7 +25,7 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool
 		return false, fmt.Errorf("could not connect to contract session")
 	}
 
-	balance, err := exchangeInterface.BalanceOf(nil, o.Give.Token, o.User)
+	balance, err := exchangeInterface.BalanceOf(nil, common.HexToAddress(o.Give.Token), o.User)
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract")
 	}

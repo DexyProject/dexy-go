@@ -50,9 +50,12 @@ func (order *Order) OrderHash() ([]byte, error) {
 		return nil, err
 	}
 
-	sha.Write(common.HexToAddress(order.Get.Token)[:])
+	get := common.HexToAddress(order.Get.Token)
+	give := common.HexToAddress(order.Give.Token)
+
+	sha.Write(get[:])
 	sha.Write(amountGet[:])
-	sha.Write(common.HexToAddress(order.Give.Token)[:])
+	sha.Write(give[:])
 	sha.Write(amountGive[:])
 	sha.Write(expires[:])
 	sha.Write(nonce[:])
