@@ -34,6 +34,7 @@ func main() {
 		"X-Requested-With",
 		"Accept",
 		"Accept-Language",
+		"Accept-Encoding",
 		"Content-Language",
 		"Origin",
 	})
