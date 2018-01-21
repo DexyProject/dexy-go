@@ -50,7 +50,7 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 
 	err = c.Insert(NewOrder)
 	if err != nil {
-		return fmt.Errorf("order could not be added to database")
+		return err
 	}
 
 	return nil
