@@ -30,7 +30,7 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	// Connect to Mongo session
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -57,7 +57,7 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 }
 
 func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -71,7 +71,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 
 func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
 	var orders []types.Order
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -88,7 +88,7 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 
 func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
 	var orders []types.Order
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -105,7 +105,7 @@ func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit
 
 func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	order := types.Order{}
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
