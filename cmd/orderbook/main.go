@@ -29,7 +29,7 @@ func main() {
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
 	http.Handle("/", r)
 
-	headersOk := handlers.AllowedHeaders([]string{"*"})
+	headersOk := handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
