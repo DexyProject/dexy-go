@@ -87,6 +87,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	//}
 
 	hash, err := o.OrderHash()
+	log.Printf("order hash is: %v",common.ToHex(hash))
 	if err != nil {
 		log.Printf("hashing order failed: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -106,6 +107,8 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
+		log.Printf("InsertOrder failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// @todo response
