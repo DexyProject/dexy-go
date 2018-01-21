@@ -18,7 +18,7 @@ type Orders struct {
 	BalanceValidator validators.BalanceValidator
 }
 
-func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
+func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	query := r.URL.Query()
@@ -57,7 +57,7 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
+func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	decoder := json.NewDecoder(r.Body)
