@@ -10,6 +10,11 @@ type Trade struct {
 	Amount string         `json:"amount" bson:"amount"`
 }
 
+type Orders struct {
+	Asks []Order `json:"asks"`
+	Bids []Order `json:"bids"`
+}
+
 type Order struct {
 	Hash      string         `json:"hash,omitempty" bson:"hash"`
 	Price     string         `json:"price,omitempty" bson:"price"`
