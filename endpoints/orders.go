@@ -59,12 +59,15 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-
+	
 	decoder := json.NewDecoder(r.Body)
 	var o types.Order
-	err := decoder.Decode(o)
+	err := decoder.Decode(&o)
 	if err != nil {
+		log.Printf("unmarshalling json failed: %v", err.Error())
+		//http.Error(rw, err.Error(), 400) // too revealing
 		rw.WriteHeader(http.StatusBadRequest)
+
 		// @todo
 		return
 	}
