@@ -6,8 +6,8 @@ import (
 )
 
 type Trade struct {
-	Token  common.Address `json:"token" bson:"token"`
-	Amount string         `json:"amount" bson:"amount"`
+	Token  string `json:"token" bson:"token"`
+	Amount string `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
