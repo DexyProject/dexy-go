@@ -18,8 +18,8 @@ type Orders struct {
 type Order struct {
 	Hash      string         `json:"hash,omitempty" bson:"hash"`
 	Price     string         `json:"price,omitempty" bson:"price"`
-	Give      Trade          `json:"give" bson:"give,inline"`
-	Get       Trade          `json:"get" bson:"get,inline"`
+	Give      Trade          `json:"give" bson:"give"`
+	Get       Trade          `json:"get" bson:"get"`
 	Expires   string         `json:"expires" bson:"expires"`
 	Nonce     string         `json:"nonce" bson:"nonce"`
 	User      common.Address `json:"user" bson:"user"`
