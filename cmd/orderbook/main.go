@@ -26,9 +26,9 @@ func main() {
 	createorder := handlers.CreateOrderHandler{OrderBook: ob}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/orders", getorders.Handle).Methods("GET").Queries("token", "")
+	r.HandleFunc("/orders", getorders.Handle).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", createorder.Handle).Methods("POST")
-	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET")
+	r.HandleFunc("/orders/{order}", getorder.Handle).Methods("GET", "HEAD")
 	http.Handle("/", r)
 
 	headersOk := muxhandlers.AllowedHeaders([]string{"X-Requested-With"})
