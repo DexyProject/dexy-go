@@ -69,19 +69,19 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, err := orders.BalanceValidator.CheckBalance(o)
-	if err != nil {
-		log.Printf("checking balance failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
-		return
-	}
+	//ok, err := orders.BalanceValidator.CheckBalance(o)
+	//if err != nil {
+	//	log.Printf("checking balance failed: %v", err)
+	//	rw.WriteHeader(http.StatusInternalServerError)
+	//	// @todo
+	//	return
+	//}
 
-	if !ok {
-		rw.WriteHeader(http.StatusBadRequest)
-		// @todo
-		return
-	}
+	//if !ok {
+	//	rw.WriteHeadegr(http.StatusBadRequest)
+	//	// @todo
+	//	return
+	//}
 
 	hash, err := o.OrderHash()
 	if err != nil {
