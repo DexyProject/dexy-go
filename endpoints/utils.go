@@ -3,6 +3,7 @@ package endpoints
 import (
 	"strconv"
 
+	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -18,11 +19,11 @@ func GetLimit(limit string) int {
 	return 100
 }
 
-func GetUser(user string) *common.Address {
+func GetUser(user string) *types.Address {
 	if user == "" || !common.IsHexAddress(user) {
 		return nil
 	}
 
-	addr := common.HexToAddress(user)
+	addr := types.HexToAddress(user)
 	return &addr
 }

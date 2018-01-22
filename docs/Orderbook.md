@@ -107,8 +107,8 @@ Adds a new order to the order book.
     "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
     "amount": "300000000000000000000"
   },
-  "expires": 1514892553,
-  "nonce": 12,
+  "expires": "1514892553",
+  "nonce": "12",
   "user": "0x9f612fcb422d1971c1be7416c37e3ebc77c0de19",
   "exchange": "0x58e91b0734e2b33efc86067ce4db128366f30dc9",
   "signature": {

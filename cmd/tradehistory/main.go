@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/endpoints"
+	"github.com/DexyProject/dexy-go/history"
+	"github.com/gorilla/mux"
 )
 
 func main() {
