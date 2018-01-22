@@ -1,13 +1,12 @@
 package types
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
-	Token  string `json:"token" bson:"token"`
-	Amount string `json:"amount" bson:"amount"`
+	Token  Address `json:"token" bson:"token"`
+	Amount string  `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
@@ -16,15 +15,15 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      string         `json:"hash,omitempty" bson:"hash"`
-	Price     string         `json:"price,omitempty" bson:"price"`
-	Give      Trade          `json:"give" bson:"give"`
-	Get       Trade          `json:"get" bson:"get"`
-	Expires   string         `json:"expires" bson:"expires"`
-	Nonce     string         `json:"nonce" bson:"nonce"`
-	User      string `json:"user" bson:"user"`
-	Exchange  string `json:"exchange" bson:"exchange"`
-	Signature EC             `json:"signature" bson:"signature"`
+	Hash      string  `json:"hash,omitempty" bson:"hash"`
+	Price     string  `json:"price,omitempty" bson:"price"`
+	Give      Trade   `json:"give" bson:"give"`
+	Get       Trade   `json:"get" bson:"get"`
+	Expires   string  `json:"expires" bson:"expires"`
+	Nonce     string  `json:"nonce" bson:"nonce"`
+	User      Address `json:"user" bson:"user"`
+	Exchange  Address `json:"exchange" bson:"exchange"`
+	Signature EC      `json:"signature" bson:"signature"`
 }
 
 func (order *Order) OrderHash() ([]byte, error) {
@@ -50,19 +49,14 @@ func (order *Order) OrderHash() ([]byte, error) {
 		return nil, err
 	}
 
-	get := common.HexToAddress(order.Get.Token)
-	give := common.HexToAddress(order.Give.Token)
-	userAddr := common.HexToAddress(order.User)
-	exchangeAddr := common.HexToAddress(order.Exchange)
-
-	sha.Write(get[:])
+	sha.Write(order.Get.Token.Address[:])
 	sha.Write(amountGet[:])
-	sha.Write(give[:])
+	sha.Write(order.Give.Token.Address[:])
 	sha.Write(amountGive[:])
 	sha.Write(expires[:])
 	sha.Write(nonce[:])
-	sha.Write(userAddr[:])
-	sha.Write(exchangeAddr[:])
+	sha.Write(order.User.Address[:])
+	sha.Write(order.Exchange.Address[:])
 
 	return sha.Sum(nil), nil
 }

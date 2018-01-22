@@ -34,7 +34,7 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	user := getUser(query.Get("user"))
 
 	o := types.Orders{}
-	address := common.HexToAddress(token)
+	address := types.HexToAddress(token)
 
 	o.Asks = orders.OrderBook.Asks(address, user, limit)
 	o.Bids = orders.OrderBook.Bids(address, user, limit)
@@ -59,7 +59,7 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	
+
 	decoder := json.NewDecoder(r.Body)
 	var o types.Order
 	err := decoder.Decode(&o)
@@ -87,7 +87,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	//}
 
 	hash, err := o.OrderHash()
-	log.Printf("order hash is: %v",common.ToHex(hash))
+	log.Printf("order hash is: %v", common.ToHex(hash))
 	if err != nil {
 		log.Printf("hashing order failed: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -127,7 +127,7 @@ func calculatePrice(order types.Order) (string, error) {
 	}
 
 	var price float64
-	if order.Get.Token == "0x0000000000000000000000000000000000000000" {
+	if order.Get.Token.IsZero() {
 		price = get / give
 	} else {
 		price = give / get
@@ -148,11 +148,11 @@ func getLimit(limit string) int {
 	return 100
 }
 
-func getUser(user string) *common.Address {
+func getUser(user string) *types.Address {
 	if user == "" || !common.IsHexAddress(user) {
 		return nil
 	}
 
-	addr := common.HexToAddress(user)
+	addr := types.HexToAddress(user)
 	return &addr
 }
