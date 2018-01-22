@@ -1,19 +1,18 @@
-package history
+package endpoints
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/DexyProject/dexy-go/handlers"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type GetTradeHistoryHandler struct {
+type History struct {
 	History history.History
 }
 
-func (handler *GetTradeHistoryHandler) Handle(rw http.ResponseWriter, r *http.Request) {
+func (history *History) Handle(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	query := r.URL.Query()
@@ -25,11 +24,11 @@ func (handler *GetTradeHistoryHandler) Handle(rw http.ResponseWriter, r *http.Re
 		return
 	}
 
-	limit := handlers.GetLimit(query.Get("limit"))
-	user := handlers.GetUser(query.Get("user"))
+	limit := GetLimit(query.Get("limit"))
+	user := GetUser(query.Get("user"))
 
 	addr := common.HexToAddress(token)
 
-	h := handler.History.GetHistory(addr, user, limit)
+	h := history.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
 }

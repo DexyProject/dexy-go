@@ -2,6 +2,7 @@ package orderbook
 
 import (
 	"fmt"
+
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
@@ -12,7 +13,6 @@ type MongoOrderBook struct {
 	connection string
 	session    *mgo.Session
 }
-
 
 const (
 	DBName   = "OrderBook"
@@ -116,4 +116,3 @@ func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 
 	return &order
 }
-
