@@ -2,6 +2,7 @@ package orderbook
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -77,9 +78,9 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"get.token": token.String()}
+	q := bson.M{"get.token": strings.ToLower(token.String())}
 	if user != nil {
-		q["user"] = user.String()
+		q["user"] = strings.ToLower(user.String())
 	}
 
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -94,9 +95,9 @@ func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"give.token": token.String()}
+	q := bson.M{"give.token": strings.ToLower(token.String())}
 	if user != nil {
-		q["user"] = user.String()
+		q["user"] = strings.ToLower(user.String())
 	}
 
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
