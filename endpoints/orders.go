@@ -148,11 +148,11 @@ func getLimit(limit string) int {
 	return 100
 }
 
-func getUser(user string) *common.Address {
+func getUser(user string) *types.Address {
 	if user == "" || !common.IsHexAddress(user) {
 		return nil
 	}
 
-	addr := common.HexToAddress(user)
+	addr := types.HexToAddress(user)
 	return &addr
 }
