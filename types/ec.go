@@ -13,7 +13,7 @@ type EC struct {
 	S string `json:"s" bson:"s"`
 }
 
-func (ec *EC) Verify(address common.Address, hash []byte) bool {
+func (ec *EC) Verify(address Address, hash []byte) bool {
 
 	r, err := StringToBytes(ec.R)
 	if err != nil {
@@ -38,5 +38,5 @@ func (ec *EC) Verify(address common.Address, hash []byte) bool {
 	}
 
 	recoverAddress := common.BytesToAddress(crypto.Keccak256(pub[1:])[12:])
-	return reflect.DeepEqual(address[:], recoverAddress[:])
+	return reflect.DeepEqual(address.Address[:], recoverAddress[:])
 }

@@ -2,10 +2,8 @@ package orderbook
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -45,8 +43,7 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 		return fmt.Errorf("could not create order hash")
 	}
 
-	user := common.HexToAddress(NewOrder.User)
-	if !NewOrder.Signature.Verify(user, hash) {
+	if !NewOrder.Signature.Verify(NewOrder.User, hash) {
 		return fmt.Errorf("signature could not be verified")
 	}
 
@@ -71,16 +68,16 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
+func (ob *MongoOrderBook) Bids(token types.Address, user *types.Address, limit int) []types.Order {
 	var orders []types.Order
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"get.token": strings.ToLower(token.String())}
+	q := bson.M{"get.token": token}
 	if user != nil {
-		q["user"] = strings.ToLower(user.String())
+		q["user"] = user
 	}
 
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -88,16 +85,16 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
+func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit int) []types.Order {
 	var orders []types.Order
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"give.token": strings.ToLower(token.String())}
+	q := bson.M{"give.token": token}
 	if user != nil {
-		q["user"] = strings.ToLower(user.String())
+		q["user"] = user
 	}
 
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
