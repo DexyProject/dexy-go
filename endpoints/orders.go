@@ -18,7 +18,7 @@ type Orders struct {
 	BalanceValidator validators.BalanceValidator
 }
 
-func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
+func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	query := r.URL.Query()
@@ -34,7 +34,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	user := GetUser(query.Get("user"))
 
 	o := types.Orders{}
-	address := common.HexToAddress(token)
+	address := types.HexToAddress(token)
 
 	o.Asks = orders.OrderBook.Asks(address, user, limit)
 	o.Bids = orders.OrderBook.Bids(address, user, limit)
@@ -57,14 +57,17 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
+func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	decoder := json.NewDecoder(r.Body)
 	var o types.Order
-	err := decoder.Decode(o)
+	err := decoder.Decode(&o)
 	if err != nil {
+		log.Printf("unmarshalling json failed: %v", err.Error())
+		//http.Error(rw, err.Error(), 400) // too revealing
 		rw.WriteHeader(http.StatusBadRequest)
+
 		// @todo
 		return
 	}
@@ -83,7 +86,11 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
+	// @todo validate that token strings are not equal.
+	// @todo validate that amounts are not 0
+
 	hash, err := o.OrderHash()
+	log.Printf("order hash is: %v", common.ToHex(hash))
 	if err != nil {
 		log.Printf("hashing order failed: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -103,6 +110,8 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
+		log.Printf("InsertOrder failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// @todo response
@@ -121,7 +130,7 @@ func calculatePrice(order types.Order) (string, error) {
 	}
 
 	var price float64
-	if order.Get.Token.String() == "0x0000000000000000000000000000000000000000" {
+	if order.Get.Token.IsZero() {
 		price = get / give
 	} else {
 		price = give / get
