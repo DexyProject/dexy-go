@@ -11,6 +11,7 @@ import (
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"strings"
 )
 
 type Orders struct {
@@ -60,15 +61,11 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	decoder := json.NewDecoder(r.Body)
 	var o types.Order
-	err := decoder.Decode(&o)
+	err := json.NewDecoder(r.Body).Decode(&o)
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		//http.Error(rw, err.Error(), 400) // too revealing
 		rw.WriteHeader(http.StatusBadRequest)
-
-		// @todo
 		return
 	}
 
@@ -86,7 +83,18 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	// @todo validate that token strings are not equal.
+	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
+		log.Printf("address is not hex address")
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
+		log.Printf("addresses are identical")
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// @todo validate that amounts are not 0
 
 	hash, err := o.OrderHash()
