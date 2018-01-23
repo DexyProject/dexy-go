@@ -1,4 +1,4 @@
-package handlers
+package endpoints
 
 import (
 	"net/http"
@@ -6,17 +6,17 @@ import (
 	"encoding/json"
 )
 
-type GetTicksHandler struct {
+type Ticks struct {
 	TickQuery db.TickQuery
 }
 
-func (handler *GetTicksHandler) Handle(rw http.ResponseWriter, r *http.Request) {
+func (ticks *TickQuery) GetTicks(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	query := r.URL.Query()
 	block := query.Get("block")
 
-	h, err := handler.TickQuery.AggregateTick(block)
+	h, err := ticks.TickQuery.AggregateTick(block)
 	if err != nil {
 		// @todo error handling
 		rw.WriteHeader(http.StatusBadRequest)
