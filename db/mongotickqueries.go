@@ -31,7 +31,7 @@ func (tq *MongoTickQueries) InsertTick(NewTick types.Transaction) error {
 	return nil
 }
 
-func (tq *MongoTickQueries) AggregateTick(block string) ([]bson.M, error) {
+func (tq *MongoTickQueries) AggregateTick(block int) ([]bson.M, error) {
 	session := tq.session.Clone()
 	defer session.Close()
 

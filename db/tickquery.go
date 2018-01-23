@@ -7,5 +7,5 @@ import (
 
 type TickQuery interface {
 	InsertTick(NewTick types.Transaction) error
-	AggregateTick(block string) ([]bson.M, error)
+	AggregateTick(block int) ([]bson.M, error)
 }
