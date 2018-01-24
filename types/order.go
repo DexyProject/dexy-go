@@ -1,12 +1,15 @@
 package types
 
 import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
-	Amount string  `json:"amount" bson:"amount"`
+	Amount big.Int `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
@@ -19,8 +22,8 @@ type Order struct {
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
-	Expires   string  `json:"expires" bson:"expires"`
-	Nonce     string  `json:"nonce" bson:"nonce"`
+	Expires   int64   `json:"expires" bson:"expires"`
+	Nonce     int64   `json:"nonce" bson:"nonce"`
 	User      Address `json:"user" bson:"user"`
 	Exchange  Address `json:"exchange" bson:"exchange"`
 	Signature EC      `json:"signature" bson:"signature"`
@@ -29,25 +32,10 @@ type Order struct {
 func (order *Order) OrderHash() ([]byte, error) {
 	sha := sha3.NewKeccak256()
 
-	expires, err := IntStringToBytes(order.Expires)
-	if err != nil {
-		return nil, err
-	}
-
-	amountGive, err := IntStringToBytes(order.Give.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	amountGet, err := IntStringToBytes(order.Get.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	nonce, err := IntStringToBytes(order.Nonce)
-	if err != nil {
-		return nil, err
-	}
+	expires := new(big.Int).SetInt64(order.Expires).Bytes()
+	amountGive := abi.U256(&order.Give.Amount)
+	amountGet := abi.U256(&order.Get.Amount)
+	nonce := new(big.Int).SetInt64(order.Nonce).Bytes()
 
 	sha.Write(order.Get.Token.Address[:])
 	sha.Write(amountGet[:])
