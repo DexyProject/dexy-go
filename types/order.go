@@ -22,7 +22,7 @@ type Order struct {
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
-	Expires   big.Int `json:"expires" bson:"expires"`
+	Expires   int64 `json:"expires" bson:"expires"`
 	Nonce     big.Int `json:"nonce" bson:"nonce"`
 	User      Address `json:"user" bson:"user"`
 	Exchange  Address `json:"exchange" bson:"exchange"`
@@ -32,7 +32,7 @@ type Order struct {
 func (order *Order) OrderHash() ([]byte, error) {
 	sha := sha3.NewKeccak256()
 
-	expires := abi.U256(&order.Expires)
+	expires := abi.U256(new(big.Int).SetInt64(order.Expires))
 	amountGive := abi.U256(&order.Give.Amount)
 	amountGet := abi.U256(&order.Get.Amount)
 	nonce := abi.U256(&order.Nonce)
