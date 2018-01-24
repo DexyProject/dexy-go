@@ -129,7 +129,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 
 func calculatePrice(order types.Order) (string, error) {
 
-	if order.Get.Amount.Sign() == 0 || order.Give.Amount.Sign() == 0 {
+	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
 		return "", fmt.Errorf("can not divide by zero")
 	}
 
