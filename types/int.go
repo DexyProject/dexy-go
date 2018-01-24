@@ -1,10 +1,11 @@
 package types
 
 import (
-	"gopkg.in/mgo.v2/bson"
-	"math/big"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"fmt"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Int struct {
