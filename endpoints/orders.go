@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
@@ -33,8 +32,8 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit := getLimit(query.Get("limit"))
-	user := getUser(query.Get("user"))
+	limit := GetLimit(query.Get("limit"))
+	user := GetUser(query.Get("user"))
 
 	o := types.Orders{}
 	address := types.HexToAddress(token)
@@ -142,25 +141,4 @@ func calculatePrice(order types.Order) (string, error) {
 	}
 
 	return price.Quo(give, get).String(), nil
-}
-
-func getLimit(limit string) int {
-	if len(limit) != 0 && limit != "0" {
-
-		u, err := strconv.Atoi(limit)
-		if err == nil {
-			return u
-		}
-	}
-
-	return 100
-}
-
-func getUser(user string) *types.Address {
-	if user == "" || !common.IsHexAddress(user) {
-		return nil
-	}
-
-	addr := types.HexToAddress(user)
-	return &addr
 }
