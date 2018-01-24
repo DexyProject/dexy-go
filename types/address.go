@@ -9,12 +9,11 @@ import (
 )
 
 type Address struct {
-	*common.Address
+	common.Address
 }
 
 func HexToAddress(hex string) Address {
-	addr := common.HexToAddress(hex)
-	return Address{Address: &addr}
+	return Address{Address: common.HexToAddress(hex)}
 }
 
 func (a Address) GetBSON() (interface{}, error) {
@@ -28,8 +27,7 @@ func (a *Address) SetBSON(raw bson.Raw) error {
 		return err
 	}
 
-	addr := common.HexToAddress(s)
-	a.Address = &addr
+	a.Address = common.HexToAddress(s)
 
 	return nil
 }
