@@ -3,10 +3,12 @@ package watchers
 import (
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/DexyProject/dexy-go/exchange"
 )
 
 type TradeWatcher struct {
 	history history.History
+	exchange exchange.ExchangeInterface
 }
 
 func (tf *TradeWatcher) Watch() error {
@@ -21,6 +23,9 @@ func (tf *TradeWatcher) HandleTransaction(transaction types.Transaction) {
 		// @todo handle
 		return
 	}
+
+
+	// @todo call filled
 
 	// @todo updated filled values
 	// @todo delete if amount == filled
