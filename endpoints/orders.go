@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/big"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"fmt"
 )
 
 type Orders struct {

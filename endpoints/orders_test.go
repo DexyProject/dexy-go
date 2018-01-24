@@ -1,10 +1,10 @@
 package endpoints
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/DexyProject/dexy-go/types"
-	"math/big"
 )
 
 var pricetests = []struct {
@@ -38,7 +38,7 @@ func Test_CalculatePrice(t *testing.T) {
 
 		price, err := calculatePrice(order)
 
-		if !tt.err && err != nil{
+		if !tt.err && err != nil {
 			t.Errorf("error was not expected")
 		}
 

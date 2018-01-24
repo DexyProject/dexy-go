@@ -2,8 +2,8 @@ package types
 
 import (
 	"bytes"
-	"testing"
 	"math/big"
+	"testing"
 )
 
 func TestOrder_OrderHash(t *testing.T) {
