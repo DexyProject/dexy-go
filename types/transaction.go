@@ -10,8 +10,8 @@ type Transaction struct {
 	OrderHash     string         `json:"hash" bson:"hash"`
 	BlockNumber   int            `json:"block" bson:"block"`
 	Timestamp     string         `json:"timestamp" bson:"timestamp"`
-	Taker         Address `json:"taker" bson:"taker"`
-	Maker         Address `json:"maker" bson:"maker"`
+	Taker         Address        `json:"taker" bson:"taker"`
+	Maker         Address        `json:"maker" bson:"maker"`
 	Give          Trade          `json:"give" bson:"give"`
 	Get           Trade          `json:"get" bson:"get"`
 }

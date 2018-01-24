@@ -30,11 +30,11 @@ func Test_CalculatePrice(t *testing.T) {
 		order.Give.Amount = tt.give
 
 		if tt.getEth {
-			order.Get.Token = common.HexToAddress("0x0000000000000000000000000000000000000000")
-			order.Give.Token = common.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
+			order.Get.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
+			order.Give.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
 		} else {
-			order.Give.Token = common.HexToAddress("0x0000000000000000000000000000000000000000")
-			order.Get.Token = common.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
+			order.Give.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
+			order.Get.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
 		}
 
 		price, err := calculatePrice(order)
