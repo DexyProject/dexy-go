@@ -2,6 +2,9 @@ package types
 
 import (
 	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"github.com/ethereum/go-ethereum/common"
+	"fmt"
+	"strings"
 )
 
 type Trade struct {
@@ -59,4 +62,16 @@ func (order *Order) OrderHash() ([]byte, error) {
 	sha.Write(order.Exchange.Address[:])
 
 	return sha.Sum(nil), nil
+}
+
+func (order *Order) Validate() error {
+	if !common.IsHexAddress(order.Get.Token.String()) || !common.IsHexAddress(order.Give.Token.String()) {
+		return fmt.Errorf("address is not valid hex")
+	}
+
+	if strings.ToLower(order.Give.Token.String()) == strings.ToLower(order.Get.Token.String()) {
+		return fmt.Errorf("token addresses are identical")
+	}
+
+	return nil
 }
