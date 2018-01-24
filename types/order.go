@@ -1,13 +1,13 @@
 package types
 
 import (
+	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
 	"github.com/ethereum/go-ethereum/common"
-	"fmt"
-	"strings"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
