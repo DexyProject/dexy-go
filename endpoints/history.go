@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/DexyProject/dexy-go/history"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type History struct {
