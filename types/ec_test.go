@@ -2,8 +2,6 @@ package types
 
 import (
 	"testing"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 func TestEC_Verify(t *testing.T) {

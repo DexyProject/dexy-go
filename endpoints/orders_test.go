@@ -4,21 +4,19 @@ import (
 	"testing"
 
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 var pricetests = []struct {
 	expected string
 	err      bool
-	give     string
-	get      string
+	give     int64
+	get      int64
 	getEth   bool
 }{
-	{"", true, "fail", "fail", true},
-	{"", true, "fail", "1", true},
-	{"1", true, "3000000000000000000", "3000000000000000000", false},
-	{"0.3333333333333333", true, "1000000000000000000", "3000000000000000000", false},
-	{"0.0018499999999894799", true, "67489986216600", "124856474500", true},
+	{"1", false, 3000000000000000000, 3000000000000000000, false},
+	{"0.3333333333", false, 1000000000000000000, 3000000000000000000, false},
+	{"0.00185", false, 67489986216600, 124856474500, true},
+	{"", true, 0, 124856474500, true},
 }
 
 func Test_CalculatePrice(t *testing.T) {
@@ -26,8 +24,8 @@ func Test_CalculatePrice(t *testing.T) {
 	for _, tt := range pricetests {
 		order := types.Order{}
 
-		order.Get.Amount = tt.get
-		order.Give.Amount = tt.give
+		order.Get.Amount = types.NewInt(tt.get)
+		order.Give.Amount = types.NewInt(tt.give)
 
 		if tt.getEth {
 			order.Get.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
@@ -39,7 +37,7 @@ func Test_CalculatePrice(t *testing.T) {
 
 		price, err := calculatePrice(order)
 
-		if err != nil && !tt.err {
+		if !tt.err && err != nil {
 			t.Errorf("error was not expected")
 		}
 

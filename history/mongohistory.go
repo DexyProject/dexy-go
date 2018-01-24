@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -28,23 +27,23 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 	return &MongoHistory{connection: connection, session: session}, nil
 }
 
-func (history *MongoHistory) GetHistory(token common.Address, user *common.Address, limit int) []types.Transaction {
-	session := history.session.Clone()
+func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
+	session := history.session.Copy()
 	defer session.Close()
-
-	var transactions []types.Transaction
 
 	c := session.DB(DBName).C(FileName)
 
+	var transactions []types.Transaction
+
 	q := bson.M{
 		"$or": []bson.M{
-			{"give.token": token.String()},
-			{"get.token": token.String()},
+			{"give.token": token},
+			{"get.token": token},
 		},
 	}
 
 	if user != nil {
-		q["user"] = user.String()
+		q["user"] = user
 	}
 
 	c.Find(q).Sort("-timestamp").Limit(limit).All(&transactions)
