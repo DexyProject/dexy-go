@@ -6,6 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 type MongoOrderBook struct {
@@ -96,7 +97,10 @@ func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit i
 		q["user"] = user
 	}
 
-	c.Find(q).Sort("price").Limit(limit).All(&orders)
+	err := c.Find(q).Sort("price").Limit(limit).All(&orders)
+	if err != nil {
+		log.Printf("%+v", err)
+	}
 
 	return orders
 }
