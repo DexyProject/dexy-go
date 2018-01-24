@@ -127,6 +127,8 @@ func calculatePrice(order types.Order) string {
 	get := new(big.Float).SetInt(&order.Get.Amount)
 	give := new(big.Float).SetInt(&order.Give.Amount)
 
+	// @todo: test if numbers are 0
+
 	price := new(big.Float)
 	if order.Get.Token.IsZero() {
 		price = price.Quo(get, give)
