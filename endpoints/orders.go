@@ -63,6 +63,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 
 	var o types.Order
 	err := json.NewDecoder(r.Body).Decode(&o)
+	defer r.Body.Close()
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
 		rw.WriteHeader(http.StatusBadRequest)
