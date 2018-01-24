@@ -28,13 +28,12 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 }
 
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
-	// Connect to Mongo session
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	if ob.GetOrderByHash(NewOrder.Hash) != nil { // Check if Hash exists
+	if ob.GetOrderByHash(NewOrder.Hash) != nil {
 		return fmt.Errorf("order exists in orderbook")
 	}
 
