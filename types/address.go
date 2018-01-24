@@ -39,5 +39,5 @@ func (a Address) IsZero() bool {
 }
 
 func (a *Address) MarshalJSON() ([]byte, error) {
-	return json.Marshal(a.Address.String())
+	return json.Marshal(strings.ToLower(a.Address.String()))
 }
