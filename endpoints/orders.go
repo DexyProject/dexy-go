@@ -132,8 +132,8 @@ func calculatePrice(order types.Order) (string, error) {
 		return "", fmt.Errorf("can not divide by zero")
 	}
 
-	get := new(big.Float).SetInt(&order.Get.Amount)
-	give := new(big.Float).SetInt(&order.Give.Amount)
+	get := new(big.Float).SetInt(&order.Get.Amount.Int)
+	give := new(big.Float).SetInt(&order.Give.Amount.Int)
 
 	price := new(big.Float)
 	if order.Get.Token.IsZero() {

@@ -28,5 +28,5 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool
 		return false, fmt.Errorf("could not get balance from contract")
 	}
 
-	return balance.Cmp(&o.Give.Amount) >= 0, nil
+	return balance.Cmp(&o.Give.Amount.Int) >= 0, nil
 }
