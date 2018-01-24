@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -30,7 +29,7 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 
 func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 	// Connect to Mongo session
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -50,14 +49,14 @@ func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
 
 	err = c.Insert(NewOrder)
 	if err != nil {
-		return fmt.Errorf("order could not be added to database")
+		return err
 	}
 
 	return nil
 }
 
 func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -69,16 +68,16 @@ func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit int) []types.Order {
+func (ob *MongoOrderBook) Bids(token types.Address, user *types.Address, limit int) []types.Order {
 	var orders []types.Order
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"get.token": token.String()}
+	q := bson.M{"get.token": token}
 	if user != nil {
-		q["user"] = user.String()
+		q["user"] = user
 	}
 
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -86,16 +85,16 @@ func (ob *MongoOrderBook) Bids(token common.Address, user *common.Address, limit
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit int) []types.Order {
+func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit int) []types.Order {
 	var orders []types.Order
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"give.token": token.String()}
+	q := bson.M{"give.token": token}
 	if user != nil {
-		q["user"] = user.String()
+		q["user"] = user
 	}
 
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
@@ -105,7 +104,7 @@ func (ob *MongoOrderBook) Asks(token common.Address, user *common.Address, limit
 
 func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
 	order := types.Order{}
-	session := ob.session.Clone()
+	session := ob.session.Copy()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
