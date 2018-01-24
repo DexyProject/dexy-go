@@ -96,7 +96,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit i
 		q["user"] = user
 	}
 
-	gc.Find(q).Sort("price").Limit(limit).All(&orders)
+	c.Find(q).Sort("price").Limit(limit).All(&orders)
 
 	return orders
 }
