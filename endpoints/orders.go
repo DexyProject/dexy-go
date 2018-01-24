@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"strings"
+	"math/big"
 )
 
 type Orders struct {
@@ -108,13 +109,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	o.Hash = common.ToHex(hash)
-	price, err := calculatePrice(o)
-	if err != nil {
-		log.Printf("price calculation failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
-		return
-	}
+	price := calculatePrice(o)
 
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
@@ -127,26 +122,19 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 }
 
-func calculatePrice(order types.Order) (string, error) {
+func calculatePrice(order types.Order) string {
 
-	get, err := strconv.ParseFloat(order.Get.Amount, 64)
-	if err != nil {
-		return "", err
-	}
+	get := new(big.Float).SetInt(&order.Get.Amount)
+	give := new(big.Float).SetInt(&order.Give.Amount)
 
-	give, err := strconv.ParseFloat(order.Give.Amount, 64)
-	if err != nil {
-		return "", err
-	}
-
-	var price float64
+	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-		price = get / give
+		price = price.Quo(get, give)
 	} else {
-		price = give / get
+		price = price.Quo(give, get)
 	}
 
-	return strconv.FormatFloat(price, 'f', -1, 64), nil
+	return price.String()
 }
 
 func getLimit(limit string) int {

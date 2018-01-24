@@ -1,12 +1,15 @@
 package types
 
 import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
-	Amount string  `json:"amount" bson:"amount"`
+	Amount big.Int `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
@@ -34,15 +37,8 @@ func (order *Order) OrderHash() ([]byte, error) {
 		return nil, err
 	}
 
-	amountGive, err := IntStringToBytes(order.Give.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	amountGet, err := IntStringToBytes(order.Get.Amount)
-	if err != nil {
-		return nil, err
-	}
+	amountGive := abi.U256(&order.Give.Amount)
+	amountGet := abi.U256(&order.Get.Amount)
 
 	nonce, err := IntStringToBytes(order.Nonce)
 	if err != nil {
