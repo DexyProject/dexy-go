@@ -122,7 +122,8 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// @todo response
+
+	rw.WriteHeader(http.StatusCreated)
 }
 
 func calculatePrice(order types.Order) (string, error) {
