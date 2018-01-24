@@ -2,16 +2,18 @@ package endpoints
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"strings"
 )
 
 type Orders struct {
@@ -110,9 +112,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	o.Hash = common.ToHex(hash)
 	price, err := calculatePrice(o)
 	if err != nil {
-		log.Printf("price calculation failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -129,24 +129,19 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 
 func calculatePrice(order types.Order) (string, error) {
 
-	get, err := strconv.ParseFloat(order.Get.Amount, 64)
-	if err != nil {
-		return "", err
+	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
+		return "", fmt.Errorf("can not divide by zero")
 	}
 
-	give, err := strconv.ParseFloat(order.Give.Amount, 64)
-	if err != nil {
-		return "", err
-	}
+	get := new(big.Float).SetInt(&order.Get.Amount)
+	give := new(big.Float).SetInt(&order.Give.Amount)
 
-	var price float64
+	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-		price = get / give
-	} else {
-		price = give / get
+		return price.Quo(get, give).String(), nil
 	}
 
-	return strconv.FormatFloat(price, 'f', -1, 64), nil
+	return price.Quo(give, get).String(), nil
 }
 
 func getLimit(limit string) int {
