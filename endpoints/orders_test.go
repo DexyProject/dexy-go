@@ -14,9 +14,10 @@ var pricetests = []struct {
 	get      int64
 	getEth   bool
 }{
-	{"1", true, 3000000000000000000, 3000000000000000000, false},
-	{"0.3333333333", true, 1000000000000000000, 3000000000000000000, false},
-	{"0.00185", true, 67489986216600, 124856474500, true},
+	{"1", false, 3000000000000000000, 3000000000000000000, false},
+	{"0.3333333333", false, 1000000000000000000, 3000000000000000000, false},
+	{"0.00185", false, 67489986216600, 124856474500, true},
+	{"", true, 0, 124856474500, true},
 }
 
 func Test_CalculatePrice(t *testing.T) {
@@ -35,7 +36,11 @@ func Test_CalculatePrice(t *testing.T) {
 			order.Get.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
 		}
 
-		price := calculatePrice(order)
+		price, err := calculatePrice(order)
+
+		if !tt.err && err != nil{
+			t.Errorf("error was not expected")
+		}
 
 		if price != tt.expected {
 			t.Errorf("price %s did not match expected %s", price, tt.expected)

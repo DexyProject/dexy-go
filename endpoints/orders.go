@@ -13,6 +13,7 @@ import (
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"fmt"
 )
 
 type Orders struct {
@@ -109,7 +110,11 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	o.Hash = common.ToHex(hash)
-	price := calculatePrice(o)
+	price, err := calculatePrice(o)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
@@ -122,21 +127,21 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 }
 
-func calculatePrice(order types.Order) string {
+func calculatePrice(order types.Order) (string, error) {
+
+	if order.Get.Amount.Sign() == 0 || order.Give.Amount.Sign() == 0 {
+		return "", fmt.Errorf("can not divide by zero")
+	}
 
 	get := new(big.Float).SetInt(&order.Get.Amount)
 	give := new(big.Float).SetInt(&order.Give.Amount)
 
-	// @todo: test if numbers are 0
-
 	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-		price = price.Quo(get, give)
-	} else {
-		price = price.Quo(give, get)
+		return price.Quo(get, give).String(), nil
 	}
 
-	return price.String()
+	return price.Quo(give, get).String(), nil
 }
 
 func getLimit(limit string) int {
