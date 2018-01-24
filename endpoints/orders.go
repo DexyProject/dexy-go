@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"

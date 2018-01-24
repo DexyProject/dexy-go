@@ -6,6 +6,7 @@ import (
 
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/DexyProject/dexy-go/types"
 )
 
 type History struct {
@@ -27,7 +28,7 @@ func (history *History) Handle(rw http.ResponseWriter, r *http.Request) {
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("user"))
 
-	addr := common.HexToAddress(token)
+	addr := types.HexToAddress(token)
 
 	h := history.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
