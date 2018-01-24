@@ -3,16 +3,16 @@ package endpoints
 import (
 	"encoding/json"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"strings"
-	"math/big"
 )
 
 type Orders struct {
