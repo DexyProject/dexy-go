@@ -22,7 +22,7 @@ type Order struct {
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
-	Expires   int64 `json:"expires" bson:"expires"`
+	Expires   int64   `json:"expires" bson:"expires"`
 	Nonce     big.Int `json:"nonce" bson:"nonce"`
 	User      Address `json:"user" bson:"user"`
 	Exchange  Address `json:"exchange" bson:"exchange"`
