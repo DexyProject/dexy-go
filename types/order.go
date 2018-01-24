@@ -32,10 +32,10 @@ type Order struct {
 func (order *Order) OrderHash() ([]byte, error) {
 	sha := sha3.NewKeccak256()
 
-	expires := new(big.Int).SetInt64(order.Expires).Bytes()
+	expires := abi.U256(new(big.Int).SetInt64(order.Expires))
 	amountGive := abi.U256(&order.Give.Amount)
 	amountGet := abi.U256(&order.Get.Amount)
-	nonce := new(big.Int).SetInt64(order.Nonce).Bytes()
+	nonce := abi.U256(new(big.Int).SetInt64(order.Nonce))
 
 	sha.Write(order.Get.Token.Address[:])
 	sha.Write(amountGet[:])

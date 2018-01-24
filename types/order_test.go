@@ -13,8 +13,8 @@ func TestOrder_OrderHash(t *testing.T) {
 		Price:    "0.1",
 		Give:     Trade{Token: HexToAddress("0x0000000000000000000000000000000000000000"), Amount: *new(big.Int).SetInt64(30)},
 		Get:      Trade{Token: HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: *new(big.Int).SetInt64(300)},
-		Expires:  *new(big.Int).SetInt64(1514892553),
-		Nonce:    *new(big.Int).SetInt64(123),
+		Expires:  1514892553,
+		Nonce:    123,
 		User:     HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
 		Exchange: HexToAddress("0x58e91b0734e2b33efc86067ce4db128366f30dc9"),
 	}
