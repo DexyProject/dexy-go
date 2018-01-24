@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -20,16 +21,21 @@ func (a Address) GetBSON() (interface{}, error) {
 }
 
 func (a *Address) SetBSON(raw bson.Raw) error {
-
-	var addr string
-	err := raw.Unmarshal(addr)
+	var s string
+	err := raw.Unmarshal(&s)
 	if err != nil {
 		return err
 	}
 
-	return a.UnmarshalJSON([]byte(addr))
+	a.Address = common.HexToAddress(s)
+
+	return nil
 }
 
 func (a Address) IsZero() bool {
 	return a.String() == "0x0000000000000000000000000000000000000000"
+}
+
+func (a *Address) MarshalJSON() ([]byte, error) {
+	return json.Marshal(strings.ToLower(a.Address.String()))
 }

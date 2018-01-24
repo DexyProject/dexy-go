@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"math/big"
 	"testing"
 
 	"github.com/DexyProject/dexy-go/types"
@@ -25,8 +24,8 @@ func Test_CalculatePrice(t *testing.T) {
 	for _, tt := range pricetests {
 		order := types.Order{}
 
-		order.Get.Amount = *new(big.Int).SetInt64(tt.get)
-		order.Give.Amount = *new(big.Int).SetInt64(tt.give)
+		order.Get.Amount = types.NewInt(tt.get)
+		order.Give.Amount = types.NewInt(tt.give)
 
 		if tt.getEth {
 			order.Get.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")

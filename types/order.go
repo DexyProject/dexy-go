@@ -1,15 +1,12 @@
 package types
 
 import (
-	"math/big"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
-	Amount big.Int `json:"amount" bson:"amount"`
+	Amount Int     `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
@@ -32,10 +29,10 @@ type Order struct {
 func (order *Order) OrderHash() ([]byte, error) {
 	sha := sha3.NewKeccak256()
 
-	expires := new(big.Int).SetInt64(order.Expires).Bytes()
-	amountGive := abi.U256(&order.Give.Amount)
-	amountGet := abi.U256(&order.Get.Amount)
-	nonce := new(big.Int).SetInt64(order.Nonce).Bytes()
+	expires := NewInt(order.Expires).U256()
+	amountGive := order.Give.Amount.U256()
+	amountGet := order.Get.Amount.U256()
+	nonce := NewInt(order.Nonce).U256()
 
 	sha.Write(order.Get.Token.Address[:])
 	sha.Write(amountGet[:])
