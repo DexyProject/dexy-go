@@ -2,9 +2,12 @@ package endpoints
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -60,15 +63,12 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	decoder := json.NewDecoder(r.Body)
 	var o types.Order
-	err := decoder.Decode(&o)
+	err := json.NewDecoder(r.Body).Decode(&o)
+	defer r.Body.Close()
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		//http.Error(rw, err.Error(), 400) // too revealing
 		rw.WriteHeader(http.StatusBadRequest)
-
-		// @todo
 		return
 	}
 
@@ -86,7 +86,18 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	// @todo validate that token strings are not equal.
+	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
+		log.Printf("address is not hex address")
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
+		log.Printf("addresses are identical")
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// @todo validate that amounts are not 0
 
 	hash, err := o.OrderHash()
@@ -101,9 +112,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	o.Hash = common.ToHex(hash)
 	price, err := calculatePrice(o)
 	if err != nil {
-		log.Printf("price calculation failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -114,27 +123,23 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// @todo response
+
+	rw.WriteHeader(http.StatusCreated)
 }
 
 func calculatePrice(order types.Order) (string, error) {
 
-	get, err := strconv.ParseFloat(order.Get.Amount, 64)
-	if err != nil {
-		return "", err
+	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
+		return "", fmt.Errorf("can not divide by zero")
 	}
 
-	give, err := strconv.ParseFloat(order.Give.Amount, 64)
-	if err != nil {
-		return "", err
-	}
+	get := new(big.Float).SetInt(&order.Get.Amount)
+	give := new(big.Float).SetInt(&order.Give.Amount)
 
-	var price float64
+	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-		price = get / give
-	} else {
-		price = give / get
+		return price.Quo(get, give).String(), nil
 	}
 
-	return strconv.FormatFloat(price, 'f', -1, 64), nil
+	return price.Quo(give, get).String(), nil
 }
