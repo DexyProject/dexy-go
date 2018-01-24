@@ -2,7 +2,6 @@ package validators
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/types"
@@ -29,12 +28,5 @@ func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool
 		return false, fmt.Errorf("could not get balance from contract")
 	}
 
-	balanceFloat := float64(balance.Int64())
-	giveAmount, err := strconv.ParseFloat(o.Give.Amount, 64)
-
-	if err != nil {
-		return false, fmt.Errorf("error parsing o.give.amount")
-	}
-
-	return balanceFloat >= giveAmount, nil
+	return balance.Cmp(&o.Give.Amount) >= 0, nil
 }
