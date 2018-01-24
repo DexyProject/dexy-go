@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"time"
 )
 
 type Trade struct {
@@ -59,6 +60,10 @@ func (order *Order) Validate() error {
 
 	if strings.ToLower(order.Give.Token.String()) == strings.ToLower(order.Get.Token.String()) {
 		return fmt.Errorf("token addresses are identical")
+	}
+
+	if order.Expires <= time.Now().Unix() {
+		return fmt.Errorf("invalid expires time: %v", order.Expires)
 	}
 
 	return nil
