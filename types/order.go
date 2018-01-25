@@ -15,7 +15,7 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      string  `json:"hash,omitempty" bson:"hash"`
+	Hash      Hash  `json:"hash,omitempty" bson:"hash"`
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
@@ -26,7 +26,16 @@ type Order struct {
 	Signature EC      `json:"signature" bson:"signature"`
 }
 
-func (o *Order) OrderHash() []byte {
+
+func (o *Order) OrderHash() Hash {
+	if o.Hash.String() == (Hash{}).String() {
+		o.generateHash()
+	}
+
+	return o.Hash
+}
+
+func (o *Order) generateHash() {
 	sha := sha3.NewKeccak256()
 
 	sha.Write(o.Get.Token.Address[:])
@@ -38,5 +47,5 @@ func (o *Order) OrderHash() []byte {
 	sha.Write(o.User.Address[:])
 	sha.Write(o.Exchange.Address[:])
 
-	return sha.Sum(nil)
+	o.Hash.SetBytes(sha.Sum(nil))
 }

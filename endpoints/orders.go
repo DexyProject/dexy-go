@@ -48,7 +48,7 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
-	o := orders.OrderBook.GetOrderByHash(params["order"])
+	o := orders.OrderBook.GetOrderByHash(types.NewHash(params["order"]))
 
 	if o == nil {
 		http.NotFound(rw, r)
@@ -97,16 +97,6 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash := o.OrderHash()
-	log.Printf("order hash is: %v", common.ToHex(hash))
-	if err != nil {
-		log.Printf("hashing order failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
-		return
-	}
-
-	o.Hash = common.ToHex(hash)
 	price, err := calculatePrice(o)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
