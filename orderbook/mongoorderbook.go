@@ -6,6 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 type MongoOrderBook struct {
@@ -33,11 +34,11 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 
 	c := session.DB(DBName).C(FileName)
 
-	if ob.GetOrderByHash(order.Hash) != nil {
+	hash := order.OrderHash()
+	if ob.GetOrderByHash(hash) != nil {
 		return fmt.Errorf("order exists in orderbook")
 	}
 
-	hash := order.OrderHash()
 	if !order.Signature.Verify(order.User, hash) {
 		return fmt.Errorf("signature could not be verified")
 	}
@@ -47,10 +48,12 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 		return err
 	}
 
+	log.Printf("inserted new order %s", hash)
+
 	return nil
 }
 
-func (ob *MongoOrderBook) RemoveOrder(hash string) bool {
+func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 	session := ob.session.Copy()
 	defer session.Close()
 
@@ -97,7 +100,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit i
 	return orders
 }
 
-func (ob *MongoOrderBook) GetOrderByHash(hash string) *types.Order {
+func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	order := types.Order{}
 	session := ob.session.Copy()
 	defer session.Close()
