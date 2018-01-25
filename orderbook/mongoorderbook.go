@@ -27,26 +27,22 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 	return &MongoOrderBook{connection: connection, session: session}, nil
 }
 
-func (ob *MongoOrderBook) InsertOrder(NewOrder types.Order) error {
+func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	if ob.GetOrderByHash(NewOrder.Hash) != nil {
+	if ob.GetOrderByHash(order.Hash) != nil {
 		return fmt.Errorf("order exists in orderbook")
 	}
 
-	hash, err := NewOrder.OrderHash()
-	if err != nil {
-		return fmt.Errorf("could not create order hash")
-	}
-
-	if !NewOrder.Signature.Verify(NewOrder.User, hash) {
+	hash := order.OrderHash()
+	if !order.Signature.Verify(order.User, hash) {
 		return fmt.Errorf("signature could not be verified")
 	}
 
-	err = c.Insert(NewOrder)
+	err := c.Insert(order)
 	if err != nil {
 		return err
 	}

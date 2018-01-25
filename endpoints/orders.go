@@ -97,9 +97,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// @todo validate that amounts are not 0
-
-	hash, err := o.OrderHash()
+	hash := o.OrderHash()
 	log.Printf("order hash is: %v", common.ToHex(hash))
 	if err != nil {
 		log.Printf("hashing order failed: %v", err)

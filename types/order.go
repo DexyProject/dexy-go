@@ -26,17 +26,17 @@ type Order struct {
 	Signature EC      `json:"signature" bson:"signature"`
 }
 
-func (order *Order) OrderHash() ([]byte, error) {
+func (o *Order) OrderHash() []byte {
 	sha := sha3.NewKeccak256()
 
-	sha.Write(order.Get.Token.Address[:])
-	sha.Write(order.Get.Amount.U256()[:])
-	sha.Write(order.Give.Token.Address[:])
-	sha.Write(order.Give.Amount.U256()[:])
-	sha.Write(NewInt(order.Expires).U256()[:])
-	sha.Write(NewInt(order.Nonce).U256()[:])
-	sha.Write(order.User.Address[:])
-	sha.Write(order.Exchange.Address[:])
+	sha.Write(o.Get.Token.Address[:])
+	sha.Write(o.Get.Amount.U256()[:])
+	sha.Write(o.Give.Token.Address[:])
+	sha.Write(o.Give.Amount.U256()[:])
+	sha.Write(NewInt(o.Expires).U256()[:])
+	sha.Write(NewInt(o.Nonce).U256()[:])
+	sha.Write(o.User.Address[:])
+	sha.Write(o.Exchange.Address[:])
 
-	return sha.Sum(nil), nil
+	return sha.Sum(nil)
 }
