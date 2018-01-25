@@ -41,7 +41,7 @@ func (h Hash) MarshalJSON() ([]byte, error) {
 	return json.Marshal(h.String())
 }
 
-func (h Hash) UnmarshalJSON(input []byte) error {
+func (h *Hash) UnmarshalJSON(input []byte) error {
 	return hexutil.UnmarshalFixedJSON(reflect.TypeOf(Hash{}), input, h[:])
 }
 
