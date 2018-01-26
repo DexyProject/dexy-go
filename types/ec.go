@@ -13,7 +13,7 @@ type EC struct {
 	S string `json:"s" bson:"s"`
 }
 
-func (ec *EC) Verify(address Address, hash []byte) bool {
+func (ec *EC) Verify(address Address, hash Hash) bool {
 
 	r, err := StringToBytes(ec.R)
 	if err != nil {

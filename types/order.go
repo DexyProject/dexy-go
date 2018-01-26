@@ -2,18 +2,16 @@ package types
 
 import (
 	"fmt"
-	"math/big"
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
-	Amount big.Int `json:"amount" bson:"amount"`
+	Amount Int     `json:"amount" bson:"amount"`
 }
 
 type Orders struct {
@@ -22,7 +20,7 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      string  `json:"hash,omitempty" bson:"hash"`
+	Hash      Hash    `json:"hash,omitempty" bson:"hash"`
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
@@ -33,24 +31,27 @@ type Order struct {
 	Signature EC      `json:"signature" bson:"signature"`
 }
 
-func (order *Order) OrderHash() ([]byte, error) {
+func (o *Order) OrderHash() Hash {
+	if o.Hash.String() == (Hash{}).String() {
+		o.generateHash()
+	}
+
+	return o.Hash
+}
+
+func (o *Order) generateHash() {
 	sha := sha3.NewKeccak256()
 
-	expires := new(big.Int).SetInt64(order.Expires).Bytes()
-	amountGive := abi.U256(&order.Give.Amount)
-	amountGet := abi.U256(&order.Get.Amount)
-	nonce := new(big.Int).SetInt64(order.Nonce).Bytes()
+	sha.Write(o.Get.Token.Address[:])
+	sha.Write(o.Get.Amount.U256()[:])
+	sha.Write(o.Give.Token.Address[:])
+	sha.Write(o.Give.Amount.U256()[:])
+	sha.Write(NewInt(o.Expires).U256()[:])
+	sha.Write(NewInt(o.Nonce).U256()[:])
+	sha.Write(o.User.Address[:])
+	sha.Write(o.Exchange.Address[:])
 
-	sha.Write(order.Get.Token.Address[:])
-	sha.Write(amountGet[:])
-	sha.Write(order.Give.Token.Address[:])
-	sha.Write(amountGive[:])
-	sha.Write(expires[:])
-	sha.Write(nonce[:])
-	sha.Write(order.User.Address[:])
-	sha.Write(order.Exchange.Address[:])
-
-	return sha.Sum(nil), nil
+	o.Hash.SetBytes(sha.Sum(nil))
 }
 
 func (order *Order) Validate() error {

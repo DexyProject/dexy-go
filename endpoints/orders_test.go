@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"math/big"
 	"testing"
 
 	"github.com/DexyProject/dexy-go/types"
@@ -14,9 +13,9 @@ var pricetests = []struct {
 	get      int64
 	getEth   bool
 }{
-	{"1", false, 3000000000000000000, 3000000000000000000, false},
-	{"0.3333333333", false, 1000000000000000000, 3000000000000000000, false},
-	{"0.00185", false, 67489986216600, 124856474500, true},
+	{"1.00000000", false, 3000000000000000000, 3000000000000000000, false},
+	{"0.33333333", false, 1000000000000000000, 3000000000000000000, false},
+	{"0.00185000", false, 67489986216600, 124856474500, true},
 	{"", true, 0, 124856474500, true},
 }
 
@@ -25,8 +24,8 @@ func Test_CalculatePrice(t *testing.T) {
 	for _, tt := range pricetests {
 		order := types.Order{}
 
-		order.Get.Amount = *new(big.Int).SetInt64(tt.get)
-		order.Give.Amount = *new(big.Int).SetInt64(tt.give)
+		order.Get.Amount = types.NewInt(tt.get)
+		order.Give.Amount = types.NewInt(tt.give)
 
 		if tt.getEth {
 			order.Get.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
