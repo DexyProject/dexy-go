@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"math/big"
 )
 
 type Trade struct {
@@ -65,6 +66,11 @@ func (o *Order) Validate() error {
 
 	if o.Expires <= time.Now().Unix() {
 		return fmt.Errorf("invalid expires time: %v", o.Expires)
+	}
+
+	zero := new(big.Int).SetInt64(0)
+	if o.Get.Amount.Cmp(zero) == 0 || o.Give.Amount.Cmp(zero) == 0 {
+		return fmt.Errorf("amounts are not allowed to be 0")
 	}
 
 	return nil
