@@ -38,7 +38,7 @@ func (tq *MongoTicks) InsertTick(NewTick types.Transaction) error {
 	return nil
 }
 
-func (tq *MongoTicks) FetchTicks() {
+func (tq *MongoTicks) FetchTicks(token types.Address) {
 	//todo
 }
 
