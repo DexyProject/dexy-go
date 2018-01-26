@@ -54,17 +54,17 @@ func (o *Order) generateHash() {
 	o.Hash.SetBytes(sha.Sum(nil))
 }
 
-func (order *Order) Validate() error {
-	if !common.IsHexAddress(order.Get.Token.String()) || !common.IsHexAddress(order.Give.Token.String()) {
+func (o *Order) Validate() error {
+	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
 		return fmt.Errorf("address is not valid hex")
 	}
 
-	if strings.ToLower(order.Give.Token.String()) == strings.ToLower(order.Get.Token.String()) {
+	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
 		return fmt.Errorf("token addresses are identical")
 	}
 
-	if order.Expires <= time.Now().Unix() {
-		return fmt.Errorf("invalid expires time: %v", order.Expires)
+	if o.Expires <= time.Now().Unix() {
+		return fmt.Errorf("invalid expires time: %v", o.Expires)
 	}
 
 	return nil
