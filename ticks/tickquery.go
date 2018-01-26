@@ -1,4 +1,4 @@
-package db
+package ticks
 
 import (
 	"github.com/DexyProject/dexy-go/types"
@@ -7,5 +7,4 @@ import (
 
 type TickQuery interface {
 	InsertTick(NewTick types.Transaction) error
-	AggregateTick(block int) ([]bson.M, error)
 }
