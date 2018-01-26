@@ -125,7 +125,7 @@ func calculatePrice(order types.Order) (string, error) {
 
 	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-	  return price.Quo(get, give).Text('f', 8), nil
+		return price.Quo(get, give).Text('f', 8), nil
 	}
 
 	return price.Quo(give, get).Text('f', 8), nil
