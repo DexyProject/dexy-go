@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -85,14 +84,9 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
-		log.Printf("address is not hex address")
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
-		log.Printf("addresses are identical")
+	err = o.Validate()
+	if err != nil {
+		log.Printf("validating order failed: %v", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
