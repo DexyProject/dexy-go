@@ -6,10 +6,7 @@ import (
 
 func TestEC_Verify(t *testing.T) {
 	address := HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
-	hash, err := StringToBytes("0x1f406680ed210e1589ad11769afa120d7f171ce1daf91ea3346b189ce9935203")
-	if err != nil {
-		t.Fail()
-	}
+	hash := NewHash("0x1f406680ed210e1589ad11769afa120d7f171ce1daf91ea3346b189ce9935203")
 
 	sig := EC{
 		V: 28,

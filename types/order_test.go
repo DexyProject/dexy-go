@@ -8,7 +8,6 @@ import (
 func TestOrder_OrderHash(t *testing.T) {
 
 	o := Order{
-		Hash:     "0xcd09064f280940d69e0d3d9741c7986b80935dbe066a218cc83823e7eb518681",
 		Price:    "0.1",
 		Give:     Trade{Token: HexToAddress("0x0000000000000000000000000000000000000000"), Amount: NewInt(30)},
 		Get:      Trade{Token: HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: NewInt(300)},
@@ -18,17 +17,11 @@ func TestOrder_OrderHash(t *testing.T) {
 		Exchange: HexToAddress("0x58e91b0734e2b33efc86067ce4db128366f30dc9"),
 	}
 
-	hashed, err := o.OrderHash()
-	if err != nil {
-		t.Error(err)
-	}
 
-	byteHash, err := StringToBytes(o.Hash)
-	if err != nil {
-		t.Error(err)
-	}
+	expected := NewHash("0xcd09064f280940d69e0d3d9741c7986b80935dbe066a218cc83823e7eb518681")
+	hash := o.Hash
 
-	if !bytes.Equal(hashed, byteHash) {
+	if !bytes.Equal(expected[:], hash[:]) {
 		t.Error("order hashes were not equal")
 	}
 }
