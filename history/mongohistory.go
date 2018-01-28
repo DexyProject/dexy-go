@@ -61,23 +61,43 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 
 	o1 := bson.M{
 		"$match": bson.M{
-			"block": block }} //matching block
+			"block": block}} //matching block
 
 	o2 := bson.M{
-		"$group": bson.M{
-			"_id": bson.M {
-				"give_token": "$give.token", "get_token": "$get.token"},
-			"tickdata": "$$ROOT" }} //@todo verify/test queries
+		"$match": bson.M{
+			"give.token": bson.M{
+				"$nin": []interface{}{ethAddress}},}} // parse out 0x0 from give tokens
 
 	o3 := bson.M{
 		"$match": bson.M{
-			"give.token": bson.M{
-				"$nin": []interface{}{ ethAddress }},}} // parse out 0x0 from give tokens
+			"get.token": bson.M{
+				"$nin": []interface{}{ethAddress}},}} // parse out 0x0 from get token
 
 	o4 := bson.M{
-		"$match": bson.M{
-			"get.token": bson.M{
-				"$nin": []interface{}{ ethAddress }},}} // parse out 0x0 from get tokens
+		"$group": bson.M{
+			"_id": "$block",
+			"opentime": bson.M{
+			},
+			"closetime": bson.M{
+			},
+			"volume": bson.M{
+			},
+			"open": bson.M{
+			},
+			"close": bson.M{
+			},
+			"high": bson.M{
+				"$cond": []interface{}{bson.M{
+					"$gte": []interface{}{bson.M{
+						"$max": "$give.amount"}, bson.M{"$max": "$get.amount"}}},
+					bson.M{"$max": "$give.amount"},
+					bson.M{"$max": "get.amount"}}},
+			"low": bson.M{
+				"$cond": []interface{}{bson.M{
+					"$gte": []interface{}{bson.M{
+						"$min": "$give.amount"}, bson.M{"$min": "$get.amount"}}},
+					bson.M{"$min": "$give.amount"},
+					bson.M{"$max": "$get.amount"}}}}}
 
 
 	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4})

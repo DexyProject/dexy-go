@@ -39,6 +39,12 @@ func (tq *MongoTicks) InsertTick(NewTick types.Transaction) error {
 }
 
 func (tq *MongoTicks) FetchTicks(token types.Address) {
+	session := tq.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+
 	//todo
 }
 
