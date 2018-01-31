@@ -55,8 +55,7 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 	session := history.session.Clone()
 	defer session.Close()
 
-	ethAddr := "0x0000000000000000000000000000000000000000"
-	ethAddress := types.HexToAddress(ethAddr)
+	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	c := session.DB(DBName).C(FileName)
 
 	o1 := bson.M{
