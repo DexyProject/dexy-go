@@ -86,6 +86,22 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 			"closetime": bson.M{
 				"$last": "$timestamp"},
 
+			"getvolume": bson.M{
+				"$sum": bson.M{
+					"$cond": []interface{}{bson.M{
+						"$eq": []interface{}{
+							ethAddress, "$get.token"}},
+						0,
+						"$get.amount"}}},
+
+			"givevolume": bson.M{
+				"$sum": bson.M{
+					"$cond": []interface{}{bson.M{
+						"$eq": []interface{}{
+							ethAddress, "$give.token"}},
+						0,
+						"$give.amount"}}},
+
 			"price": bson.M{
 				"$cond": []interface{}{bson.M{
 					"$eq": []interface{}{
@@ -102,6 +118,11 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 			"opentime": "$opentime",
 
 			"closetime": "$closetime",
+
+			"volume": bson.M{
+				"$add": []interface{}{
+					"$givevolume",
+					"$getvolume" }},
 
 			"open": bson.M{
 				"$first": "$price" },
