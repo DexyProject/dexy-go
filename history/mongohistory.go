@@ -60,48 +60,39 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 
 	o1 := bson.M{
 		"$match": bson.M{
-			"block": block}} //matching block
-
-//	o2 := bson.M{
-//		"$match": bson.M{
-//			"give.token": bson.M{
-//				"$nin": []interface{}{ethAddress}},}} // parse out 0x0 from give tokens
-//
-//	o3 := bson.M{
-//		"$match": bson.M{
-//			"get.token": bson.M{
-//				"$nin": []interface{}{ethAddress}},}} // parse out 0x0 from get token
+			"block": block}}
 
 	o2 := bson.M{
 		"$sort": bson.M{
-			"timestamp": 1 }} //ascending
+			"timestamp": 1 }} // ascending
 
 	o3 := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
-
 			"opentime": bson.M{
 				"$first": "$timestamp"},
-
 			"closetime": bson.M{
 				"$last": "$timestamp"},
-
 			"getvolume": bson.M{
 				"$sum": bson.M{
 					"$cond": []interface{}{bson.M{
 						"$eq": []interface{}{
-							ethAddress, "$get.token"}},
+							ethAddress, "$get.token"},
+					},
 						0,
-						"$get.amount"}}},
-
+						"$get.amount"},
+				},
+			},
 			"givevolume": bson.M{
 				"$sum": bson.M{
 					"$cond": []interface{}{bson.M{
 						"$eq": []interface{}{
-							ethAddress, "$give.token"}},
+							ethAddress, "$give.token"},
+					},
 						0,
-						"$give.amount"}}},
-
+						"$give.amount"},
+				},
+			},
 			"price": bson.M{
 				"$cond": []interface{}{bson.M{
 					"$eq": []interface{}{
@@ -109,32 +100,33 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 					bson.M{"$divide": []interface{}{
 						"$get.amount", "$give.amount"}},
 					bson.M{"$divide": []interface{}{
-						"$give.amount", "$get.amount" }}}}}}
+						"$give.amount", "$get.amount"},
+					},
+				},
+			},
+		},
+	}
 
 	o4 := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
-
 			"opentime": "$opentime",
-
 			"closetime": "$closetime",
-
 			"volume": bson.M{
 				"$add": []interface{}{
 					"$givevolume",
-					"$getvolume" }},
-
+					"$getvolume"},
+			},
 			"open": bson.M{
-				"$first": "$price" },
-
+				"$first": "$price"},
 			"close": bson.M{
-				"$last": "$price" },
-
+				"$last": "$price"},
 			"high": bson.M{
-				"$max": "$price" },
-
+				"$max": "$price"},
 			"low": bson.M{
-				"$min": "$price" }}}
+				"$min": "$price"},
+		},
+	}
 
 	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4})
 	response := []bson.M{}
