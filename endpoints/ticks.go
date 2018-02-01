@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"github.com/DexyProject/dexy-go/db"
 	"encoding/json"
+	"github.com/DexyProject/dexy-go/history"
 )
 
 type Ticks struct {
-	TickQuery db.TickQuery
+	TickQuery history.History
 }
 
 func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
