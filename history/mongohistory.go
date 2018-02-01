@@ -73,8 +73,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 					"$cond": []interface{}{bson.M{
 						"$eq": []interface{}{ethAddress, "$get.token"},
 					},
-						0,
-						"$get.amount",
+						0, "$get.amount",
 					},
 				},
 			},
@@ -82,17 +81,17 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 					"$cond": []interface{}{bson.M{
 						"$eq": []interface{}{ethAddress, "$give.token"},
 					},
-						0,
-						"$give.amount",
+						0, "$give.amount",
 					},
 				},
 			},
-			"price": bson.M{"$cond": []interface{}{bson.M{
+			"price": bson.M{
+				"$cond": []interface{}{bson.M{
 				"$eq": []interface{}{ethAddress, "$get.token"},
-			},
+				},
 				bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
 				bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},
-			},
+				},
 			},
 		},
 	}
