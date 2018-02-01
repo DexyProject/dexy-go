@@ -2,7 +2,6 @@ package ticks
 
 import (
 	"github.com/DexyProject/dexy-go/types"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Ticks interface {
