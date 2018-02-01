@@ -6,7 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	)
+)
 
 const (
 	DBName   = "TradeHistory"
@@ -51,87 +51,66 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 	return transactions
 }
 
-func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) {
+func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 
 	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	c := session.DB(DBName).C(FileName)
 
-	o1 := bson.M{
-		"$match": bson.M{
-			"block": block},
-			}
-
-	o2 := bson.M{
-		"$sort": bson.M{
-			"timestamp": 1},
-			} // ascending
-
-	o3 := bson.M{
+	p1 := bson.M{
+		"$match": bson.M{"block": block},
+	}
+	p2 := bson.M{
+		"$sort": bson.M{"timestamp": 1},
+	}
+	p3 := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
-			"opentime": bson.M{
-				"$first": "$timestamp"},
-			"closetime": bson.M{
-				"$last": "$timestamp"},
-			"getvolume": bson.M{
-				"$sum": bson.M{
+			"opentime": bson.M{"$first": "$timestamp"},
+			"closetime": bson.M{"$last": "$timestamp"},
+			"getvolume": bson.M{"$sum": bson.M{
 					"$cond": []interface{}{bson.M{
-						"$eq": []interface{}{
-							ethAddress, "$get.token"},
+						"$eq": []interface{}{ethAddress, "$get.token"},
 					},
 						0,
-						"$get.amount"},
+						"$get.amount",
+					},
 				},
 			},
-			"givevolume": bson.M{
-				"$sum": bson.M{
+			"givevolume": bson.M{"$sum": bson.M{
 					"$cond": []interface{}{bson.M{
-						"$eq": []interface{}{
-							ethAddress, "$give.token"},
+						"$eq": []interface{}{ethAddress, "$give.token"},
 					},
 						0,
-						"$give.amount"},
-				},
-			},
-			"price": bson.M{
-				"$cond": []interface{}{bson.M{
-					"$eq": []interface{}{
-						ethAddress, "$get.token"}},
-					bson.M{"$divide": []interface{}{
-						"$get.amount", "$give.amount"}},
-					bson.M{"$divide": []interface{}{
-						"$give.amount", "$get.amount"},
+						"$give.amount",
 					},
 				},
+			},
+			"price": bson.M{"$cond": []interface{}{bson.M{
+				"$eq": []interface{}{ethAddress, "$get.token"},
+			},
+				bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
+				bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},
+			},
 			},
 		},
 	}
-
-	o4 := bson.M{
+	p4 := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
 			"opentime": "$opentime",
 			"closetime": "$closetime",
-			"volume": bson.M{
-				"$add": []interface{}{
-					"$givevolume",
-					"$getvolume"},
-			},
-			"open": bson.M{
-				"$first": "$price"},
-			"close": bson.M{
-				"$last": "$price"},
-			"high": bson.M{
-				"$max": "$price"},
-			"low": bson.M{
-				"$min": "$price"},
+			"volume": bson.M{"$add": []interface{}{"$givevolume", "$getvolume"}},
+			"open": bson.M{"$first": "$price"},
+			"close": bson.M{"$last": "$price"},
+			"high": bson.M{"$max": "$price"},
+			"low": bson.M{"$min": "$price"},
 		},
 	}
 
-	pipeline := c.Pipe([]bson.M{o1, o2, o3, o4})
-	response := []bson.M{}
+	pipeline := c.Pipe([]bson.M{p1,p2,p3,p4})
+	var response []types.Tick
 	err := pipeline.All(&response)
 	if err != nil {
 		return nil, fmt.Errorf("could not query history")
