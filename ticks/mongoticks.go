@@ -39,13 +39,21 @@ func (tq *MongoTicks) InsertTick(NewTick types.Tick) error {
 	return nil
 }
 
-func (tq *MongoTicks) FetchTicks(block int64) ([]types.Tick, error) {
+func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 	session := tq.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 	var results []types.Tick
-	err := c.Find(bson.M{"block": block}).All(&results)
+
+	q := bson.M{
+		"$or": []bson.M{
+			{"give.token": token},
+			{"get.token": token},
+		},
+	}
+
+	err := c.Find(q).All(&results)
 	if err!= nil {
 		return nil, fmt.Errorf("could not fetch ticks")
 	}
