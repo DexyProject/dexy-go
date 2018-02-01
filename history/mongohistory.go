@@ -60,11 +60,13 @@ func (history *MongoHistory) AggregateTransactions(block int) ([]bson.M, error) 
 
 	o1 := bson.M{
 		"$match": bson.M{
-			"block": block}}
+			"block": block},
+			}
 
 	o2 := bson.M{
 		"$sort": bson.M{
-			"timestamp": 1 }} // ascending
+			"timestamp": 1 },
+			} // ascending
 
 	o3 := bson.M{
 		"$group": bson.M{
