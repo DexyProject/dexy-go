@@ -58,13 +58,13 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	c := session.DB(DBName).C(FileName)
 
-	p1 := bson.M{
+	match := bson.M{
 		"$match": bson.M{"block": block},
 	}
-	p2 := bson.M{
+	timestampSort := bson.M{
 		"$sort": bson.M{"timestamp": 1},
 	}
-	p3 := bson.M{
+	priceCalc := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
 			"opentime": bson.M{"$first": "$timestamp"},
@@ -95,7 +95,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			},
 		},
 	}
-	p4 := bson.M{
+	aggregate := bson.M{
 		"$group": bson.M{
 			"_id": "$block",
 			"opentime": "$opentime",
@@ -108,7 +108,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		},
 	}
 
-	pipeline := c.Pipe([]bson.M{p1,p2,p3,p4})
+	pipeline := c.Pipe([]bson.M{match, timestampSort, priceCalc, aggregate})
 	var response []types.Tick
 	err := pipeline.All(&response)
 	if err != nil {
