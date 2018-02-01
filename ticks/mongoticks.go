@@ -4,6 +4,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"github.com/DexyProject/dexy-go/types"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -25,7 +26,7 @@ func NewMongoTicks(connection string) (*MongoTicks, error) {
 	return &MongoTicks{connection: connection, session: session}, nil
 }
 
-func (tq *MongoTicks) InsertTick(NewTick types.Transaction) error {
+func (tq *MongoTicks) InsertTick(NewTick types.Tick) error {
 	session := tq.session.Clone()
 	defer session.Close()
 
@@ -38,14 +39,18 @@ func (tq *MongoTicks) InsertTick(NewTick types.Transaction) error {
 	return nil
 }
 
-func (tq *MongoTicks) FetchTicks(token types.Address) {
+func (tq *MongoTicks) FetchTicks(block int64) ([]types.Tick, error) {
 	session := tq.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
+	var results []types.Tick
+	err := c.Find(bson.M{"block": block}).All(&results)
+	if err!= nil {
+		return nil, fmt.Errorf("could not fetch ticks")
+	}
 
-
-	//todo
+	return results, nil
 }
 
 

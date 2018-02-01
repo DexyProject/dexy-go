@@ -5,7 +5,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type TickQuery interface {
-	InsertTick(NewTick types.Transaction) error
-	FetchTicks(token types.Address)
+type Ticks interface {
+	InsertTick(NewTick types.Tick) error
+	FetchTicks(block int64) ([]types.Tick, error)
 }

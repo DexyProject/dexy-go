@@ -22,7 +22,4 @@ func main() {
 	r.HandleFunc("/trades", get.Handle).Methods("GET").Queries("token", "")
 
 	err = http.ListenAndServe(":12312", r)
-	if err != nil {
-		log.Fatal("Listen:", err)
-	}
 }
