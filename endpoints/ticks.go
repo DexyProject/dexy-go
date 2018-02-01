@@ -2,25 +2,27 @@ package endpoints
 
 import (
 	"net/http"
-	"github.com/DexyProject/dexy-go/db"
 	"encoding/json"
-	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/ticks"
+	"github.com/DexyProject/dexy-go/types"
 )
 
 type Ticks struct {
-	TickQuery history.History
+	TickQuery ticks.Ticks
 }
 
 func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	query := r.URL.Query()
-	block := query.Get("block")
+	token := query.Get("token")
+	addr := types.HexToAddress(token)
 
-	h, err := ticks.TickQuery.AggregateTick(block) //Output of AggregateTick is bson.M[]
+	h, err := ticks.TickQuery.FetchTicks(addr)
 	if err != nil {
 		// @todo error handling
 		rw.WriteHeader(http.StatusBadRequest)
 	}
+
 	json.NewEncoder(rw).Encode(h)
 }
