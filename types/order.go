@@ -10,7 +10,7 @@ import (
 	"math/big"
 )
 
-var ORDER_HASH_SCHEME = NewHash("")
+var ORDER_HASH_SCHEME = NewHash("0xa8da5e6ea8c46a0516b3a2e3b010f264e8334214f4b37ff5f2bc8a2dd3f32be1")
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
