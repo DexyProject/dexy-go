@@ -70,24 +70,24 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			"opentime": bson.M{"$first": "$timestamp"},
 			"closetime": bson.M{"$last": "$timestamp"},
 			"getvolume": bson.M{"$sum": bson.M{
-					"$cond": []interface{}{bson.M{
-						"$eq": []interface{}{ethAddress, "$get.token"},
-					},
-						0, "$get.amount",
-					},
+				"$cond": []interface{}{bson.M{
+					"$eq": []interface{}{ethAddress, "$get.token"},
+				},
+					0, "$get.amount",
 				},
 			},
+			},
 			"givevolume": bson.M{"$sum": bson.M{
-					"$cond": []interface{}{bson.M{
-						"$eq": []interface{}{ethAddress, "$give.token"},
-					},
-						0, "$give.amount",
-					},
+				"$cond": []interface{}{bson.M{
+					"$eq": []interface{}{ethAddress, "$give.token"},
 				},
+					0, "$give.amount",
+				},
+			},
 			},
 			"price": bson.M{
 				"$cond": []interface{}{bson.M{
-				"$eq": []interface{}{ethAddress, "$get.token"},
+					"$eq": []interface{}{ethAddress, "$get.token"},
 				},
 				bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
 				bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},

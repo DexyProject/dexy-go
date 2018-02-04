@@ -1,25 +1,26 @@
 package ticks
 
 import (
-	"gopkg.in/mgo.v2"
-	"github.com/DexyProject/dexy-go/types"
 	"fmt"
+
+	"github.com/DexyProject/dexy-go/types"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
 const (
-	DBName = "TickData"
+	DBName   = "TickData"
 	FileName = "Ticks"
 )
 
 type MongoTicks struct {
 	connection string
-	session *mgo.Session
+	session    *mgo.Session
 }
 
 func NewMongoTicks(connection string) (*MongoTicks, error) {
 	session, err := mgo.Dial(connection)
-	if err!= nil {
+	if err != nil {
 		return nil, fmt.Errorf("could not connect to tick database")
 	}
 
@@ -54,11 +55,9 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 	}
 
 	err := c.Find(q).All(&results)
-	if err!= nil {
+	if err != nil {
 		return nil, fmt.Errorf("could not fetch ticks")
 	}
 
 	return results, nil
 }
-
-
