@@ -10,6 +10,8 @@ import (
 	"math/big"
 )
 
+var ORDER_HASH_SCHEME = NewHash("")
+
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
 	Amount Int     `json:"amount" bson:"amount"`
@@ -41,16 +43,20 @@ func (o *Order) OrderHash() Hash {
 }
 
 func (o *Order) generateHash() {
-	sha := sha3.NewKeccak256()
 
-	sha.Write(o.Get.Token.Address[:])
-	sha.Write(o.Get.Amount.U256()[:])
-	sha.Write(o.Give.Token.Address[:])
-	sha.Write(o.Give.Amount.U256()[:])
-	sha.Write(NewInt(o.Expires).U256()[:])
-	sha.Write(NewInt(o.Nonce).U256()[:])
-	sha.Write(o.User.Address[:])
-	sha.Write(o.Exchange.Address[:])
+	orderhash := sha3.NewKeccak256()
+	orderhash.Write(o.Get.Token.Address[:])
+	orderhash.Write(o.Get.Amount.U256()[:])
+	orderhash.Write(o.Give.Token.Address[:])
+	orderhash.Write(o.Give.Amount.U256()[:])
+	orderhash.Write(NewInt(o.Expires).U256()[:])
+	orderhash.Write(NewInt(o.Nonce).U256()[:])
+	orderhash.Write(o.User.Address[:])
+	orderhash.Write(o.Exchange.Address[:])
+
+	sha := sha3.NewKeccak256()
+	sha.Write(ORDER_HASH_SCHEME[:])
+	sha.Write(orderhash.Sum(nil))
 
 	o.Hash.SetBytes(sha.Sum(nil))
 }
