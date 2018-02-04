@@ -1,8 +1,9 @@
 package endpoints
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
+
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/types"
 )

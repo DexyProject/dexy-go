@@ -66,8 +66,8 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	}
 	priceCalc := bson.M{
 		"$group": bson.M{
-			"_id": "$block",
-			"opentime": bson.M{"$first": "$timestamp"},
+			"_id":       "$block",
+			"opentime":  bson.M{"$first": "$timestamp"},
 			"closetime": bson.M{"$last": "$timestamp"},
 			"getvolume": bson.M{"$sum": bson.M{
 				"$cond": []interface{}{bson.M{
@@ -89,22 +89,22 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 				"$cond": []interface{}{bson.M{
 					"$eq": []interface{}{ethAddress, "$get.token"},
 				},
-				bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
-				bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},
+					bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
+					bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},
 				},
 			},
 		},
 	}
 	aggregate := bson.M{
 		"$group": bson.M{
-			"_id": "$block",
-			"opentime": "$opentime",
+			"_id":       "$block",
+			"opentime":  "$opentime",
 			"closetime": "$closetime",
-			"volume": bson.M{"$add": []interface{}{"$givevolume", "$getvolume"}},
-			"open": bson.M{"$first": "$price"},
-			"close": bson.M{"$last": "$price"},
-			"high": bson.M{"$max": "$price"},
-			"low": bson.M{"$min": "$price"},
+			"volume":    bson.M{"$add": []interface{}{"$givevolume", "$getvolume"}},
+			"open":      bson.M{"$first": "$price"},
+			"close":     bson.M{"$last": "$price"},
+			"high":      bson.M{"$max": "$price"},
+			"low":       bson.M{"$min": "$price"},
 		},
 	}
 
