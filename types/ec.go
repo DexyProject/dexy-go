@@ -30,9 +30,7 @@ func (ec *EC) Verify(address Address, hash Hash) bool {
 	copy(sigBytes[64-len(s):64], s[:])
 	sigBytes[64] = byte(ec.V - 27)
 
-	hashedBytes := append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...)
-	signedBytes := crypto.Keccak256(hashedBytes)
-	pub, err := crypto.Ecrecover(signedBytes, sigBytes)
+	pub, err := crypto.Ecrecover(hash[:], sigBytes)
 	if err != nil {
 		return false
 	}
