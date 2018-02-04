@@ -18,8 +18,8 @@ func TestOrder_OrderHash(t *testing.T) {
 	}
 
 
-	expected := NewHash("0xcd09064f280940d69e0d3d9741c7986b80935dbe066a218cc83823e7eb518681")
-	hash := o.Hash
+	expected := NewHash("0x56209e5e80fab187438ab24ba6d3df31b8c369b0e86d7b210358efd92eef1cfa")
+	hash := o.OrderHash()
 
 	if !bytes.Equal(expected[:], hash[:]) {
 		t.Error("order hashes were not equal")
