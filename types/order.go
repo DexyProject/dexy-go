@@ -1,8 +1,16 @@
 package types
 
 import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"math/big"
 )
+
+var ORDER_HASH_SCHEME = NewHash("0xa8da5e6ea8c46a0516b3a2e3b010f264e8334214f4b37ff5f2bc8a2dd3f32be1")
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
@@ -15,7 +23,7 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      Hash  `json:"hash,omitempty" bson:"hash"`
+	Hash      Hash    `json:"hash,omitempty" bson:"hash"`
 	Price     string  `json:"price,omitempty" bson:"price"`
 	Give      Trade   `json:"give" bson:"give"`
 	Get       Trade   `json:"get" bson:"get"`
@@ -26,7 +34,6 @@ type Order struct {
 	Signature EC      `json:"signature" bson:"signature"`
 }
 
-
 func (o *Order) OrderHash() Hash {
 	if o.Hash.String() == (Hash{}).String() {
 		o.generateHash()
@@ -36,16 +43,41 @@ func (o *Order) OrderHash() Hash {
 }
 
 func (o *Order) generateHash() {
-	sha := sha3.NewKeccak256()
 
-	sha.Write(o.Get.Token.Address[:])
-	sha.Write(o.Get.Amount.U256()[:])
-	sha.Write(o.Give.Token.Address[:])
-	sha.Write(o.Give.Amount.U256()[:])
-	sha.Write(NewInt(o.Expires).U256()[:])
-	sha.Write(NewInt(o.Nonce).U256()[:])
-	sha.Write(o.User.Address[:])
-	sha.Write(o.Exchange.Address[:])
+	orderhash := sha3.NewKeccak256()
+	orderhash.Write(o.Get.Token.Address[:])
+	orderhash.Write(o.Get.Amount.U256()[:])
+	orderhash.Write(o.Give.Token.Address[:])
+	orderhash.Write(o.Give.Amount.U256()[:])
+	orderhash.Write(NewInt(o.Expires).U256()[:])
+	orderhash.Write(NewInt(o.Nonce).U256()[:])
+	orderhash.Write(o.User.Address[:])
+	orderhash.Write(o.Exchange.Address[:])
+
+	sha := sha3.NewKeccak256()
+	sha.Write(ORDER_HASH_SCHEME[:])
+	sha.Write(orderhash.Sum(nil))
 
 	o.Hash.SetBytes(sha.Sum(nil))
+}
+
+func (o *Order) Validate() error {
+	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
+		return fmt.Errorf("address is not valid hex")
+	}
+
+	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
+		return fmt.Errorf("token addresses are identical")
+	}
+
+	if o.Expires <= time.Now().Unix() {
+		return fmt.Errorf("invalid expires time: %v", o.Expires)
+	}
+
+	zero := new(big.Int).SetInt64(0)
+	if o.Get.Amount.Cmp(zero) == 0 || o.Give.Amount.Cmp(zero) == 0 {
+		return fmt.Errorf("amounts are not allowed to be 0")
+	}
+
+	return nil
 }
