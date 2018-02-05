@@ -31,7 +31,8 @@ Returns Asks and Bids for a specified ```token```
       "signature": {
         "v": 12,
         "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-        "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+        "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+        "prefixed": false
       }
     }
   ],
@@ -54,7 +55,8 @@ Returns Asks and Bids for a specified ```token```
       "signature": {
         "v": 27,
         "r": "0x61a3ed31b43c8780e905a260a35faefcc527be7516aa11c0256729b5b351bc33",
-        "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254"
+        "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254",
+        "prefixed": false
       }
     }
   ]
@@ -86,7 +88,8 @@ Returns order by the ```hash```
   "signature": {
     "v": 12,
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+    "prefixed": false
   }
 }
 ```
@@ -114,7 +117,8 @@ Adds a new order to the order book.
   "signature": {
     "v": 12,
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+    "prefixed": false
   }
 }
 ```

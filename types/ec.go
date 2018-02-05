@@ -8,9 +8,10 @@ import (
 )
 
 type EC struct {
-	V int    `json:"v" bson:"v"`
-	R string `json:"r" bson:"r"`
-	S string `json:"s" bson:"s"`
+	V        int    `json:"v" bson:"v"`
+	R        string `json:"r" bson:"r"`
+	S        string `json:"s" bson:"s"`
+	Prefixed bool   `json:"prefixed" bson:"prefixed"`
 }
 
 func (ec *EC) Verify(address Address, hash Hash) bool {
@@ -30,7 +31,11 @@ func (ec *EC) Verify(address Address, hash Hash) bool {
 	copy(sigBytes[64-len(s):64], s[:])
 	sigBytes[64] = byte(ec.V - 27)
 
-	hashedBytes := append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...)
+	var hashedBytes = hash[:]
+	if ec.Prefixed {
+		hashedBytes = append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...)
+	}
+
 	signedBytes := crypto.Keccak256(hashedBytes)
 	pub, err := crypto.Ecrecover(signedBytes, sigBytes)
 	if err != nil {
