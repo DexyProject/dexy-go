@@ -1,14 +1,16 @@
 package watchers
 
 import (
-	"github.com/DexyProject/dexy-go/history"
-	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/types"
 )
 
 type TradeWatcher struct {
-	history history.History
-	exchange exchange.ExchangeInterface
+	history   history.History
+	exchange  exchange.ExchangeInterface
+	orderbook orderbook.OrderBook
 }
 
 func (tf *TradeWatcher) Watch() error {
@@ -24,10 +26,7 @@ func (tf *TradeWatcher) HandleTransaction(transaction types.Transaction) {
 		return
 	}
 
+	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, transaction.Get.Amount)
 
-	// @todo call filled
-
-	// @todo updated filled values
 	// @todo delete if amount == filled
-
 }
