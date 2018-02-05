@@ -122,3 +122,11 @@ Adds a new order to the order book.
   }
 }
 ```
+
+#### Sig Modes
+
+| Value | Meaning                                                                                                         |
+|-------|-----------------------------------------------------------------------------------------------------------------|
+| 0     | Messages signed using the ```eth_signTypedData``` method                                                        |
+| 1     | Messages signed using geth, this will append the ```\x19Ethereum Signed Message:\n32``` prefix when verifying   |
+| 2     | Messages signed using a trezor, this will append the ```\x19Ethereum Signed Message:\n``` prefix when verifying |
