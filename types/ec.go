@@ -33,11 +33,10 @@ func (ec *EC) Verify(address Address, hash Hash) bool {
 
 	var hashedBytes = hash[:]
 	if ec.Prefixed {
-		hashedBytes = append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...)
+		hashedBytes = crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...))
 	}
 
-	signedBytes := crypto.Keccak256(hashedBytes)
-	pub, err := crypto.Ecrecover(signedBytes, sigBytes)
+	pub, err := crypto.Ecrecover(hashedBytes, sigBytes)
 	if err != nil {
 		return false
 	}
