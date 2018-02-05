@@ -61,7 +61,7 @@ func getMessage(hash Hash, mode SigMode) []byte {
 	case GETH:
 		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...))
 	case TREZOR:
-		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n"), hash[:]...))
+		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n\x20"), hash[:]...))
 	}
 
 	return nil
