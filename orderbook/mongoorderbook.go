@@ -2,11 +2,11 @@ package orderbook
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"log"
 )
 
 type MongoOrderBook struct {
