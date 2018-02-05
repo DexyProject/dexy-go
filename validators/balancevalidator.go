@@ -12,12 +12,12 @@ type BalanceValidator interface {
 	CheckBalance(o types.Order) (bool, error)
 }
 
-type BalanceValidatorSession struct {
+type RPCBalanceValidator struct {
 	conn bind.ContractBackend
 }
 
-func (balanceSession *BalanceValidatorSession) CheckBalance(o types.Order) (bool, error) {
-	exchangeInterface, err := exchange.NewExchangeInterface(o.Exchange.Address, balanceSession.conn)
+func (balanceSession *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
+	exchangeInterface, err := exchange.NewExchangeInterfaceCaller(o.Exchange.Address, balanceSession.conn)
 
 	if err != nil {
 		return false, fmt.Errorf("could not connect to contract session")
