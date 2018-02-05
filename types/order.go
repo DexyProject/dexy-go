@@ -2,12 +2,12 @@ package types
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
-	"math/big"
 )
 
 var ORDER_HASH_SCHEME = NewHash("0xa8da5e6ea8c46a0516b3a2e3b010f264e8334214f4b37ff5f2bc8a2dd3f32be1")
@@ -44,19 +44,19 @@ func (o *Order) OrderHash() Hash {
 
 func (o *Order) generateHash() {
 
-	orderhash := sha3.NewKeccak256()
-	orderhash.Write(o.Get.Token.Address[:])
-	orderhash.Write(o.Get.Amount.U256()[:])
-	orderhash.Write(o.Give.Token.Address[:])
-	orderhash.Write(o.Give.Amount.U256()[:])
-	orderhash.Write(NewInt(o.Expires).U256()[:])
-	orderhash.Write(NewInt(o.Nonce).U256()[:])
-	orderhash.Write(o.User.Address[:])
-	orderhash.Write(o.Exchange.Address[:])
+	hash := sha3.NewKeccak256()
+	hash.Write(o.Get.Token.Address[:])
+	hash.Write(o.Get.Amount.U256()[:])
+	hash.Write(o.Give.Token.Address[:])
+	hash.Write(o.Give.Amount.U256()[:])
+	hash.Write(NewInt(o.Expires).U256()[:])
+	hash.Write(NewInt(o.Nonce).U256()[:])
+	hash.Write(o.User.Address[:])
+	hash.Write(o.Exchange.Address[:])
 
 	sha := sha3.NewKeccak256()
 	sha.Write(ORDER_HASH_SCHEME[:])
-	sha.Write(orderhash.Sum(nil))
+	sha.Write(hash.Sum(nil))
 
 	o.Hash.SetBytes(sha.Sum(nil))
 }
