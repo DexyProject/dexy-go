@@ -25,7 +25,7 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	token := query.Get("token")
 
-	if token == "0x0000000000000000000000000000000000000000" || !common.IsHexAddress(token) {
+	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
 		// @todo error body
 		rw.WriteHeader(http.StatusBadRequest)
 		return
