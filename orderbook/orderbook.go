@@ -9,5 +9,6 @@ type OrderBook interface {
 	RemoveOrder(hash types.Hash) bool
 	Bids(token types.Address, user *types.Address, limit int) []types.Order
 	Asks(token types.Address, user *types.Address, limit int) []types.Order
+	UpdateOrderFilledAmount(hash types.Hash, amount types.Int) error
 	GetOrderByHash(hash types.Hash) *types.Order
 }
