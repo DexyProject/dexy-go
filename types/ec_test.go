@@ -12,7 +12,7 @@ func TestEC_Verify(t *testing.T) {
 		V: 28,
 		R: "0x490149269faa99a814bdb4c34be3205ebbdfcbc9079c6c3779d3ea80f1d06f8d",
 		S: "0x28eec0e2deff6903087d597bf6f728cf30d333b6efb5405d7e0c555e6964608b",
-		Prefixed: true,
+		SigMode: GETH,
 	}
 
 	if !sig.Verify(address, hash) {
