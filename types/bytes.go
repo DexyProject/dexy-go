@@ -11,7 +11,6 @@ type Bytes struct {
 }
 
 func NewBytes(bytes string) (*Bytes, error) {
-
 	b := &Bytes{}
 	err := b.UnmarshalText([]byte(bytes))
 	if err != nil {
