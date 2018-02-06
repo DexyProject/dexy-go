@@ -64,6 +64,35 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	timestampSort := bson.M{
 		"$sort": bson.M{"timestamp": 1},
 	}
+	tokenGroup := bson.M{
+		"$project": bson.M{
+			"give.token": bson.M{
+				"$filter": bson.M{
+					"input": "$give.token",
+					"as":    "give.tokens",
+					"cond": bson.M{"$or": []interface{}{
+						bson.M{"$eq": []interface{}{"$$give.tokens", "$get.token"}},
+						bson.M{"$eq": []interface{}{"$$give.tokens", "$give.token"}},
+						bson.M{"$eq": []interface{}{"$$give.tokens", ethAddress}},
+					},
+					},
+				},
+			},
+			"get.token": bson.M{
+				"$filter": bson.M{
+					"input": "$get.token",
+					"as":    "$get.tokens",
+					"cond": bson.M{"$or": []interface{}{
+						bson.M{"$eq": []interface{}{"$$get.tokens", "$give.token"}},
+						bson.M{"$eq": []interface{}{"$$get.tokens", "$get.token"}},
+						bson.M{"$eq": []interface{}{"$$get.tokens", ethAddress}},
+					},
+					},
+				},
+			},
+		},
+	}
+
 	priceCalc := bson.M{
 		"$group": bson.M{
 			"_id":       "$block",
@@ -108,7 +137,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		},
 	}
 
-	pipeline := c.Pipe([]bson.M{match, timestampSort, priceCalc, aggregate})
+	pipeline := c.Pipe([]bson.M{match, timestampSort, tokenGroup, priceCalc, aggregate})
 	var response []types.Tick
 	err := pipeline.All(&response)
 	if err != nil {
