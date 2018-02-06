@@ -9,9 +9,9 @@ func TestEC_Verify(t *testing.T) {
 	hash := NewHash("0x1f406680ed210e1589ad11769afa120d7f171ce1daf91ea3346b189ce9935203")
 
 	sig := EC{
-		V: 28,
-		R: "0x490149269faa99a814bdb4c34be3205ebbdfcbc9079c6c3779d3ea80f1d06f8d",
-		S: "0x28eec0e2deff6903087d597bf6f728cf30d333b6efb5405d7e0c555e6964608b",
+		V:       28,
+		R:       "0x490149269faa99a814bdb4c34be3205ebbdfcbc9079c6c3779d3ea80f1d06f8d",
+		S:       "0x28eec0e2deff6903087d597bf6f728cf30d333b6efb5405d7e0c555e6964608b",
 		SigMode: GETH,
 	}
 

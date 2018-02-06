@@ -25,8 +25,8 @@ type EC struct {
 func (ec *EC) Verify(address Address, hash Hash) bool {
 
 	sigBytes := make([]byte, 65)
-	copy(sigBytes[32-len(ec.R):32], ec.R[:])
-	copy(sigBytes[64-len(ec.S):64], ec.S[:])
+	copy(sigBytes[32-len(ec.R.Bytes):32], ec.R.Bytes[:])
+	copy(sigBytes[64-len(ec.S.Bytes):64], ec.S.Bytes[:])
 	sigBytes[64] = byte(ec.V - 27)
 
 	hashBytes := getMessage(hash, ec.SigMode)
