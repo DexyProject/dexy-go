@@ -31,5 +31,5 @@ func (b *Bytes) SetBSON(raw bson.Raw) error {
 		return err
 	}
 
-	return b.UnmarshalText(common.FromHex(val))
+	return b.UnmarshalText([]byte(val))
 }
