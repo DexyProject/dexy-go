@@ -70,24 +70,30 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 				"$filter": bson.M{
 					"input": "$give.token",
 					"as":    "give.tokens",
-					"cond": bson.M{"$or": []interface{}{
-						bson.M{"$eq": []interface{}{"$$give.tokens", "$get.token"}},
-						bson.M{"$eq": []interface{}{"$$give.tokens", "$give.token"}},
-						bson.M{"$ne": []interface{}{"$$give.tokens", ethAddress}},
+					"cond": bson.M{"$and": []interface{}{bson.M{
+						"$or": []interface{}{
+							bson.M{"$eq": []interface{}{"$$give.tokens", "$get.token"}},
+							bson.M{"$eq": []interface{}{"$$give.tokens", "$give.token"}},
+							bson.M{"$ne": []interface{}{"$$give.tokens", ethAddress}},
+						},
+					},
 					},
 					},
 				},
 			},
-			"get.token": bson.M{
-				"$filter": bson.M{
-					"input": "$get.token",
-					"as":    "$get.tokens",
-					"cond": bson.M{"$or": []interface{}{
+		},
+		"get.token": bson.M{
+			"$filter": bson.M{
+				"input": "$get.token",
+				"as":    "$get.tokens",
+				"cond": bson.M{"$and": []interface{}{bson.M{
+					"$or": []interface{}{
 						bson.M{"$eq": []interface{}{"$$get.tokens", "$give.token"}},
 						bson.M{"$eq": []interface{}{"$$get.tokens", "$get.token"}},
 						bson.M{"$ne": []interface{}{"$$get.tokens", ethAddress}},
 					},
-					},
+				},
+				},
 				},
 			},
 		},
