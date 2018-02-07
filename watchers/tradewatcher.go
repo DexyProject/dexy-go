@@ -25,6 +25,7 @@ func (tf *TradeWatcher) Watch() error {
 	}
 
 	for {
+		// @todo async
 		msg, err := tf.subscriber.Listen()
 		if err != nil {
 			// @todo
