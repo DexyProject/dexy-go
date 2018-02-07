@@ -5,7 +5,7 @@ import (
 )
 
 type RedisSubscriber struct {
-	pubsub *redis.PubSub
+	pubsub  *redis.PubSub
 	channel string
 }
 
