@@ -1,8 +1,8 @@
 package types
 
 import (
-	"testing"
 	"encoding/json"
+	"testing"
 )
 
 var hash = "0x153e75acf6376f9c9c89934f4224710f54a4270a6b552797d49be8685d8880e7"

@@ -17,26 +17,16 @@ const (
 
 type EC struct {
 	V       int     `json:"v" bson:"v"`
-	R       string  `json:"r" bson:"r"`
-	S       string  `json:"s" bson:"s"`
+	R       Bytes   `json:"r" bson:"r"`
+	S       Bytes   `json:"s" bson:"s"`
 	SigMode SigMode `json:"sig_mode" bson:"sig_mode"`
 }
 
 func (ec *EC) Verify(address Address, hash Hash) bool {
 
-	r, err := StringToBytes(ec.R)
-	if err != nil {
-		return false
-	}
-
-	s, err := StringToBytes(ec.S)
-	if err != nil {
-		return false
-	}
-
 	sigBytes := make([]byte, 65)
-	copy(sigBytes[32-len(r):32], r[:])
-	copy(sigBytes[64-len(s):64], s[:])
+	copy(sigBytes[32-len(ec.R.Bytes):32], ec.R.Bytes[:])
+	copy(sigBytes[64-len(ec.S.Bytes):64], ec.S.Bytes[:])
 	sigBytes[64] = byte(ec.V - 27)
 
 	hashBytes := getMessage(hash, ec.SigMode)
