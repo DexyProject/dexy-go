@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"gopkg.in/mgo.v2/bson"
+	"encoding/json"
 )
 
 type Int struct {
@@ -35,6 +36,10 @@ func (x *Int) SetBSON(raw bson.Raw) error {
 	x.Int = *num
 
 	return nil
+}
+
+func (x Int) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
 }
 
 func (x Int) U256() []byte {
