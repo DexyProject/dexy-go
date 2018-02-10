@@ -1,12 +1,12 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"gopkg.in/mgo.v2/bson"
-	"encoding/json"
 )
 
 type Int struct {
