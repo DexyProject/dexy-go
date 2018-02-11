@@ -8,6 +8,7 @@ import (
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/subscribers"
 	"github.com/DexyProject/dexy-go/types"
+	"encoding/json"
 )
 
 type TradeWatcher struct {
@@ -32,6 +33,15 @@ func (tf *TradeWatcher) Watch() error {
 			continue
 		}
 
+		var tx *types.Transaction
+		err = json.Unmarshal([]byte(msg), tx)
+		if err != nil {
+			// @todo
+			continue
+		}
+
+		go tf.handleTransaction(*tx)
+
 		// @todo
 		log.Print(msg)
 	}
@@ -40,7 +50,7 @@ func (tf *TradeWatcher) Watch() error {
 	return nil
 }
 
-func (tf *TradeWatcher) HandleTransaction(transaction types.Transaction) {
+func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 
 	err := tf.history.InsertTransaction(transaction)
 	if err != nil {
