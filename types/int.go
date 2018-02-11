@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 
@@ -35,6 +36,10 @@ func (x *Int) SetBSON(raw bson.Raw) error {
 	x.Int = *num
 
 	return nil
+}
+
+func (x Int) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
 }
 
 func (x Int) U256() []byte {
