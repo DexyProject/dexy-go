@@ -51,6 +51,7 @@ func (tf *TradeWatcher) Watch() error {
 	return nil
 }
 
+// @todo this can probably use some optimization
 func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 
 	err := tf.history.InsertTransaction(transaction)
@@ -59,13 +60,23 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 		return
 	}
 
-	filled, err := tf.exchange.Filled(nil, transaction.Maker.Address, transaction.OrderHash)
+	f, err := tf.exchange.Filled(nil, transaction.Maker.Address, transaction.OrderHash)
 	if err != nil {
 		// @todo
 		return
 	}
 
-	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, types.Int{*filled})
+	filled := types.Int{Int: *f}
 
-	// @todo delete if amount == filled
+	if tf.isOrderFilled(transaction.OrderHash, filled) {
+		// @todo delete
+		return
+	}
+
+	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, filled)
+}
+
+func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) (bool) {
+	o := tf.orderbook.GetOrderByHash(order)
+	return o.Get.Amount.Cmp(&amount.Int) == 0
 }
