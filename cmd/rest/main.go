@@ -78,8 +78,7 @@ func setupBalanceValidator() (validators.BalanceValidator, error) {
 		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
 	}
 
-	bv := &validators.RPCBalanceValidator{Conn: conn}
-	return bv, nil
+	return &validators.RPCBalanceValidator{Conn: conn}, nil
 }
 
 func deferOnPanic() {
