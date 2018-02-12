@@ -59,8 +59,13 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 		return
 	}
 
-	// @todo query the filled amount
-	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, transaction.Get.Amount)
+	filled, err := tf.exchange.Filled(nil, transaction.Maker.Address, transaction.OrderHash)
+	if err != nil {
+		// @todo
+		return
+	}
+
+	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, types.Int{*filled})
 
 	// @todo delete if amount == filled
 }
