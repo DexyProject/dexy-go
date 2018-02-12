@@ -27,6 +27,7 @@ func (tf *TradeWatcher) Watch() error {
 
 	for {
 		// @todo async
+		// @todo ack, dec message depending on if it worked.
 		msg, err := tf.subscriber.Listen()
 		if err != nil {
 			// @todo
@@ -58,6 +59,7 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 		return
 	}
 
+	// @todo query the filled amount
 	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, transaction.Get.Amount)
 
 	// @todo delete if amount == filled

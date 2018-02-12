@@ -106,7 +106,7 @@ func (ob *MongoOrderBook) UpdateOrderFilledAmount(hash types.Hash, amount types.
 
 	c := session.DB(DBName).C(FileName)
 
-	err := c.Update(bson.M{"hash": hash}, bson.M{"$inc": bson.M{"filled": amount}})
+	err := c.Update(bson.M{"hash": hash}, bson.M{"$set": bson.M{"filled": amount}})
 	if err != nil {
 		return err
 	}
