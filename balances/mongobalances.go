@@ -33,10 +33,11 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 
 	c := session.DB(DBName).C(FileName)
 
-	match := bson.M{"user": user, "give.token": token}
+	match := bson.M{"$match": bson.M{"user": user, "give.token": token}}
 
 	price := bson.M{
 		"$group": bson.M{
+			"_id": nil,
 			"amount": bson.M{"$sum": "$give.amount"},
 		},
 	}
