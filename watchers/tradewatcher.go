@@ -67,7 +67,7 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 	}
 
 	if tf.isOrderFilled(transaction.OrderHash, filled) {
-		// @todo delete
+		tf.orderbook.RemoveOrder(transaction.OrderHash) // @todo check response
 		return
 	}
 
