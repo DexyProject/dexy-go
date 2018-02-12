@@ -33,16 +33,13 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 
 	c := session.DB(DBName).C(FileName)
 
-	match := bson.M{"$match": bson.M{"user": user, "give.token": token}}
-
-	price := bson.M{
-		"$group": bson.M{
-			"_id": nil,
-			"amount": bson.M{"$sum": "$give.amount"},
+	pipeline := []bson.M{
+			{"$match": bson.M{"user": user, "give.token": token}},
+			{"$project": bson.M{"amount": bson.M{"$sum": "$give.amount"}},
 		},
 	}
 
-	pipe := c.Pipe([]bson.M{match, price})
+	pipe := c.Pipe(pipelineg)
 
 	var result struct {
 		Amount types.Int `bson:"amount"`
