@@ -39,7 +39,7 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 		},
 	}
 
-	pipe := c.Pipe(pipelineg)
+	pipe := c.Pipe(pipeline)
 
 	var result struct {
 		Amount types.Int `bson:"amount"`
