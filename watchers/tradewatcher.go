@@ -1,6 +1,7 @@
 package watchers
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/DexyProject/dexy-go/exchange"
@@ -8,7 +9,6 @@ import (
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/subscribers"
 	"github.com/DexyProject/dexy-go/types"
-	"encoding/json"
 )
 
 type TradeWatcher struct {
