@@ -60,13 +60,11 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 		return
 	}
 
-	f, err := tf.exchange.Filled(nil, transaction.Maker.Address, transaction.OrderHash)
+	filled, err := tf.orderFilledAmount(transaction.Maker, transaction.OrderHash)
 	if err != nil {
 		// @todo
 		return
 	}
-
-	filled := types.Int{Int: *f}
 
 	if tf.isOrderFilled(transaction.OrderHash, filled) {
 		// @todo delete
@@ -79,4 +77,13 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) (bool) {
 	o := tf.orderbook.GetOrderByHash(order)
 	return o.Get.Amount.Cmp(&amount.Int) == 0
+}
+
+func (tf *TradeWatcher) orderFilledAmount(maker types.Address, order types.Hash) (types.Int, error) {
+	f, err := tf.exchange.Filled(nil, maker.Address, order)
+	if err != nil {
+		return types.Int{}, err
+	}
+
+	return types.Int{Int: *f}, nil
 }
