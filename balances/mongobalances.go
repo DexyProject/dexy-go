@@ -2,6 +2,7 @@ package balances
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
@@ -33,22 +34,21 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 
 	c := session.DB(DBName).C(FileName)
 
-	pipeline := []bson.M{
-			{"$match": bson.M{"user": user, "give.token": token}},
-			{"$project": bson.M{"amount": bson.M{"$sum": "$give.amount"}},
-		},
+	var result []struct {
+		Give struct {
+			Amount types.Int `bson:"amount"`
+		} `bson:"give"`
 	}
 
-	pipe := c.Pipe(pipeline)
-
-	var result struct {
-		Amount types.Int `bson:"amount"`
-	}
-
-	err := pipe.One(&result)
+	err := c.Find(bson.M{"user": user, "give.token": token}).Select(bson.M{"give.amount": 1}).All(&result)
 	if err != nil {
 		return nil, err
 	}
 
-	return &result.Amount, nil
+	i := new(big.Int)
+	for _, r := range result {
+		i = i.Add(i, &r.Give.Amount.Int)
+	}
+
+	return &types.Int{Int: *i}, nil
 }
