@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/DexyProject/dexy-go/balances"
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
@@ -78,7 +79,12 @@ func setupBalanceValidator() (validators.BalanceValidator, error) {
 		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
 	}
 
-	return &validators.RPCBalanceValidator{Conn: conn}, nil
+	b, err := balances.NewMongoBalances(os.Args[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return &validators.RPCBalanceValidator{Conn: conn, Balances: b}, nil
 }
 
 func deferOnPanic() {
