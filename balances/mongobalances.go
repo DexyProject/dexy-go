@@ -40,6 +40,8 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 		} `bson:"give"`
 	}
 
+	// we solved it like this because mongos $sum function requires values to be numbers, in our case however they are
+	// strings.
 	err := c.Find(bson.M{"user": user, "give.token": token}).Select(bson.M{"give.amount": 1}).All(&result)
 	if err != nil {
 		return nil, err
