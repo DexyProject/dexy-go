@@ -55,7 +55,6 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(o)
-
 }
 
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
