@@ -1,6 +1,6 @@
 language: go
 go:
-  - 1.8.x
+  - tip
 
 sudo: required
 
@@ -12,8 +12,11 @@ install:
     - go build -v ./...
 
 script:
-    - go vet -x $(go list ./...)
-    - $HOME/gopath/bin/golint $(go list ./...)
+  - npm run $TASK
+
+script:
+    - go vet -x $(go list ./... | grep -v /exchange/)
+    - $HOME/gopath/bin/golint $(go list ./... | grep -v /exchange/)
     - go test -v ./... -bench=. -cover
 
 notifications:
