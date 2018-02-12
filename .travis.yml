@@ -1,0 +1,20 @@
+language: go
+go:
+  - 1.8.x
+
+sudo: required
+
+before_install:
+    - go get github.com/golang/lint/golint
+
+install:
+    - go get -d -v ./...
+    - go build -v ./...
+
+script:
+    - go vet -x $(go list ./...)
+    - $HOME/gopath/bin/golint $(go list ./...)
+    - go test -v ./... -bench=. -cover
+
+notifications:
+  email: false
