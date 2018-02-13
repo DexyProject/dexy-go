@@ -81,3 +81,19 @@ func (o *Order) Validate() error {
 
 	return nil
 }
+
+func (t *Trade) calcPrice(g Trade, base Address) (float64, error) {
+	if t.Amount.Sign() <= 0 || g.Amount.Sign() <= 0 {
+		return 0.0, fmt.Errorf("can not divide by zero")
+	}
+
+	tFloat := new(big.Float).SetInt(&t.Amount.Int)
+	gFloat := new(big.Float).SetInt(&g.Amount.Int)
+
+	if t.Token == HexToAddress(ETH_ADDRESS) {
+		price, _ := new(big.Float).Quo(tFloat, gFloat).Float64()
+		return price, nil
+	}
+	price, _ := new(big.Float).Quo(gFloat, tFloat).Float64()
+	return price, nil
+}
