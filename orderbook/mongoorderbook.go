@@ -58,7 +58,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	err := c.Remove(bson.M{"hash": hash})
+	err := c.Remove(bson.M{"_id": hash})
 	if err != nil {
 		return false
 	}
@@ -120,7 +120,7 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
-	err := c.Find(bson.M{"hash": hash}).One(&order)
+	err := c.Find(bson.M{"_id": hash}).One(&order)
 	if err != nil {
 		return nil
 	}
