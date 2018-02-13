@@ -12,6 +12,7 @@ import (
 const (
 	DBName   = "tradehistory"
 	FileName = "history"
+
 )
 
 type MongoHistory struct {
@@ -26,6 +27,94 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 	}
 
 	return &MongoHistory{connection: connection, session: session}, nil
+}
+
+func calcOpenTime(transactions []types.Transaction) int64 {
+	var openTime int64
+	for _, tt := range transactions {
+		if openTime < tt.Timestamp {
+			openTime = tt.Timestamp
+		}
+	}
+
+	return openTime
+}
+
+func calcCloseTime(transactions []types.Transaction) int64 {
+	var closeTime int64
+
+	for _, tt := range transactions {
+		if closeTime > tt.Timestamp {
+			closeTime = tt.Timestamp
+		}
+	}
+
+	return closeTime
+}
+
+func calcVolume(transactions []types.Transaction) *big.Int {
+	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
+	volume := new(big.Int)
+
+	for _, tt := range transactions {
+		if tt.Give.Token != ethAddress {
+			volume.Add(volume, &tt.Give.Amount.Int)
+		}
+		if tt.Get.Token != ethAddress {
+			volume.Add(volume, &tt.Get.Amount.Int)
+		}
+	}
+
+	return volume
+}
+
+func calcPrice(transactions []types.Transaction) []float64 {
+	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
+	var price []float64
+
+	for _, tt := range transactions {
+		if tt.Get.Token == ethAddress {
+			newPrice := new(big.Int).Quo(&tt.Get.Amount.Int, &tt.Give.Amount.Int)
+			newFloat, _ := new(big.Float).SetInt(newPrice).Float64()
+			price = append(price, newFloat)
+		} else {
+			newPrice := new(big.Int).Quo(&tt.Give.Amount.Int, &tt.Get.Amount.Int)
+			newFloat, _ := new(big.Float).SetInt(newPrice).Float64()
+			price = append(price, newFloat)
+		}
+	}
+
+	return price
+}
+
+func calcHighLow(transactions []types.Transaction, price []float64) (float64, float64) {
+	var high, low float64
+	for _, p := range price {
+		if high > p {
+			high = p
+		}
+	}
+	for _, p := range price {
+		if low < p {
+			low = p
+		}
+	}
+
+	return high, low
+}
+
+func calcOpenClose(transactions []types.Transaction, price []float64, openTime, closeTime int64) (float64, float64) {
+	var openPrice, closePrice float64
+	for i, tt := range transactions {
+		if tt.Timestamp == closeTime {
+			closePrice = price[i]
+		}
+		if tt.Timestamp == openTime {
+			openPrice = price[i]
+		}
+	}
+
+	return openPrice, closePrice
 }
 
 func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
@@ -56,80 +145,23 @@ func (history *MongoHistory) AggregateTransactions(block int64) (*types.Tick, er
 	session := history.session.Clone()
 	defer session.Close()
 
-	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	c := session.DB(DBName).C(FileName)
-
 	var transactions []types.Transaction
-
 
 	err := c.Find(bson.M{"block": block}).Sort("-timestamp").All(&transactions)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
-
-	// group by tokens
-	//for i, tt := range transactions {
-	//	if tt.Give.Token == tt.Get.Token || tt.Give.Token == ethAddress {
-	//		transactions = append(transactions[:i], transactions[i+1:]...)
-	//	}
-	//}
-
-	// calculate price and volume
-	volume := new(big.Int)
-	for _, tt := range transactions {
-		if tt.Give.Token != ethAddress {
-			volume.Add(volume, &tt.Give.Amount.Int)
-		}
-		if tt.Get.Token != ethAddress {
-			volume.Add(volume, &tt.Get.Amount.Int)
-		}
-	}
-	var price []*big.Int
-	for _, tt := range transactions {
-		if tt.Get.Token == ethAddress {
-
-			price = append(price, new(big.Int).Quo(&tt.Get.Amount.Int, &tt.Give.Amount.Int))
-		} else {
-			price = append(price, new(big.Int).Quo(&tt.Give.Amount.Int, &tt.Get.Amount.Int))
-		}
-	}
-
-	// find min, max, timestamps and open/close
-	var openTime, closeTime int64
-	for _, tt := range transactions {
-		if openTime < tt.Timestamp {
-			openTime = tt.Timestamp
-		}
-	}
-	for _, tt := range transactions {
-		if closeTime > tt.Timestamp {
-			closeTime = tt.Timestamp
-		}
-	}
-	var open, close *big.Int
-	for i, tt := range transactions {
-		if tt.Timestamp == closeTime {
-			close = price[i]
-		}
-		if tt.Timestamp == openTime {
-			open = price[i]
-		}
-	}
-	var high, low *big.Int
-	for _, p := range price {
-		if high.Cmp(p) == 1 {
-			high = p
-		}
-	}
-	for _, p := range price {
-		if low.Cmp(p) == -1 {
-			low = p
-		}
-	}
+	openTime := calcOpenTime(transactions)
+	closeTime := calcCloseTime(transactions)
+	volume := calcVolume(transactions)
+	price := calcPrice(transactions)
+	openPrice, closePrice := calcOpenClose(transactions, price, openTime, closeTime)
+	high, low := calcHighLow(transactions, price)
 
 	var tick = types.Tick{
-			Block: block, OpenTime: openTime, CloseTime: closeTime, Volume: types.Int{*volume}, Open: types.Int{*open},
-			Close: types.Int{*close} , High: types.Int{*high}, Low: types.Int{*low}}
+			Block: block, OpenTime: openTime, CloseTime: closeTime, Volume: types.Int{*volume}, Open: openPrice,
+			Close: closePrice , High: high, Low: low}
 
 	return &tick, nil
 }
