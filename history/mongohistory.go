@@ -29,6 +29,57 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 	return &MongoHistory{connection: connection, session: session}, nil
 }
 
+
+
+func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
+	session := history.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	var transactions []types.Transaction
+
+	q := bson.M{
+		"$or": []bson.M{
+			{"give.token": token},
+			{"get.token": token},
+		},
+	}
+
+	if user != nil {
+		q["user"] = user
+	}
+
+	c.Find(q).Sort("-timestamp").Limit(limit).All(&transactions)
+
+	return transactions
+}
+
+func (history *MongoHistory) AggregateTransactions(block int64) (*types.Tick, error) {
+	session := history.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	var transactions []types.Transaction
+
+	err := c.Find(bson.M{"block": block}).Sort("-timestamp").All(&transactions)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve transactions")
+	}
+	openTime := calcOpenTime(transactions)
+	closeTime := calcCloseTime(transactions)
+	volume := calcVolume(transactions)
+	price := calcPrice(transactions)
+	openPrices, closePrices := calcOpenClose(transactions, price, openTime, closeTime)
+	high, low := calcHighLow(transactions, price)
+
+	var tick = types.Tick{
+			Block: block, OpenTime: openTime, CloseTime: closeTime, Volume: types.Int{*volume}, Open: openPrices,
+			Close: closePrices , High: high, Low: low}
+
+	return &tick, nil
+}
+
 func calcOpenTime(transactions []types.Transaction) int64 {
 	var openTime int64
 	for _, tt := range transactions {
@@ -53,14 +104,13 @@ func calcCloseTime(transactions []types.Transaction) int64 {
 }
 
 func calcVolume(transactions []types.Transaction) *big.Int {
-	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	volume := new(big.Int)
 
 	for _, tt := range transactions {
-		if tt.Give.Token != ethAddress {
+		if tt.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
 			volume.Add(volume, &tt.Give.Amount.Int)
 		}
-		if tt.Get.Token != ethAddress {
+		if tt.Get.Token != types.HexToAddress(types.ETH_ADDRESS) {
 			volume.Add(volume, &tt.Get.Amount.Int)
 		}
 	}
@@ -69,11 +119,10 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 }
 
 func calcPrice(transactions []types.Transaction) []float64 {
-	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	var price []float64
 
 	for _, tt := range transactions {
-		if tt.Get.Token == ethAddress {
+		if tt.Get.Token == types.HexToAddress(types.ETH_ADDRESS) {
 			newPrice := new(big.Int).Quo(&tt.Get.Amount.Int, &tt.Give.Amount.Int)
 			newFloat, _ := new(big.Float).SetInt(newPrice).Float64()
 			price = append(price, newFloat)
@@ -115,53 +164,4 @@ func calcOpenClose(transactions []types.Transaction, price []float64, openTime, 
 	}
 
 	return openPrice, closePrice
-}
-
-func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
-	session := history.session.Copy()
-	defer session.Close()
-
-	c := session.DB(DBName).C(FileName)
-
-	var transactions []types.Transaction
-
-	q := bson.M{
-		"$or": []bson.M{
-			{"give.token": token},
-			{"get.token": token},
-		},
-	}
-
-	if user != nil {
-		q["user"] = user
-	}
-
-	c.Find(q).Sort("-timestamp").Limit(limit).All(&transactions)
-
-	return transactions
-}
-
-func (history *MongoHistory) AggregateTransactions(block int64) (*types.Tick, error) {
-	session := history.session.Clone()
-	defer session.Close()
-
-	c := session.DB(DBName).C(FileName)
-	var transactions []types.Transaction
-
-	err := c.Find(bson.M{"block": block}).Sort("-timestamp").All(&transactions)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve transactions")
-	}
-	openTime := calcOpenTime(transactions)
-	closeTime := calcCloseTime(transactions)
-	volume := calcVolume(transactions)
-	price := calcPrice(transactions)
-	openPrice, closePrice := calcOpenClose(transactions, price, openTime, closeTime)
-	high, low := calcHighLow(transactions, price)
-
-	var tick = types.Tick{
-			Block: block, OpenTime: openTime, CloseTime: closeTime, Volume: types.Int{*volume}, Open: openPrice,
-			Close: closePrice , High: high, Low: low}
-
-	return &tick, nil
 }

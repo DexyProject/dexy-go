@@ -23,4 +23,3 @@ func (t *Transaction) MarshalBson() ([]byte, error) {
 func (t *Transaction) unMarshalBson(input []byte) error {
 	return bson.Unmarshal(input, t)
 }
-
