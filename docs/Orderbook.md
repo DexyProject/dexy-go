@@ -18,11 +18,11 @@ Returns Asks and Bids for a specified ```token```
       "price": "0.01",
       "get": {
         "token": "0x0000000000000000000000000000000000000000",
-        "amount": 3000000000000000000
+        "amount": "3000000000000000000"
       },
       "give": {
         "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
-        "amount": 300000000000000000000
+        "amount": "300000000000000000000"
       },
       "expires": 1514892553,
       "nonce": 12,
@@ -31,7 +31,8 @@ Returns Asks and Bids for a specified ```token```
       "signature": {
         "v": 12,
         "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-        "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+        "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+        "sig_mode": 0
       }
     }
   ],
@@ -41,11 +42,11 @@ Returns Asks and Bids for a specified ```token```
       "price": "0.01",
       "get": {
         "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
-        "amount": 300000000000000000000
+        "amount": "300000000000000000000"
       },
       "give": {
         "token": "0x0000000000000000000000000000000000000000",
-        "amount": 3000000000000000000
+        "amount": "3000000000000000000"
       },
       "expires": 1514892553,
       "nonce": 12,
@@ -54,7 +55,8 @@ Returns Asks and Bids for a specified ```token```
       "signature": {
         "v": 27,
         "r": "0x61a3ed31b43c8780e905a260a35faefcc527be7516aa11c0256729b5b351bc33",
-        "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254"
+        "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254",
+        "sig_mode": 0
       }
     }
   ]
@@ -73,11 +75,11 @@ Returns order by the ```hash```
   "price": "0.01",
   "get": {
     "token": "0x0000000000000000000000000000000000000000",
-    "amount": 3000000000000000000
+    "amount": "3000000000000000000"
   },
   "give": {
     "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
-    "amount": 300000000000000000000
+    "amount": "300000000000000000000"
   },
   "expires": 1514892553,
   "nonce": 12,
@@ -86,7 +88,8 @@ Returns order by the ```hash```
   "signature": {
     "v": 12,
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+    "sig_mode": 0
   }
 }
 ```
@@ -101,11 +104,11 @@ Adds a new order to the order book.
 {
   "get": {
     "token": "0x0000000000000000000000000000000000000000",
-    "amount": 3000000000000000000
+    "amount": "3000000000000000000"
   },
   "give": {
     "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
-    "amount": 300000000000000000000
+    "amount": "300000000000000000000"
   },
   "expires": 1514892553,
   "nonce": 12,
@@ -114,7 +117,16 @@ Adds a new order to the order book.
   "signature": {
     "v": 12,
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
-    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada"
+    "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
+    "sig_mode": 0
   }
 }
 ```
+
+#### Sig Modes
+
+| Value | Meaning                                                                                                         |
+|-------|-----------------------------------------------------------------------------------------------------------------|
+| 0     | Messages signed using the ```eth_signTypedData``` method                                                        |
+| 1     | Messages signed using geth, this will append the ```\x19Ethereum Signed Message:\n32``` prefix when verifying   |
+| 2     | Messages signed using a trezor, this will append the ```\x19Ethereum Signed Message:\n\x20``` prefix when verifying |

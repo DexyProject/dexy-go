@@ -2,11 +2,11 @@ package orderbook
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"log"
 )
 
 type MongoOrderBook struct {
@@ -40,7 +40,7 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 	}
 
 	if !order.Signature.Verify(order.User, hash) {
-		return fmt.Errorf("signature could not be verified")
+		return fmt.Errorf("signature could not be verified (hash %s)", hash)
 	}
 
 	err := c.Insert(order)

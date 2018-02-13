@@ -6,9 +6,12 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/DexyProject/dexy-go/balances"
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/validators"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -53,16 +56,35 @@ func setupHistoryEndpoints(r *mux.Router) {
 }
 
 func setupOrderBookEndpoints(r *mux.Router) {
-	ob, err := orderbook.NewMongoOrderBook(os.Args[1]) // @todo
+	ob, err := orderbook.NewMongoOrderBook(os.Args[1])
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	orders := endpoints.Orders{OrderBook: ob} // @todo balance validator
+	validator, err := setupBalanceValidator(os.Args[2], os.Args[1])
+	if err != nil {
+		log.Fatalf("validator error: %v", err.Error())
+	}
+
+	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: validator}
 
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
+}
+
+func setupBalanceValidator(ethereum string, mongo string) (validators.BalanceValidator, error) {
+	conn, err := ethclient.Dial(ethereum)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
+	}
+
+	b, err := balances.NewMongoBalances(mongo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &validators.RPCBalanceValidator{Conn: conn, Balances: b}, nil
 }
 
 func deferOnPanic() {

@@ -1,0 +1,23 @@
+language: go
+go:
+  - tip
+
+sudo: required
+
+before_install:
+    - go get github.com/golang/lint/golint
+
+install:
+    - go get -d -v ./...
+    - go build -v ./...
+
+script:
+  - npm run $TASK
+
+script:
+    - go vet -x $(go list ./... | grep -v /exchange/)
+    - $HOME/gopath/bin/golint $(go list ./... | grep -v /exchange/)
+    - go test -v ./... -bench=. -cover
+
+notifications:
+  email: false

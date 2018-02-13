@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strings"
 
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -26,7 +25,7 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	token := query.Get("token")
 
-	if token == "0x0000000000000000000000000000000000000000" || !common.IsHexAddress(token) {
+	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
 		// @todo error body
 		rw.WriteHeader(http.StatusBadRequest)
 		return
@@ -56,7 +55,6 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(o)
-
 }
 
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
@@ -71,28 +69,24 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//ok, err := orders.BalanceValidator.CheckBalance(o)
-	//if err != nil {
-	//	log.Printf("checking balance failed: %v", err)
-	//	rw.WriteHeader(http.StatusInternalServerError)
-	//	// @todo
-	//	return
-	//}
-
-	//if !ok {
-	//	rw.WriteHeadegr(http.StatusBadRequest)
-	//	// @todo
-	//	return
-	//}
-
-	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
-		log.Printf("address is not hex address")
-		rw.WriteHeader(http.StatusBadRequest)
+	ok, err := orders.BalanceValidator.CheckBalance(o)
+	if err != nil {
+		log.Printf("checking balance failed: %v", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		// @todo
 		return
 	}
 
-	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
-		log.Printf("addresses are identical")
+	if !ok {
+		rw.WriteHeader(http.StatusBadRequest)
+		log.Print("insufficient balance to place order")
+		// @todo
+		return
+	}
+
+	err = o.Validate()
+	if err != nil {
+		log.Printf("validating order failed: %v", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}

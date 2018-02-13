@@ -1,5 +1,7 @@
 # DEXY Go
 
+[![Build Status](https://travis-ci.com/DexyProject/dexy-go.svg?token=SGE7GHsjEHmsR4VosLJx&branch=development)](https://travis-ci.com/DexyProject/dexy-go)
+
 Open source orderbook code for the DEXY exchange. The code contains basic orderbook functionality as well as various chain watching code which ensures the orderbook stays up to date. Additionally this repository also contains APIs for the various endpoints required for the exchange, this includes price tickers as well as trading history.
 
 The API documentation can be found under the [docs](docs) directory.
