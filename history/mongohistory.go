@@ -6,11 +6,12 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"math/big"
 )
 
 const (
-	DBName   = "TradeHistory"
-	FileName = "History"
+	DBName   = "tradehistory"
+	FileName = "history"
 )
 
 type MongoHistory struct {
@@ -51,105 +52,84 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 	return transactions
 }
 
-func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, error) {
+func (history *MongoHistory) AggregateTransactions(block int64) (*types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 
 	ethAddress := types.HexToAddress("0x0000000000000000000000000000000000000000")
 	c := session.DB(DBName).C(FileName)
 
-	match := bson.M{
-		"$match": bson.M{"block": block},
-	}
-	timestampSort := bson.M{
-		"$sort": bson.M{"timestamp": 1},
-	}
-	tokenGroup := bson.M{
-		"group": bson.M{
-			"$give.token": bson.M{
-				"$filter": bson.M{
-					"input": "$give.token",
-					"as":    "$give.tokens",
-					"cond": bson.M{"$and": []interface{}{bson.M{
-						"$or": []interface{}{
-							bson.M{"$eq": []interface{}{"$$ive.tokens", "$get.token"}},
-							bson.M{"$eq": []interface{}{"$$give.tokens", "$give.token"}},
-							bson.M{"$ne": []interface{}{"$$give.tokens", ethAddress}},
-						},
-					},
-					},
-					},
-				},
-			},
+	var transactions []types.Transaction
 
-			"get.token": bson.M{
-				"$filter": bson.M{
-					"input": "$get.token",
-					"as":    "$get.tokens",
-					"cond": bson.M{"$and": []interface{}{bson.M{
-						"$or": []interface{}{
-							bson.M{"$eq": []interface{}{"$$get.tokens", "$give.token"}},
-							bson.M{"$eq": []interface{}{"$$get.tokens", "$get.token"}},
-							bson.M{"$ne": []interface{}{"$$get.tokens", ethAddress}},
-						},
-					},
-					},
-					},
-				},
-			},
-		},
-	}
 
-	priceCalc := bson.M{
-		"$group": bson.M{
-			"_id":       "$block",
-			"opentime":  bson.M{"$first": "$timestamp"},
-			"closetime": bson.M{"$last": "$timestamp"},
-			"getvolume": bson.M{"$sum": bson.M{
-				"$cond": []interface{}{bson.M{
-					"$eq": []interface{}{ethAddress, "$get.token"},
-				},
-					0, "$get.amount",
-				},
-			},
-			},
-			"givevolume": bson.M{"$sum": bson.M{
-				"$cond": []interface{}{bson.M{
-					"$eq": []interface{}{ethAddress, "$give.token"},
-				},
-					0, "$give.amount",
-				},
-			},
-			},
-			"price": bson.M{
-				"$cond": []interface{}{bson.M{
-					"$eq": []interface{}{ethAddress, "$get.token"},
-				},
-					bson.M{"$divide": []interface{}{"$get.amount", "$give.amount"}},
-					bson.M{"$divide": []interface{}{"$give.amount", "$get.amount"}},
-				},
-			},
-		},
-	}
-	aggregate := bson.M{
-		"$group": bson.M{
-			"_id":       "$block",
-			"opentime":  "$opentime",
-			"closetime": "$closetime",
-			"volume":    bson.M{"$add": []interface{}{"$givevolume", "$getvolume"}},
-			"open":      bson.M{"$first": "$price"},
-			"close":     bson.M{"$last": "$price"},
-			"high":      bson.M{"$max": "$price"},
-			"low":       bson.M{"$min": "$price"},
-		},
-	}
-
-	pipeline := c.Pipe([]bson.M{match, timestampSort, tokenGroup, priceCalc, aggregate})
-	var response []types.Tick
-	err := pipeline.All(&response)
+	err := c.Find(bson.M{"block": block}).Sort("-timestamp").All(&transactions)
 	if err != nil {
-		return nil, fmt.Errorf("could not query history")
+		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 
-	return response, nil
+	// group by tokens
+	//for i, tt := range transactions {
+	//	if tt.Give.Token == tt.Get.Token || tt.Give.Token == ethAddress {
+	//		transactions = append(transactions[:i], transactions[i+1:]...)
+	//	}
+	//}
+
+	// calculate price and volume
+	volume := new(big.Int)
+	for _, tt := range transactions {
+		if tt.Give.Token != ethAddress {
+			volume.Add(volume, &tt.Give.Amount.Int)
+		}
+		if tt.Get.Token != ethAddress {
+			volume.Add(volume, &tt.Get.Amount.Int)
+		}
+	}
+	var price []*big.Int
+	for _, tt := range transactions {
+		if tt.Get.Token == ethAddress {
+
+			price = append(price, new(big.Int).Quo(&tt.Get.Amount.Int, &tt.Give.Amount.Int))
+		} else {
+			price = append(price, new(big.Int).Quo(&tt.Give.Amount.Int, &tt.Get.Amount.Int))
+		}
+	}
+
+	// find min, max, timestamps and open/close
+	var openTime, closeTime int64
+	for _, tt := range transactions {
+		if openTime < tt.Timestamp {
+			openTime = tt.Timestamp
+		}
+	}
+	for _, tt := range transactions {
+		if closeTime > tt.Timestamp {
+			closeTime = tt.Timestamp
+		}
+	}
+	var open, close *big.Int
+	for i, tt := range transactions {
+		if tt.Timestamp == closeTime {
+			close = price[i]
+		}
+		if tt.Timestamp == openTime {
+			open = price[i]
+		}
+	}
+	var high, low *big.Int
+	for _, p := range price {
+		if high.Cmp(p) == 1 {
+			high = p
+		}
+	}
+	for _, p := range price {
+		if low.Cmp(p) == -1 {
+			low = p
+		}
+	}
+
+	var tick = types.Tick{
+			Block: block, OpenTime: openTime, CloseTime: closeTime, Volume: types.Int{*volume}, Open: types.Int{*open},
+			Close: types.Int{*close} , High: types.Int{*high}, Low: types.Int{*low}}
+
+	return &tick, nil
 }

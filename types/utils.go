@@ -8,3 +8,5 @@ import (
 func StringToBytes(hexString string) ([]byte, error) {
 	return hex.DecodeString(strings.TrimPrefix(hexString, "0x"))
 }
+
+
