@@ -10,17 +10,17 @@ import (
 )
 
 type TradeWatcher struct {
-	history   history.History
-	exchange  exchange.ExchangeInterface
-	orderbook orderbook.OrderBook
-	ethereum  ethclient.Client
+	History   history.History
+	Exchange  exchange.ExchangeInterface
+	Orderbook orderbook.OrderBook
+	Ethereum  *ethclient.Client
 }
 
 func (tf *TradeWatcher) Watch() error {
 
 	sink := make(chan *exchange.ExchangeInterfaceTraded)
 
-	_, err := tf.exchange.WatchTraded(nil, sink, make([][32]byte, 0))
+	_, err := tf.Exchange.WatchTraded(nil, sink, make([][32]byte, 0))
 	if err != nil {
 		// @todo return
 		return err // @todo better
@@ -36,7 +36,7 @@ func (tf *TradeWatcher) Watch() error {
 
 		// @todo cleanup
 		if block != trade.Raw.BlockHash {
-			b, err := tf.ethereum.HeaderByHash(nil, block)
+			b, err := tf.Ethereum.HeaderByHash(nil, block)
 			if err != nil {
 				// @todo
 			}
@@ -73,7 +73,7 @@ func (tf *TradeWatcher) Watch() error {
 // @todo this can probably use some optimization
 func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 
-	err := tf.history.InsertTransaction(transaction)
+	err := tf.History.InsertTransaction(transaction)
 	if err != nil {
 		// @todo handle
 		return
@@ -86,20 +86,20 @@ func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
 	}
 
 	if tf.isOrderFilled(transaction.OrderHash, filled) {
-		tf.orderbook.RemoveOrder(transaction.OrderHash) // @todo check response
+		tf.Orderbook.RemoveOrder(transaction.OrderHash) // @todo check response
 		return
 	}
 
-	tf.orderbook.UpdateOrderFilledAmount(transaction.OrderHash, filled)
+	tf.Orderbook.UpdateOrderFilledAmount(transaction.OrderHash, filled)
 }
 
 func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) bool {
-	o := tf.orderbook.GetOrderByHash(order)
+	o := tf.Orderbook.GetOrderByHash(order)
 	return o.Get.Amount.Cmp(&amount.Int) == 0
 }
 
 func (tf *TradeWatcher) orderFilledAmount(maker types.Address, order types.Hash) (types.Int, error) {
-	f, err := tf.exchange.Filled(nil, maker.Address, order)
+	f, err := tf.Exchange.Filled(nil, maker.Address, order)
 	if err != nil {
 		return types.Int{}, err
 	}
