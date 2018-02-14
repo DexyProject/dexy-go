@@ -1,53 +1,51 @@
 package watchers
 
 import (
-	"encoding/json"
-	"log"
-
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
-	"github.com/DexyProject/dexy-go/subscribers"
 	"github.com/DexyProject/dexy-go/types"
 )
 
 type TradeWatcher struct {
-	subscriber subscribers.Subscriber
-	history    history.History
-	exchange   exchange.ExchangeInterface
-	orderbook  orderbook.OrderBook
+	history   history.History
+	exchange  exchange.ExchangeInterface
+	orderbook orderbook.OrderBook
 }
 
 func (tf *TradeWatcher) Watch() error {
 
-	err := tf.subscriber.Subscribe()
+	sink := make(chan *exchange.ExchangeInterfaceTraded)
+
+	_, err := tf.exchange.WatchTraded(nil, sink, make([][32]byte, 0))
 	if err != nil {
-		return err
+		// @todo return
+		return err // @todo better
 	}
 
 	for {
-		// @todo async
-		// @todo ack, dec message depending on if it worked.
-		msg, err := tf.subscriber.Listen()
-		if err != nil {
-			// @todo
-			continue
+
+		trade := <-sink
+
+		tx := types.Transaction{
+			TransactionID: types.Bytes{Bytes: trade.Raw.TxHash.Bytes()},
+			OrderHash: trade.Hash,
+			BlockNumber: trade.Raw.BlockNumber,
+			Timestamp: 0,
+			Taker: types.Address{Address: trade.Taker},
+			Maker: types.Address{Address: trade.Maker},
+			Give: types.Trade{
+				Token: types.Address{Address: trade.TokenGive},
+				Amount: trade.AmountGive,
+			},
+			Get: types.Trade{
+				Token: types.Address{Address: trade.TokenGet},
+				Amount: trade.AmountGet,
+			},
 		}
 
-		var tx *types.Transaction
-		err = json.Unmarshal([]byte(msg), tx)
-		if err != nil {
-			// @todo
-			continue
-		}
-
-		go tf.handleTransaction(*tx)
-
-		// @todo
-		log.Print(msg)
 	}
 
-	// @todo read for trade events,
 	return nil
 }
 

@@ -3,7 +3,7 @@ package types
 type Transaction struct {
 	TransactionID Bytes   `json:"tx" bson:"tx"`
 	OrderHash     Hash    `json:"hash" bson:"hash"`
-	BlockNumber   int64   `json:"block" bson:"block"`
+	BlockNumber   uint64   `json:"block" bson:"block"`
 	Timestamp     int64   `json:"timestamp" bson:"timestamp"`
 	Taker         Address `json:"taker" bson:"taker"`
 	Maker         Address `json:"maker" bson:"maker"`
