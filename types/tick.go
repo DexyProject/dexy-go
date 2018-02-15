@@ -1,7 +1,7 @@
 package types
 
 type Tick struct {
-	//Pair      Pair      `json:"pair" bson:"pair"`
+	Pair      Pair      `json:"pair" bson:"pair"`
 	Block     int64     `json:"block" bson:"block"`
 	Volume    Int       `json:"volume" bson:"volume"`
 	Open      float64   `json:"open" bson:"open"`
@@ -11,7 +11,6 @@ type Tick struct {
 }
 
 type Pair struct {
-	Base      Address   `json:"base" bson:"base"`
 	Quote     Address   `json:"quote" bson:"quote"`
-
+	Base      Address   `json:"base" bson:"base"`
 }

@@ -19,17 +19,51 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	var ticks []types.Tick
 	var txindex []float64 //temp
 
-	err := c.Find(bson.M{"block": block}).Sort("-timestamp").All(&transactions)
+
+	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
+	sortTimestamp := bson.M{"$sort": bson.M{"$transactions.timestamp": -1}}
+	groupGetToken := bson.M{
+		"$group": bson.M{
+			"$filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$or": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.give.token"}},
+					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
+	}
+	groupGiveToken := bson.M{
+		"$group": bson.M{
+			"$filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$or": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
+					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
+	}
+
+	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetToken, groupGiveToken}).All(&transactions)
+
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 	for _, tt := range transactions {
+		pair := getPair(tt.Transactions)
 		volume := calcVolume(tt.Transactions)
 		prices := getPrices(tt.Transactions)
 		openPrices, closePrices := calcOpenClose(txindex)
 		high, low := calcHighLow(tt.Transactions, prices)
 
-		ticks = append(ticks, types.Tick{Block: block, Volume: types.Int{*volume}, Open: openPrices,
+		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrices,
 		Close: closePrices, High: high, Low: low})
 	}
 
@@ -83,5 +117,17 @@ func calcOpenClose(txindex []float64) (float64, float64) { //temporary Calculati
 	closePrice = txindex[0]
 
 	return openPrice, closePrice
+}
+
+func getPair(transactions []types.Transaction) types.Pair {
+	var newPair types.Pair
+	for _, tt := range transactions {
+		if tt.Give.Token == types.HexToAddress(types.ETH_ADDRESS) {
+			newPair = types.Pair{tt.Get.Token, types.HexToAddress(types.ETH_ADDRESS)}
+		} else {
+			newPair = types.Pair{tt.Give.Token, types.HexToAddress(types.ETH_ADDRESS)}
+		}
+	}
+	return newPair
 }
 
