@@ -12,6 +12,14 @@ The dexy go server is made up of several components.
 
 ### REST 
 
+```
+Usage of main.go
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
 ### Trade Monitor
 
 ### Balance Monitor
