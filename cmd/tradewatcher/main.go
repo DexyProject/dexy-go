@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,21 +18,32 @@ func main() {
 
 	defer deferOnPanic()
 
-	hist, err := history.NewMongoHistory(os.Args[1])
+	ethNode := flag.String("ethnode", "", "ethereum node address")
+	mongo := flag.String("mongo", "", "mongodb connection string")
+	addr := flag.String("addr", "", "exchange address")
+
+	flag.Parse()
+
+	if *ethNode == "" || *mongo == "" || *addr == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	hist, err := history.NewMongoHistory(*mongo)
 	if err != nil {
 	}
 
-	conn, err := ethclient.Dial(os.Args[2])
+	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	ob, err := orderbook.NewMongoOrderBook(os.Args[1])
+	ob, err := orderbook.NewMongoOrderBook(*mongo)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	ex, err := exchange.NewExchangeInterface(types.HexToAddress(os.Args[3]).Address, conn)
+	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
 
 	tf := watchers.TradeWatcher{
 		History:   hist,
