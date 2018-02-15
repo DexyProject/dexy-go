@@ -80,7 +80,7 @@ func getPrices(transactions []types.Transaction) []float64 {
 func calcOpenClose(txindex []float64) (float64, float64) { //temporary Calculation for open and close until index format is created
 	var openPrice, closePrice float64
 	openPrice = txindex[len(txindex)-1]
-	closePrice = txindex[len(txindex)-1]
+	closePrice = txindex[0]
 
 	return openPrice, closePrice
 }
