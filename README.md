@@ -6,6 +6,34 @@ Open source orderbook code for the DEXY exchange. The code contains basic orderb
 
 The API documentation can be found under the [docs](docs) directory.
 
+## Documentation
+
+The dexy go server is made up of several components.
+
+### REST 
+
+```
+Usage of main.go
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
+### Trade Watcher
+
+```
+Usage of main.go
+  -addr string
+    	exchange address
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
+### Balance Monitor
+
 ## Authors
 
 * **Dean Eigenmann** - [decanus](https://github.com/decanus)

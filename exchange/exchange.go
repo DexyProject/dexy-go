@@ -7,14 +7,17 @@ import (
 	"math/big"
 	"strings"
 
+	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // ExchangeInterfaceABI is the input ABI used to generate the binding from.
-const ExchangeInterfaceABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"cancel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"tokenGet\",\"type\":\"address\"},{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"expires\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"canTrade\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"Cancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Traded\",\"type\":\"event\"}]"
+
+const ExchangeInterfaceABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"canTrade\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"deposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"trade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addresses\",\"type\":\"address[3]\"},{\"name\":\"values\",\"type\":\"uint256[4]\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"},{\"name\":\"mode\",\"type\":\"uint256\"}],\"name\":\"cancel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"filled\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"amountGet\",\"type\":\"uint256\"},{\"name\":\"tokenGive\",\"type\":\"address\"},{\"name\":\"amountGive\",\"type\":\"uint256\"},{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"getVolume\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdraw\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Deposited\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdrawn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"Cancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"tokenGive\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amountGive\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"tokenGet\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amountGet\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"taker\",\"type\":\"address\"}],\"name\":\"Traded\",\"type\":\"event\"}]"
 
 // ExchangeInterfaceBin is the compiled bytecode used for deploying new contracts.
 const ExchangeInterfaceBin = `0x`
@@ -29,13 +32,14 @@ func DeployExchangeInterface(auth *bind.TransactOpts, backend bind.ContractBacke
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	return address, tx, &ExchangeInterface{ExchangeInterfaceCaller: ExchangeInterfaceCaller{contract: contract}, ExchangeInterfaceTransactor: ExchangeInterfaceTransactor{contract: contract}}, nil
+	return address, tx, &ExchangeInterface{ExchangeInterfaceCaller: ExchangeInterfaceCaller{contract: contract}, ExchangeInterfaceTransactor: ExchangeInterfaceTransactor{contract: contract}, ExchangeInterfaceFilterer: ExchangeInterfaceFilterer{contract: contract}}, nil
 }
 
 // ExchangeInterface is an auto generated Go binding around an Ethereum contract.
 type ExchangeInterface struct {
 	ExchangeInterfaceCaller     // Read-only binding to the contract
 	ExchangeInterfaceTransactor // Write-only binding to the contract
+	ExchangeInterfaceFilterer   // Log filterer for contract events
 }
 
 // ExchangeInterfaceCaller is an auto generated read-only Go binding around an Ethereum contract.
@@ -45,6 +49,11 @@ type ExchangeInterfaceCaller struct {
 
 // ExchangeInterfaceTransactor is an auto generated write-only Go binding around an Ethereum contract.
 type ExchangeInterfaceTransactor struct {
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
+}
+
+// ExchangeInterfaceFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type ExchangeInterfaceFilterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
@@ -87,16 +96,16 @@ type ExchangeInterfaceTransactorRaw struct {
 
 // NewExchangeInterface creates a new instance of ExchangeInterface, bound to a specific deployed contract.
 func NewExchangeInterface(address common.Address, backend bind.ContractBackend) (*ExchangeInterface, error) {
-	contract, err := bindExchangeInterface(address, backend, backend)
+	contract, err := bindExchangeInterface(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &ExchangeInterface{ExchangeInterfaceCaller: ExchangeInterfaceCaller{contract: contract}, ExchangeInterfaceTransactor: ExchangeInterfaceTransactor{contract: contract}}, nil
+	return &ExchangeInterface{ExchangeInterfaceCaller: ExchangeInterfaceCaller{contract: contract}, ExchangeInterfaceTransactor: ExchangeInterfaceTransactor{contract: contract}, ExchangeInterfaceFilterer: ExchangeInterfaceFilterer{contract: contract}}, nil
 }
 
 // NewExchangeInterfaceCaller creates a new read-only instance of ExchangeInterface, bound to a specific deployed contract.
 func NewExchangeInterfaceCaller(address common.Address, caller bind.ContractCaller) (*ExchangeInterfaceCaller, error) {
-	contract, err := bindExchangeInterface(address, caller, nil)
+	contract, err := bindExchangeInterface(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,20 +114,29 @@ func NewExchangeInterfaceCaller(address common.Address, caller bind.ContractCall
 
 // NewExchangeInterfaceTransactor creates a new write-only instance of ExchangeInterface, bound to a specific deployed contract.
 func NewExchangeInterfaceTransactor(address common.Address, transactor bind.ContractTransactor) (*ExchangeInterfaceTransactor, error) {
-	contract, err := bindExchangeInterface(address, nil, transactor)
+	contract, err := bindExchangeInterface(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &ExchangeInterfaceTransactor{contract: contract}, nil
 }
 
+// NewExchangeInterfaceFilterer creates a new log filterer instance of ExchangeInterface, bound to a specific deployed contract.
+func NewExchangeInterfaceFilterer(address common.Address, filterer bind.ContractFilterer) (*ExchangeInterfaceFilterer, error) {
+	contract, err := bindExchangeInterface(address, nil, nil, filterer)
+	if err != nil {
+		return nil, err
+	}
+	return &ExchangeInterfaceFilterer{contract: contract}, nil
+}
+
 // bindExchangeInterface binds a generic wrapper to an already deployed contract.
-func bindExchangeInterface(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindExchangeInterface(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(ExchangeInterfaceABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -293,4 +311,542 @@ func (_ExchangeInterface *ExchangeInterfaceSession) Withdraw(token common.Addres
 // Solidity: function withdraw(token address, amount uint256) returns()
 func (_ExchangeInterface *ExchangeInterfaceTransactorSession) Withdraw(token common.Address, amount *big.Int) (*types.Transaction, error) {
 	return _ExchangeInterface.Contract.Withdraw(&_ExchangeInterface.TransactOpts, token, amount)
+}
+
+// ExchangeInterfaceCancelledIterator is returned from FilterCancelled and is used to iterate over the raw logs and unpacked data for Cancelled events raised by the ExchangeInterface contract.
+type ExchangeInterfaceCancelledIterator struct {
+	Event *ExchangeInterfaceCancelled // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ExchangeInterfaceCancelledIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ExchangeInterfaceCancelled)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ExchangeInterfaceCancelled)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ExchangeInterfaceCancelledIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ExchangeInterfaceCancelledIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ExchangeInterfaceCancelled represents a Cancelled event raised by the ExchangeInterface contract.
+type ExchangeInterfaceCancelled struct {
+	Hash [32]byte
+	Raw  types.Log // Blockchain specific contextual infos
+}
+
+// FilterCancelled is a free log retrieval operation binding the contract event 0xbaa1eb22f2a492ba1a5fea61b8df4d27c6c8b5f3971e63bb58fa14ff72eedb70.
+//
+// Solidity: event Cancelled(hash indexed bytes32)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) FilterCancelled(opts *bind.FilterOpts, hash [][32]byte) (*ExchangeInterfaceCancelledIterator, error) {
+
+	var hashRule []interface{}
+	for _, hashItem := range hash {
+		hashRule = append(hashRule, hashItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.FilterLogs(opts, "Cancelled", hashRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ExchangeInterfaceCancelledIterator{contract: _ExchangeInterface.contract, event: "Cancelled", logs: logs, sub: sub}, nil
+}
+
+// WatchCancelled is a free log subscription operation binding the contract event 0xbaa1eb22f2a492ba1a5fea61b8df4d27c6c8b5f3971e63bb58fa14ff72eedb70.
+//
+// Solidity: event Cancelled(hash indexed bytes32)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) WatchCancelled(opts *bind.WatchOpts, sink chan<- *ExchangeInterfaceCancelled, hash [][32]byte) (event.Subscription, error) {
+
+	var hashRule []interface{}
+	for _, hashItem := range hash {
+		hashRule = append(hashRule, hashItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.WatchLogs(opts, "Cancelled", hashRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ExchangeInterfaceCancelled)
+				if err := _ExchangeInterface.contract.UnpackLog(event, "Cancelled", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ExchangeInterfaceDepositedIterator is returned from FilterDeposited and is used to iterate over the raw logs and unpacked data for Deposited events raised by the ExchangeInterface contract.
+type ExchangeInterfaceDepositedIterator struct {
+	Event *ExchangeInterfaceDeposited // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ExchangeInterfaceDepositedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ExchangeInterfaceDeposited)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ExchangeInterfaceDeposited)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ExchangeInterfaceDepositedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ExchangeInterfaceDepositedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ExchangeInterfaceDeposited represents a Deposited event raised by the ExchangeInterface contract.
+type ExchangeInterfaceDeposited struct {
+	User   common.Address
+	Token  common.Address
+	Amount *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterDeposited is a free log retrieval operation binding the contract event 0x8752a472e571a816aea92eec8dae9baf628e840f4929fbcc2d155e6233ff68a7.
+//
+// Solidity: event Deposited(user indexed address, token address, amount uint256)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) FilterDeposited(opts *bind.FilterOpts, user []common.Address) (*ExchangeInterfaceDepositedIterator, error) {
+
+	var userRule []interface{}
+	for _, userItem := range user {
+		userRule = append(userRule, userItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.FilterLogs(opts, "Deposited", userRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ExchangeInterfaceDepositedIterator{contract: _ExchangeInterface.contract, event: "Deposited", logs: logs, sub: sub}, nil
+}
+
+// WatchDeposited is a free log subscription operation binding the contract event 0x8752a472e571a816aea92eec8dae9baf628e840f4929fbcc2d155e6233ff68a7.
+//
+// Solidity: event Deposited(user indexed address, token address, amount uint256)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) WatchDeposited(opts *bind.WatchOpts, sink chan<- *ExchangeInterfaceDeposited, user []common.Address) (event.Subscription, error) {
+
+	var userRule []interface{}
+	for _, userItem := range user {
+		userRule = append(userRule, userItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.WatchLogs(opts, "Deposited", userRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ExchangeInterfaceDeposited)
+				if err := _ExchangeInterface.contract.UnpackLog(event, "Deposited", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ExchangeInterfaceTradedIterator is returned from FilterTraded and is used to iterate over the raw logs and unpacked data for Traded events raised by the ExchangeInterface contract.
+type ExchangeInterfaceTradedIterator struct {
+	Event *ExchangeInterfaceTraded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ExchangeInterfaceTradedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ExchangeInterfaceTraded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ExchangeInterfaceTraded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ExchangeInterfaceTradedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ExchangeInterfaceTradedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ExchangeInterfaceTraded represents a Traded event raised by the ExchangeInterface contract.
+type ExchangeInterfaceTraded struct {
+	Hash       [32]byte
+	TokenGive  common.Address
+	AmountGive *big.Int
+	TokenGet   common.Address
+	AmountGet  *big.Int
+	Maker      common.Address
+	Taker      common.Address
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterTraded is a free log retrieval operation binding the contract event 0xe1d2889bf5062ca6cccab7b9d6f0548e654943875f2a9c45eaaef37b11d7f68c.
+//
+// Solidity: event Traded(hash indexed bytes32, tokenGive address, amountGive uint256, tokenGet address, amountGet uint256, maker address, taker address)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) FilterTraded(opts *bind.FilterOpts, hash [][32]byte) (*ExchangeInterfaceTradedIterator, error) {
+
+	var hashRule []interface{}
+	for _, hashItem := range hash {
+		hashRule = append(hashRule, hashItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.FilterLogs(opts, "Traded", hashRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ExchangeInterfaceTradedIterator{contract: _ExchangeInterface.contract, event: "Traded", logs: logs, sub: sub}, nil
+}
+
+// WatchTraded is a free log subscription operation binding the contract event 0xe1d2889bf5062ca6cccab7b9d6f0548e654943875f2a9c45eaaef37b11d7f68c.
+//
+// Solidity: event Traded(hash indexed bytes32, tokenGive address, amountGive uint256, tokenGet address, amountGet uint256, maker address, taker address)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) WatchTraded(opts *bind.WatchOpts, sink chan<- *ExchangeInterfaceTraded, hash [][32]byte) (event.Subscription, error) {
+
+	var hashRule []interface{}
+	for _, hashItem := range hash {
+		hashRule = append(hashRule, hashItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.WatchLogs(opts, "Traded", hashRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ExchangeInterfaceTraded)
+				if err := _ExchangeInterface.contract.UnpackLog(event, "Traded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ExchangeInterfaceWithdrawnIterator is returned from FilterWithdrawn and is used to iterate over the raw logs and unpacked data for Withdrawn events raised by the ExchangeInterface contract.
+type ExchangeInterfaceWithdrawnIterator struct {
+	Event *ExchangeInterfaceWithdrawn // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ExchangeInterfaceWithdrawnIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ExchangeInterfaceWithdrawn)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ExchangeInterfaceWithdrawn)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ExchangeInterfaceWithdrawnIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ExchangeInterfaceWithdrawnIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ExchangeInterfaceWithdrawn represents a Withdrawn event raised by the ExchangeInterface contract.
+type ExchangeInterfaceWithdrawn struct {
+	User   common.Address
+	Token  common.Address
+	Amount *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterWithdrawn is a free log retrieval operation binding the contract event 0xd1c19fbcd4551a5edfb66d43d2e337c04837afda3482b42bdf569a8fccdae5fb.
+//
+// Solidity: event Withdrawn(user indexed address, token address, amount uint256)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) FilterWithdrawn(opts *bind.FilterOpts, user []common.Address) (*ExchangeInterfaceWithdrawnIterator, error) {
+
+	var userRule []interface{}
+	for _, userItem := range user {
+		userRule = append(userRule, userItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.FilterLogs(opts, "Withdrawn", userRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ExchangeInterfaceWithdrawnIterator{contract: _ExchangeInterface.contract, event: "Withdrawn", logs: logs, sub: sub}, nil
+}
+
+// WatchWithdrawn is a free log subscription operation binding the contract event 0xd1c19fbcd4551a5edfb66d43d2e337c04837afda3482b42bdf569a8fccdae5fb.
+//
+// Solidity: event Withdrawn(user indexed address, token address, amount uint256)
+func (_ExchangeInterface *ExchangeInterfaceFilterer) WatchWithdrawn(opts *bind.WatchOpts, sink chan<- *ExchangeInterfaceWithdrawn, user []common.Address) (event.Subscription, error) {
+
+	var userRule []interface{}
+	for _, userItem := range user {
+		userRule = append(userRule, userItem)
+	}
+
+	logs, sub, err := _ExchangeInterface.contract.WatchLogs(opts, "Withdrawn", userRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ExchangeInterfaceWithdrawn)
+				if err := _ExchangeInterface.contract.UnpackLog(event, "Withdrawn", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
 }
