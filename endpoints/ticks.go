@@ -9,7 +9,7 @@ import (
 )
 
 type Ticks struct {
-	TickQuery ticks.Ticks
+	Ticks ticks.Ticks
 }
 
 func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
 	token := query.Get("token")
 	addr := types.HexToAddress(token)
 
-	h, err := ticks.TickQuery.FetchTicks(addr)
+	h, err := ticks.Ticks.FetchTicks(addr)
 	if err != nil {
 		// @todo error handling
 		rw.WriteHeader(http.StatusBadRequest)
