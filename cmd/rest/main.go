@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/DexyProject/dexy-go/balances"
 	"github.com/DexyProject/dexy-go/endpoints"
@@ -22,8 +22,13 @@ func main() {
 
 	r := mux.NewRouter()
 
-	setupOrderBookEndpoints(r)
-	setupHistoryEndpoints(r)
+	ethNode := flag.String("ethnode", "", "ethereum node address")
+	mongo := flag.String("mongo", "", "mongodb connection string")
+
+	flag.Parse()
+
+	setupOrderBookEndpoints(*ethNode, *mongo, r)
+	setupHistoryEndpoints(*mongo, r)
 
 	http.Handle("/", r)
 
@@ -45,8 +50,8 @@ func main() {
 	}
 }
 
-func setupHistoryEndpoints(r *mux.Router) {
-	h, err := history.NewMongoHistory(os.Args[1])
+func setupHistoryEndpoints(mongo string, r *mux.Router) {
+	h, err := history.NewMongoHistory(mongo)
 	if err != nil {
 		log.Fatal("History:", err)
 	}
@@ -55,13 +60,13 @@ func setupHistoryEndpoints(r *mux.Router) {
 	r.HandleFunc("/trades", endpoint.Handle).Methods("GET").Queries("token", "")
 }
 
-func setupOrderBookEndpoints(r *mux.Router) {
-	ob, err := orderbook.NewMongoOrderBook(os.Args[1])
+func setupOrderBookEndpoints(ethereum string, mongo string, r *mux.Router) {
+	ob, err := orderbook.NewMongoOrderBook(ethereum)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	validator, err := setupBalanceValidator(os.Args[2], os.Args[1])
+	validator, err := setupBalanceValidator(ethereum, mongo)
 	if err != nil {
 		log.Fatalf("validator error: %v", err.Error())
 	}
