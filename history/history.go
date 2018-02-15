@@ -6,5 +6,5 @@ import (
 
 type History interface {
 	GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction
-	InsertTransaction(transaction types.Transaction) error
+	AggregateTransactions(block int) (*types.Tick, error)
 }
