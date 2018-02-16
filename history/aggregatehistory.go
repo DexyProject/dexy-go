@@ -22,7 +22,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 
 	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
 	sortTimestamp := bson.M{"$sort": bson.M{"$transactions.timestamp": -1}}
-	groupGetToken := bson.M{
+	groupGetTokens := bson.M{
 		"$group": bson.M{
 			"$filter": bson.M{
 				"input": "$transactions",
@@ -35,7 +35,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			},
 		},
 	}
-	groupGiveToken := bson.M{
+	groupGiveTokens := bson.M{
 		"$group": bson.M{
 			"$filter": bson.M{
 				"input": "$transactions",
@@ -48,7 +48,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			},
 		},
 	}
-	groupGiveGetToken := bson.M{
+	groupGiveGetTokens := bson.M{
 		"$group": bson.M{
 			"$filter": bson.M{
 				"input": "$transactions",
@@ -62,7 +62,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		},
 	}
 
-	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetToken, groupGiveToken, groupGiveGetToken}).All(&transactions)
+	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetTokens, groupGiveTokens, groupGiveGetTokens}).All(&transactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
@@ -132,13 +132,9 @@ func calcOpenClose(txindex []float64) (float64, float64) { //temporary Calculati
 
 func getPair(transactions []types.Transaction) types.Pair {
 	var newPair types.Pair
-	for _, tt := range transactions {
-		if tt.Give.Token == types.HexToAddress(types.ETH_ADDRESS) {
-			newPair = types.Pair{tt.Get.Token, types.HexToAddress(types.ETH_ADDRESS)}
-		} else {
-			newPair = types.Pair{tt.Give.Token, types.HexToAddress(types.ETH_ADDRESS)}
-		}
+	if transactions[1].Give.Token == types.HexToAddress(types.ETH_ADDRESS) {
+		newPair = types.Pair{transactions[1].Get.Token, types.HexToAddress(types.ETH_ADDRESS)}
 	}
+	newPair = types.Pair{types.HexToAddress(types.ETH_ADDRESS), transactions[1].Get.Token}
 	return newPair
 }
-
