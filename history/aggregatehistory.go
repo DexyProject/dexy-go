@@ -27,8 +27,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			"$filter": bson.M{
 				"input": "$transactions",
 				"as":    "tt",
-				"cond": bson.M{"$or": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.give.token"}},
+				"cond": bson.M{"$and": []interface{}{
 					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
 					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
 				},
@@ -41,8 +40,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			"$filter": bson.M{
 				"input": "$transactions",
 				"as":    "tt",
-				"cond": bson.M{"$or": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
+				"cond": bson.M{"$and": []interface{}{
 					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
 					bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
 				},
@@ -50,8 +48,21 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			},
 		},
 	}
+	groupGiveGetToken := bson.M{
+		"$group": bson.M{
+			"$filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$and": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
+	}
 
-	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetToken, groupGiveToken}).All(&transactions)
+	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetToken, groupGiveToken, groupGiveGetToken}).All(&transactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
