@@ -45,17 +45,11 @@ func main() {
 
 	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
 
-	tf := watchers.TradeWatcher{
-		History:   hist,
-		Exchange:  *ex,
-		Orderbook: ob,
-		Ethereum:  conn,
-	}
+	channel := make(chan types.Transaction)
 
-	err = tf.Watch()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	tf := watchers.NewTradeWatcher(hist, *ex, ob, channel)
+
+	tf.Watch()
 }
 
 func deferOnPanic() {

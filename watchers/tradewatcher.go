@@ -5,101 +5,60 @@ import (
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type TradeWatcher struct {
-	History   history.History
-	Exchange  exchange.ExchangeInterface
-	Orderbook orderbook.OrderBook
-	Ethereum  *ethclient.Client
+	history   history.History
+	exchange  exchange.ExchangeInterface
+	orderbook orderbook.OrderBook
+
+	in <-chan types.Transaction
 }
 
-func (tf *TradeWatcher) Watch() error {
-
-	sink := make(chan *exchange.ExchangeInterfaceTraded)
-
-	_, err := tf.Exchange.WatchTraded(nil, sink, make([][32]byte, 0))
-	if err != nil {
-		// @todo return
-		return err // @todo better
+func NewTradeWatcher(history history.History, exchange exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan types.Transaction) TradeWatcher {
+	return TradeWatcher{
+		history: history,
+		exchange: exchange,
+		orderbook: book,
+		in: in,
 	}
+}
 
-	var timestamp types.Int
-	var block common.Hash
+func (tf *TradeWatcher) Watch() {
 
 	for {
+		tx := <-tf.in
 
-		// @todo make async see to handle sub errors from first return val
-		trade := <-sink
+		// @todo we should be able to ack or reject, depending on if we fail somewhere
 
-		// @todo cleanup
-		if block != trade.Raw.BlockHash {
-			b, err := tf.Ethereum.HeaderByHash(nil, block)
-			if err != nil {
-				// @todo
-			}
-
-			block = trade.Raw.BlockHash
-			timestamp = types.Int{Int: *b.Time}
+		err := tf.history.InsertTransaction(tx)
+		if err != nil {
+			// @todo handle
+			return
 		}
 
-		tx := types.Transaction{
-			TransactionID:    types.Bytes{Bytes: trade.Raw.TxHash.Bytes()},
-			TransactionIndex: trade.Raw.Index,
-			OrderHash:        trade.Hash,
-			BlockNumber:      trade.Raw.BlockNumber,
-			Timestamp:        timestamp,
-			Taker:            types.Address{Address: trade.Taker},
-			Maker:            types.Address{Address: trade.Maker},
-			Give: types.Trade{
-				Token:  types.Address{Address: trade.TokenGive},
-				Amount: types.Int{Int: *trade.AmountGive},
-			},
-			Get: types.Trade{
-				Token:  types.Address{Address: trade.TokenGet},
-				Amount: types.Int{Int: *trade.AmountGet},
-			},
+		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
+		if err != nil {
+			// @todo
+			return
 		}
 
-		go tf.handleTransaction(tx)
+		if tf.isOrderFilled(tx.OrderHash, filled) {
+			tf.orderbook.RemoveOrder(tx.OrderHash) // @todo check response
+			return
+		}
 
+		tf.orderbook.UpdateOrderFilledAmount(tx.OrderHash, filled)
 	}
-
-	return nil
-}
-
-// @todo this can probably use some optimization
-func (tf *TradeWatcher) handleTransaction(transaction types.Transaction) {
-
-	err := tf.History.InsertTransaction(transaction)
-	if err != nil {
-		// @todo handle
-		return
-	}
-
-	filled, err := tf.orderFilledAmount(transaction.Maker, transaction.OrderHash)
-	if err != nil {
-		// @todo
-		return
-	}
-
-	if tf.isOrderFilled(transaction.OrderHash, filled) {
-		tf.Orderbook.RemoveOrder(transaction.OrderHash) // @todo check response
-		return
-	}
-
-	tf.Orderbook.UpdateOrderFilledAmount(transaction.OrderHash, filled)
 }
 
 func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) bool {
-	o := tf.Orderbook.GetOrderByHash(order)
+	o := tf.orderbook.GetOrderByHash(order)
 	return o.Get.Amount.Cmp(&amount.Int) == 0
 }
 
 func (tf *TradeWatcher) orderFilledAmount(maker types.Address, order types.Hash) (types.Int, error) {
-	f, err := tf.Exchange.Filled(nil, maker.Address, order)
+	f, err := tf.exchange.Filled(nil, maker.Address, order)
 	if err != nil {
 		return types.Int{}, err
 	}
