@@ -17,8 +17,6 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	}
 
 	var ticks []types.Tick
-	var txindex []float64 //temp
-
 
 	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
 	sortTimestamp := bson.M{"$sort": bson.M{"$transactions.timestamp": -1}}
@@ -71,11 +69,12 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		pair := getPair(tt.Transactions)
 		volume := calcVolume(tt.Transactions)
 		prices := getPrices(tt.Transactions)
-		openPrices, closePrices := calcOpenClose(txindex)
-		high, low := calcHighLow(tt.Transactions, prices)
+		openIndex, closeIndex := CalcOpenCloseIndex(tt.Transactions)
+		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
+		high, low := calcHighLow(prices)
 
-		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrices,
-		Close: closePrices, High: high, Low: low})
+		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
+		Close: closePrice, High: high, Low: low})
 	}
 
 	return ticks, nil
@@ -96,36 +95,54 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 	return volume
 }
 
-func calcHighLow(transactions []types.Transaction, price []float64) (float64, float64) {
-	var high, low float64
-	for _, p := range price {
-		if high > p {
-			high = p
+func calcHighLow(prices []types.Price) (float64, float64) {
+	high, low := prices[0].Price, prices[0].Price
+	for _, p := range prices {
+		if high > p.Price {
+			high = p.Price
 		}
-	}
-	for _, p := range price {
-		if low < p {
-			low = p
+		if low < p.Price {
+			low = p.Price
 		}
 	}
 
 	return high, low
 }
 
-func getPrices(transactions []types.Transaction) []float64 {
-	var prices []float64
+func getPrices(transactions []types.Transaction) []types.Price {
+	var prices []types.Price
 	for _, tt := range transactions {
 		newPrice, _ := tt.Get.CalcPrice(tt.Give, types.HexToAddress(types.ETH_ADDRESS))
-		prices = append(prices, newPrice)
+		priceStruct := types.Price{tt.TransactionIndex, newPrice}
+		prices = append(prices, priceStruct)
 	}
 
 	return prices
 }
 
-func calcOpenClose(txindex []float64) (float64, float64) { //temporary Calculation for open and close until index format is created
+func CalcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
+	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
+	for _, tt := range transactions {
+		if openIndex < tt.TransactionIndex {
+			openIndex = tt.TransactionIndex
+		}
+		if closeIndex > tt.TransactionIndex {
+			closeIndex = tt.TransactionIndex}
+	}
+
+
+	return openIndex, closeIndex
+}
+
+func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) { //temporary Calculation for open and close until index format is created
 	var openPrice, closePrice float64
-	openPrice = txindex[len(txindex)-1]
-	closePrice = txindex[0]
+	for _, tt := range prices {
+		if tt.TransactionIndex == OpenIndex {
+			openPrice = tt.Price
+		} else if tt.TransactionIndex == CloseIndex {
+			closePrice = tt.Price
+		}
+	}
 
 	return openPrice, closePrice
 }

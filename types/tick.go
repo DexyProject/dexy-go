@@ -14,3 +14,8 @@ type Pair struct {
 	Quote     Address   `json:"quote" bson:"quote"`
 	Base      Address   `json:"base" bson:"base"`
 }
+
+type Price struct {
+	TransactionIndex  uint     `json:"transactionindex" bson:"transactionindex"`
+	Price             float64  `json:"price" bson:"price"`
+}
