@@ -26,7 +26,6 @@ func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterfa
 }
 
 func (tf *TradeWatcher) Watch() {
-
 	for {
 		msg := <-tf.in
 		tx := msg.Transaction
