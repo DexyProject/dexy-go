@@ -61,7 +61,7 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 }
 
 func setupOrderBookEndpoints(ethereum string, mongo string, r *mux.Router) {
-	ob, err := orderbook.NewMongoOrderBook(ethereum)
+	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
