@@ -17,9 +17,9 @@ func NewTradedMessage(tx types.Transaction) *TradedMessage {
 
 // @todo
 func (TradedMessage) Ack() {
-	panic("implement me")
+	// @todo here we will want to send to a channel
 }
 
 func (TradedMessage) Reject() {
-	panic("implement me")
+	// @todo here we will want to send to a channel
 }

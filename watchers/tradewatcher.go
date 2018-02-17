@@ -1,11 +1,13 @@
 package watchers
 
 import (
+	"errors"
+
+	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/DexyProject/dexy-go/consumers"
 )
 
 type TradeWatcher struct {
@@ -16,12 +18,12 @@ type TradeWatcher struct {
 	in <-chan *consumers.TradedMessage
 }
 
-func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan *consumers.TradedMessage) TradeWatcher {
+func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <-chan *consumers.TradedMessage) TradeWatcher {
 	return TradeWatcher{
-		history: history,
-		exchange: exchange,
+		history:   history,
+		exchange:  exchange,
 		orderbook: book,
-		in: in,
+		in:        in,
 	}
 }
 
@@ -40,19 +42,30 @@ func (tf *TradeWatcher) Watch() {
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
 			msg.Reject()
-			// @todo
 			return
 		}
 
-		if tf.isOrderFilled(tx.OrderHash, filled) {
-			tf.orderbook.RemoveOrder(tx.OrderHash) // @todo check response
-			msg.Ack()
+		err = tf.handleFill(tx, filled)
+		if err != nil {
+			msg.Reject()
 			return
 		}
 
-		tf.orderbook.UpdateOrderFilledAmount(tx.OrderHash, filled) // @todo check response
 		msg.Ack()
 	}
+}
+
+func (tf *TradeWatcher) handleFill(tx types.Transaction, filled types.Int) error {
+	if !tf.isOrderFilled(tx.OrderHash, filled) {
+		return tf.orderbook.UpdateOrderFilledAmount(tx.OrderHash, filled)
+	}
+
+	ok := tf.orderbook.RemoveOrder(tx.OrderHash)
+	if !ok {
+		return errors.New("failed to delete order")
+	}
+
+	return nil
 }
 
 func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) bool {
