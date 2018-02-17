@@ -48,7 +48,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 			},
 		},
 	}
-	groupGiveGetTokens := bson.M{
+	groupTokens := bson.M{
 		"$group": bson.M{
 			"$filter": bson.M{
 				"input": "$transactions",
@@ -62,7 +62,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		},
 	}
 
-	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetTokens, groupGiveTokens, groupGiveGetTokens}).All(&transactions)
+	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetTokens, groupGiveTokens, groupTokens}).All(&transactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
