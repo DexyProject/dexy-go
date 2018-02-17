@@ -5,6 +5,7 @@ import (
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/DexyProject/dexy-go/consumers"
 )
 
 type TradeWatcher struct {
@@ -12,10 +13,10 @@ type TradeWatcher struct {
 	exchange  *exchange.ExchangeInterface
 	orderbook orderbook.OrderBook
 
-	in <-chan types.Transaction
+	in <-chan *consumers.TradedMessage
 }
 
-func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan types.Transaction) TradeWatcher {
+func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan *consumers.TradedMessage) TradeWatcher {
 	return TradeWatcher{
 		history: history,
 		exchange: exchange,
@@ -27,18 +28,19 @@ func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterfa
 func (tf *TradeWatcher) Watch() {
 
 	for {
-		tx := <-tf.in
-
-		// @todo we should be able to ack or reject, depending on if we fail somewhere
+		msg := <-tf.in
+		tx := msg.Transaction
 
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
+			msg.Reject()
 			// @todo handle
 			return
 		}
 
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
+			msg.Reject()
 			// @todo
 			return
 		}

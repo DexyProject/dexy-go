@@ -17,13 +17,13 @@ type TradedConsumer struct {
 	exchange *exchange.ExchangeInterface
 	conn     *ethclient.Client
 
-	out chan<- types.Transaction
+	out chan<- *TradedMessage
 
 	sub   event.Subscription
 	block Block
 }
 
-func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- types.Transaction) TradedConsumer {
+func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
 	return TradedConsumer{exchange: ex, conn: conn, out: out}
 }
 
@@ -57,7 +57,7 @@ func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded)
 			// @todo think about how we can handle this gracefully
 		}
 
-		tc.out <- types.NewTransaction(*trade, *time)
+		tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time))
 	}
 
 }
