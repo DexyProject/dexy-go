@@ -9,13 +9,13 @@ import (
 
 type TradeWatcher struct {
 	history   history.History
-	exchange  exchange.ExchangeInterface
+	exchange  *exchange.ExchangeInterface
 	orderbook orderbook.OrderBook
 
 	in <-chan types.Transaction
 }
 
-func NewTradeWatcher(history history.History, exchange exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan types.Transaction) TradeWatcher {
+func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <- chan types.Transaction) TradeWatcher {
 	return TradeWatcher{
 		history: history,
 		exchange: exchange,

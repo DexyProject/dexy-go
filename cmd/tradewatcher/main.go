@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
@@ -47,7 +48,10 @@ func main() {
 
 	channel := make(chan types.Transaction)
 
-	tf := watchers.NewTradeWatcher(hist, *ex, ob, channel)
+	tc := consumers.NewTradedConsumer(ex, conn, channel)
+	tf := watchers.NewTradeWatcher(hist, ex, ob, channel)
+
+	tc.StartConsuming()
 
 	tf.Watch()
 }
