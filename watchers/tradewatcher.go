@@ -47,10 +47,12 @@ func (tf *TradeWatcher) Watch() {
 
 		if tf.isOrderFilled(tx.OrderHash, filled) {
 			tf.orderbook.RemoveOrder(tx.OrderHash) // @todo check response
+			msg.Ack()
 			return
 		}
 
-		tf.orderbook.UpdateOrderFilledAmount(tx.OrderHash, filled)
+		tf.orderbook.UpdateOrderFilledAmount(tx.OrderHash, filled) // @todo check response
+		msg.Ack()
 	}
 }
 
