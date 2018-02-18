@@ -53,7 +53,7 @@ func main() {
 
 	err = tc.StartConsuming()
 	if err != nil {
-		log.Print(err)
+		log.Fatal(err)
 	}
 
 	tf.Watch()
