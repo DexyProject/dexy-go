@@ -25,7 +25,7 @@ type TradedConsumer struct {
 	stop chan struct{}
 
 	// @todo these 2 scenarios need handling
-	ack chan types.Bytes
+	ack    chan types.Bytes
 	reject chan types.Bytes
 
 	sub   event.Subscription
@@ -35,11 +35,11 @@ type TradedConsumer struct {
 func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
 	return TradedConsumer{
 		exchange: ex,
-		conn: conn,
-		out: out,
-		stop: make(chan struct{}),
-		ack: make(chan types.Bytes),
-		reject: make(chan types.Bytes),
+		conn:     conn,
+		out:      out,
+		stop:     make(chan struct{}),
+		ack:      make(chan types.Bytes),
+		reject:   make(chan types.Bytes),
 	}
 }
 

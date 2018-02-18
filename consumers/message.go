@@ -10,18 +10,18 @@ type Message interface {
 type TradedMessage struct {
 	Transaction types.Transaction
 
-	ack chan <-types.Bytes
-	reject chan <-types.Bytes
+	ack    chan<- types.Bytes
+	reject chan<- types.Bytes
 }
 
-func NewTradedMessage(tx types.Transaction, ack, reject chan <-types.Bytes) *TradedMessage {
+func NewTradedMessage(tx types.Transaction, ack, reject chan<- types.Bytes) *TradedMessage {
 	return &TradedMessage{Transaction: tx, ack: ack, reject: reject}
 }
 
 func (tm TradedMessage) Ack() {
-	tm.ack<- tm.Transaction.TransactionID
+	tm.ack <- tm.Transaction.TransactionID
 }
 
 func (tm TradedMessage) Reject() {
-	tm.reject<- tm.Transaction.TransactionID
+	tm.reject <- tm.Transaction.TransactionID
 }
