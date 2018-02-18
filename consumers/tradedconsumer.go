@@ -55,14 +55,12 @@ func (tc *TradedConsumer) StopConsuming() {
 
 func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded) {
 	for {
-
 		select {
 		case trade := <-sink:
 			tc.handleTrade(trade)
 		case <-tc.stop:
-			break
+			return
 		}
-
 	}
 
 }
