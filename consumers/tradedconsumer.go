@@ -1,6 +1,8 @@
 package consumers
 
 import (
+	"context"
+	"log"
 	"sync"
 
 	"github.com/DexyProject/dexy-go/exchange"
@@ -8,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/event"
-	"log"
 )
 
 type Block struct {
@@ -95,7 +96,7 @@ func (tc *TradedConsumer) blockTimestamp(hash common.Hash) (*types.Int, error) {
 	defer tc.Unlock()
 
 	if tc.block.Hash != hash {
-		h, err := tc.conn.HeaderByHash(nil, hash)
+		h, err := tc.conn.HeaderByHash(context.Background(), hash)
 		if err != nil {
 			return nil, err
 		}
