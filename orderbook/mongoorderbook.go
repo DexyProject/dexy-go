@@ -2,7 +2,6 @@ package orderbook
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
@@ -49,8 +48,6 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 	if err != nil {
 		return err
 	}
-
-	log.Printf("inserted new order %s", hash)
 
 	return nil
 }
