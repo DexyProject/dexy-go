@@ -100,6 +100,20 @@ func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit i
 	return orders
 }
 
+func (ob *MongoOrderBook) UpdateOrderFilledAmount(hash types.Hash, amount types.Int) error {
+	session := ob.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	err := c.Update(bson.M{"hash": hash}, bson.M{"$set": bson.M{"filled": amount}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	order := types.Order{}
 	session := ob.session.Copy()
