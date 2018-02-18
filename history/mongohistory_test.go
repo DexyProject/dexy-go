@@ -134,7 +134,7 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 func TestCalcOpenCloseIndex(t *testing.T) {
 	var openIndex, closeIndex uint
 	for _, tt := range historyData {
-		openIndex, closeIndex = CalcOpenCloseIndex(tt.Transactions)
+		openIndex, closeIndex = calcOpenCloseIndex(tt.Transactions)
 	}
 	if openIndex == 0 || closeIndex == 0 {
 		t.Errorf("could not calculate open and close indices")
@@ -145,9 +145,9 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 
 func TestCalcOpenClosePrice(t *testing.T) {
 	var openPrice, closePrice float64
-	prices := GetPrices(historyData[1].Transactions)
-	openIndex, closeIndex := CalcOpenCloseIndex(historyData[1].Transactions)
-	openPrice, closePrice = CalcOpenClosePrice(prices, openIndex, closeIndex)
+	prices := getPrices(historyData[1].Transactions)
+	openIndex, closeIndex := calcOpenCloseIndex(historyData[1].Transactions)
+	openPrice, closePrice = calcOpenClosePrice(prices, openIndex, closeIndex)
 	if openPrice == 0 || closePrice == 0 {
 		t.Errorf("could not calculate open and close prices")
 	}
@@ -156,7 +156,7 @@ func TestCalcOpenClosePrice(t *testing.T) {
 }
 
 func TestGetPrices(t *testing.T) {
-	err := GetPrices(historyData[1].Transactions)
+	err := getPrices(historyData[1].Transactions)
 	if err == nil {
 		t.Errorf("could not generate prices")
 	}
@@ -165,7 +165,7 @@ func TestGetPrices(t *testing.T) {
 }
 
 func TestGetPair(t *testing.T) {
-	newPair := GetPair(historyData[1].Transactions)
+	newPair := getPair(historyData[1].Transactions)
 	if (types.Pair{}) == newPair {
 		t.Errorf("could not generate pair from transactions")
 	}
@@ -174,8 +174,8 @@ func TestGetPair(t *testing.T) {
 }
 
 func TestCalcHighLow(t *testing.T) {
-	prices := GetPrices(historyData[1].Transactions)
-	high, low := CalcHighLow(prices)
+	prices := getPrices(historyData[1].Transactions)
+	high, low := calcHighLow(prices)
 	if high == 0 || low == 0 {
 		t.Errorf("could not retrieve high and low prices")
 	}
