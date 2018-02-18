@@ -26,7 +26,6 @@ type TradedConsumer struct {
 	out  chan<- *TradedMessage
 	stop chan struct{}
 
-	// @todo these 2 scenarios need handling
 	ack    chan types.Bytes
 	reject chan types.Bytes
 
