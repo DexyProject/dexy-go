@@ -43,6 +43,8 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 		return fmt.Errorf("signature could not be verified (hash %s)", hash)
 	}
 
+	order.Filled = types.NewInt(0)
+
 	err := c.Insert(order)
 	if err != nil {
 		return err

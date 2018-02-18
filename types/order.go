@@ -32,6 +32,7 @@ type Order struct {
 	User      Address `json:"user" bson:"user"`
 	Exchange  Address `json:"exchange" bson:"exchange"`
 	Signature EC      `json:"signature" bson:"signature"`
+	Filled    Int     `json:"filled,omitempty" bson:"filled"`
 }
 
 func (o *Order) OrderHash() Hash {
