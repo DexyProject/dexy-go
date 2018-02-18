@@ -19,22 +19,27 @@ type RPCBalanceValidator struct {
 	Balances balances.Balances
 }
 
-func (balanceSession *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
-	exchangeInterface, err := exchange.NewExchangeInterfaceCaller(o.Exchange.Address, balanceSession.Conn)
+func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
+	ex, err := exchange.NewExchangeInterfaceCaller(o.Exchange.Address, b.Conn)
 
 	if err != nil {
 		return false, fmt.Errorf("could not connect to contract session")
 	}
 
-	balance, err := exchangeInterface.BalanceOf(nil, o.Give.Token.Address, o.User.Address)
+	balance, err := ex.BalanceOf(nil, o.Give.Token.Address, o.User.Address)
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
 
-	onOrders, err := balanceSession.Balances.OnOrders(o.User, o.Give.Token)
+	if balance.String() == "0" {
+		return false, nil
+	}
+
+	onOrders, err := b.Balances.OnOrders(o.User, o.Give.Token)
 	if err != nil {
 		return false, fmt.Errorf("balances error: %v", err.Error())
 	}
 
-	return new(big.Int).Add(&onOrders.Int, balance).Cmp(&o.Give.Amount.Int) >= 0, nil
+	// (balances - onOrders) >= amount
+	return new(big.Int).Sub(balance, &onOrders.Int).Cmp(&o.Give.Amount.Int) >= 0, nil
 }
