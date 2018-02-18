@@ -109,30 +109,27 @@ var trans1 = []types.Transaction{
  }
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
-	//InsertData(historyData)
-
-	//response, err := (mgoConnection).AggregateTransactions(block)
-	//if response == nil {
-	//	t.Errorf("Aggregation returned empty")
-	//}
-	//if err != nil {
-	//	t.Errorf("Query not completed")
-	//}
-}
-
-func InsertData(tt []Transactions) error {
 	mgoConnection, err := NewMongoHistory(connection)
+	if err != nil {
+		t.Errorf("could not establish new connection")
+	}
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
 	c := mgoConnection.session.DB(DBName).C(FileName)
-	c.Insert(tt)
-
+	err = c.Insert(historyData)
 	if err != nil {
-		return fmt.Errorf("could not insert data")
+		t.Errorf("could not insert data")
 	}
-	return nil
+
+	ticks, err := mgoConnection.AggregateTransactions(block)
+	if err != nil {
+		t.Errorf("aggregate transactions returned nil")
+		fmt.Print(err)
+	}
+	fmt.Println(ticks)
 }
+
 
 func TestCalcOpenCloseIndex(t *testing.T) {
 	var openIndex, closeIndex uint
@@ -143,7 +140,7 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 		t.Errorf("could not calculate open and close indices")
 	}
 
-	fmt.Println(openIndex, closeIndex)
+	//fmt.Println(openIndex, closeIndex)
 }
 
 func TestCalcOpenClosePrice(t *testing.T) {
@@ -154,7 +151,7 @@ func TestCalcOpenClosePrice(t *testing.T) {
 	if openPrice == 0 || closePrice == 0 {
 		t.Errorf("could not calculate open and close prices")
 	}
-	fmt.Println("open:", openPrice, "close:", closePrice)
+	//fmt.Println("open:", openPrice, "close:", closePrice)
 
 }
 
@@ -164,7 +161,7 @@ func TestGetPrices(t *testing.T) {
 		t.Errorf("could not generate prices")
 	}
 
-	fmt.Println("transactionindex, price:", err)
+	//fmt.Println("transactionindex, price:", err)
 }
 
 func TestGetPair(t *testing.T) {
@@ -173,7 +170,7 @@ func TestGetPair(t *testing.T) {
 		t.Errorf("could not generate pair from transactions")
 	}
 
-	fmt.Println("pair:", newPair)
+	//fmt.Println("pair:", newPair)
 }
 
 func TestCalcHighLow(t *testing.T) {
@@ -183,7 +180,7 @@ func TestCalcHighLow(t *testing.T) {
 		t.Errorf("could not retrieve high and low prices")
 	}
 
-	fmt.Println("high:",high, "low:",low)
+	//fmt.Println("high:",high, "low:",low)
 }
 
 func BytesNew(bytes string) (types.Bytes) {
