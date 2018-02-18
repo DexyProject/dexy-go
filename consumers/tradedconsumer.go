@@ -1,6 +1,8 @@
 package consumers
 
 import (
+	"sync"
+
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,17 +16,20 @@ type Block struct {
 }
 
 type TradedConsumer struct {
+	sync.Mutex
+
 	exchange *exchange.ExchangeInterface
 	conn     *ethclient.Client
 
-	out chan<- *TradedMessage
+	out  chan<- *TradedMessage
+	stop chan struct{}
 
 	sub   event.Subscription
 	block Block
 }
 
 func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
-	return TradedConsumer{exchange: ex, conn: conn, out: out}
+	return TradedConsumer{exchange: ex, conn: conn, out: out, stop: make(chan struct{})}
 }
 
 func (tc *TradedConsumer) StartConsuming() error {
@@ -33,7 +38,7 @@ func (tc *TradedConsumer) StartConsuming() error {
 
 	sub, err := tc.exchange.WatchTraded(nil, sink, make([][32]byte, 0))
 	if err != nil {
-		return err // @todo better
+		return err
 	}
 
 	tc.sub = sub
@@ -45,24 +50,27 @@ func (tc *TradedConsumer) StartConsuming() error {
 
 func (tc *TradedConsumer) StopConsuming() {
 	tc.sub.Unsubscribe()
+	close(tc.stop)
 }
 
 func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded) {
 	for {
 
-		trade := <-sink
-
-		time, err := tc.blockTimestamp(trade.Raw.BlockHash)
-		if err != nil {
-			// @todo think about how we can handle this gracefully
+		select {
+		case trade := <-sink:
+			tc.handleTrade(trade)
+		case <-tc.stop:
+			break
 		}
 
-		tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time))
 	}
 
 }
 
 func (tc *TradedConsumer) blockTimestamp(hash common.Hash) (*types.Int, error) {
+	tc.Lock()
+	defer tc.Unlock()
+
 	if tc.block.Hash != hash {
 		h, err := tc.conn.HeaderByHash(nil, hash)
 		if err != nil {
@@ -74,4 +82,13 @@ func (tc *TradedConsumer) blockTimestamp(hash common.Hash) (*types.Int, error) {
 	}
 
 	return &tc.block.Timestamp, nil
+}
+
+func (tc *TradedConsumer) handleTrade(trade *exchange.ExchangeInterfaceTraded) {
+	time, err := tc.blockTimestamp(trade.Raw.BlockHash)
+	if err != nil {
+		// @todo think about how we can handle this gracefully
+	}
+
+	tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time))
 }
