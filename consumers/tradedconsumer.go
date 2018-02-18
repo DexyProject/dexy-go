@@ -73,7 +73,6 @@ func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded)
 			return
 		}
 	}
-
 }
 
 func (tc *TradedConsumer) blockTimestamp(hash common.Hash) (*types.Int, error) {
