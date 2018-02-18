@@ -35,7 +35,6 @@ func (tf *TradeWatcher) Watch() {
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
 			msg.Reject()
-			// @todo handle
 			return
 		}
 

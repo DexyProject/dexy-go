@@ -24,12 +24,23 @@ type TradedConsumer struct {
 	out  chan<- *TradedMessage
 	stop chan struct{}
 
+	// @todo these 2 scenarios need handling
+	ack chan types.Bytes
+	reject chan types.Bytes
+
 	sub   event.Subscription
 	block Block
 }
 
 func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
-	return TradedConsumer{exchange: ex, conn: conn, out: out, stop: make(chan struct{})}
+	return TradedConsumer{
+		exchange: ex,
+		conn: conn,
+		out: out,
+		stop: make(chan struct{}),
+		ack: make(chan types.Bytes),
+		reject: make(chan types.Bytes),
+	}
 }
 
 func (tc *TradedConsumer) StartConsuming() error {
@@ -88,5 +99,5 @@ func (tc *TradedConsumer) handleTrade(trade *exchange.ExchangeInterfaceTraded) {
 		// @todo think about how we can handle this gracefully
 	}
 
-	tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time))
+	tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time), tc.ack, tc.reject)
 }
