@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/event"
+	"log"
 )
 
 type Block struct {
@@ -55,6 +56,7 @@ func (tc *TradedConsumer) StartConsuming() error {
 	tc.sub = sub
 
 	go tc.consume(sink)
+	go tc.logProcess()
 
 	return nil
 }
@@ -69,6 +71,19 @@ func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded)
 		select {
 		case trade := <-sink:
 			tc.handleTrade(trade)
+		case <-tc.stop:
+			return
+		}
+	}
+}
+
+func (tc *TradedConsumer) logProcess() {
+	for {
+		select {
+		case tx := <-tc.reject:
+			log.Printf("rejected tx: %s", tx)
+		case tx := <-tc.ack:
+			log.Printf("ack tx: %s", tx)
 		case <-tc.stop:
 			return
 		}
