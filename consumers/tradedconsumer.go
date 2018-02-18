@@ -112,6 +112,7 @@ func (tc *TradedConsumer) handleTrade(trade *exchange.ExchangeInterfaceTraded) {
 	time, err := tc.blockTimestamp(trade.Raw.BlockHash)
 	if err != nil {
 		// @todo think about how we can handle this gracefully
+		panic(err)
 	}
 
 	tc.out <- NewTradedMessage(types.NewTransaction(*trade, *time), tc.ack, tc.reject)
