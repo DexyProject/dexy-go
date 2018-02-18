@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/DexyProject/dexy-go/balances"
 	"github.com/DexyProject/dexy-go/endpoints"
@@ -26,6 +27,11 @@ func main() {
 	mongo := flag.String("mongo", "", "mongodb connection string")
 
 	flag.Parse()
+
+	if *ethNode == "" || *mongo == "" {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
 	setupOrderBookEndpoints(*ethNode, *mongo, r)
 	setupHistoryEndpoints(*mongo, r)
@@ -61,7 +67,7 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 }
 
 func setupOrderBookEndpoints(ethereum string, mongo string, r *mux.Router) {
-	ob, err := orderbook.NewMongoOrderBook(ethereum)
+	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
