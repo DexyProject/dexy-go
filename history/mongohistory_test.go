@@ -3,6 +3,7 @@ package history
 import (
 	"testing"
 	"github.com/DexyProject/dexy-go/types"
+	"fmt"
 )
 
 const (
@@ -10,13 +11,14 @@ const (
 	block = 4862998
 )
 
-var transactions []struct {
-	Transactions []types.Transaction `json:"transactions" bson:"transactions"`
+type Transactions struct {
+	Transactions   []types.Transaction `json:"transactions" bson:"transactions"`
 }
 
 var trans1 = []types.Transaction{
 	{
 		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233752),
@@ -28,6 +30,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x89012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 2,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233753),
@@ -39,6 +42,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x98012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 3,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233754),
@@ -50,6 +54,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x98012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 4,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233755),
@@ -61,6 +66,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x98012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 5,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233756),
@@ -72,6 +78,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x98012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 6,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862998,
 		Timestamp: types.NewInt(1515233757),
@@ -83,6 +90,7 @@ var trans1 = []types.Transaction{
 
 	{
 		TransactionID: BytesNew("0x98012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 7,
 		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber: 4862999,
 		Timestamp: types.NewInt(1515233751),
@@ -95,10 +103,13 @@ var trans1 = []types.Transaction{
 
  }
 
-
+ var historyData = []Transactions {
+ 	{trans1},
+ 	{trans1},
+ }
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
-	transactions = append(transactions, )
+
 	mgoConnection, err := NewMongoHistory(connection)
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
@@ -115,8 +126,55 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	}
 }
 
+func TestCalcOpenCloseIndex(t *testing.T) {
+	var openIndex, closeIndex uint
+	for _, tt := range historyData {
+		openIndex, closeIndex = CalcOpenCloseIndex(tt.Transactions)
+	}
+	if openIndex, closeIndex == 0 {
+		t.Errorf("could not calculate open and close indices")
+	}
+
+	fmt.Println(openIndex, closeIndex)
+}
+
+func TestCalcOpenClosePrice(t *testing.T) {
+	var openPrice, closePrice float64
+	prices := GetPrices(historyData[1].Transactions)
+	openIndex, closeIndex := CalcOpenCloseIndex(historyData[1].Transactions)
+	openPrice, closePrice = CalcOpenClosePrice(prices, openIndex, closeIndex)
+	if openPrice, closePrice == 0 {
+		t.Errorf("could not calculate open and close prices")
+	}
+
+
+
+}
+
+func TestGetPrices(t *testing.T) {
+	err := GetPrices(historyData[1].Transactions)
+	if err == nil {
+		t.Errorf("could not generate prices")
+	}
+
+	fmt.Println(err)
+}
+
+func TestGetPair(t *testing.T) {
+	newPair := GetPair(historyData[1].Transactions)
+	if (types.Pair{}) == newPair {
+		t.Errorf("could not generate pair from transactions")
+	}
+
+	fmt.Println(newPair)
+}
+
+func TestCalcHighLow(t *testing.T) {
+
+}
+
 func BytesNew(bytes string) (types.Bytes) {
-b := types.Bytes{}
-b.UnmarshalText([]byte(bytes))
-return b
+	b := types.Bytes{}
+	b.UnmarshalText([]byte(bytes))
+	return b
 }

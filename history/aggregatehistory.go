@@ -66,12 +66,12 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 	for _, tt := range transactions {
-		pair := getPair(tt.Transactions)
-		volume := calcVolume(tt.Transactions)
-		prices := getPrices(tt.Transactions)
+		pair := GetPair(tt.Transactions)
+		volume := CalcVolume(tt.Transactions)
+		prices := GetPrices(tt.Transactions)
 		openIndex, closeIndex := CalcOpenCloseIndex(tt.Transactions)
-		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
-		high, low := calcHighLow(prices)
+		openPrice, closePrice := CalcOpenClosePrice(prices, openIndex, closeIndex)
+		high, low := CalcHighLow(prices)
 
 		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
 		Close: closePrice, High: high, Low: low})
@@ -80,7 +80,7 @@ func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, e
 	return ticks, nil
 }
 
-func calcVolume(transactions []types.Transaction) *big.Int {
+func CalcVolume(transactions []types.Transaction) *big.Int {
 	volume := new(big.Int)
 
 	for _, tt := range transactions {
@@ -95,7 +95,7 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 	return volume
 }
 
-func calcHighLow(prices []types.Price) (float64, float64) {
+func CalcHighLow(prices []types.Price) (float64, float64) {
 	high, low := prices[0].Price, prices[0].Price
 	for _, p := range prices {
 		if high > p.Price {
@@ -109,7 +109,7 @@ func calcHighLow(prices []types.Price) (float64, float64) {
 	return high, low
 }
 
-func getPrices(transactions []types.Transaction) []types.Price {
+func GetPrices(transactions []types.Transaction) []types.Price {
 	var prices []types.Price
 	for _, tt := range transactions {
 		newPrice, _ := tt.Get.CalcPrice(tt.Give, types.HexToAddress(types.ETH_ADDRESS))
@@ -134,7 +134,7 @@ func CalcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	return openIndex, closeIndex
 }
 
-func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) { //temporary Calculation for open and close until index format is created
+func CalcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) { //temporary Calculation for open and close until index format is created
 	var openPrice, closePrice float64
 	for _, tt := range prices {
 		if tt.TransactionIndex == OpenIndex {
@@ -147,7 +147,7 @@ func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float
 	return openPrice, closePrice
 }
 
-func getPair(transactions []types.Transaction) types.Pair {
+func GetPair(transactions []types.Transaction) types.Pair {
 	var newPair types.Pair
 	if transactions[1].Give.Token == types.HexToAddress(types.ETH_ADDRESS) {
 		newPair = types.Pair{transactions[1].Get.Token, types.HexToAddress(types.ETH_ADDRESS)}
