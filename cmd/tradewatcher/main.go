@@ -51,7 +51,10 @@ func main() {
 	tc := consumers.NewTradedConsumer(ex, conn, channel)
 	tf := watchers.NewTradeWatcher(hist, ex, ob, channel)
 
-	tc.StartConsuming()
+	err = tc.StartConsuming()
+	if err != nil {
+		log.Print(err)
+	}
 
 	tf.Watch()
 }
