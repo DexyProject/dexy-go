@@ -98,10 +98,10 @@ func CalcVolume(transactions []types.Transaction) *big.Int {
 func CalcHighLow(prices []types.Price) (float64, float64) {
 	high, low := prices[0].Price, prices[0].Price
 	for _, p := range prices {
-		if high > p.Price {
+		if high < p.Price {
 			high = p.Price
 		}
-		if low < p.Price {
+		if low > p.Price {
 			low = p.Price
 		}
 	}
@@ -123,10 +123,10 @@ func GetPrices(transactions []types.Transaction) []types.Price {
 func CalcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
 	for _, tt := range transactions {
-		if openIndex < tt.TransactionIndex {
+		if openIndex > tt.TransactionIndex {
 			openIndex = tt.TransactionIndex
 		}
-		if closeIndex > tt.TransactionIndex {
+		if closeIndex < tt.TransactionIndex {
 			closeIndex = tt.TransactionIndex}
 	}
 
