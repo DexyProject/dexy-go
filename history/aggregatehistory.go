@@ -134,7 +134,7 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	return openIndex, closeIndex
 }
 
-func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) { //temporary Calculation for open and close until index format is created
+func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for _, tt := range prices {
 		if tt.TransactionIndex == OpenIndex {
