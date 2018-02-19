@@ -19,7 +19,6 @@ func NewCancelledWatcher(book orderbook.OrderBook, in <-chan *consumers.Cancelle
 	}
 }
 
-
 func (cw *CancelledWatcher) Watch() {
 	for {
 		msg := <- cw.in
