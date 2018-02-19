@@ -9,8 +9,16 @@ import (
 type CancelledWatcher struct {
 	orderbook orderbook.OrderBook
 
-	in <-chan *consumers.Message
+	in <-chan *consumers.CancelledMessage
 }
+
+func NewCancelledWatcher(book orderbook.OrderBook, in <-chan *consumers.CancelledMessage) CancelledWatcher {
+	return CancelledWatcher{
+		orderbook: book,
+		in:        in,
+	}
+}
+
 
 func (cw *CancelledWatcher) Watch() {
 	for {
