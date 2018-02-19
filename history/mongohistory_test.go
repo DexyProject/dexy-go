@@ -123,62 +123,72 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
 	sortTimestamp := bson.M{"$sort": bson.M{"transactions.timestamp": -1}}
 	groupGetTokens := bson.M{
-		"$group": bson.M{
-			"filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-				},
+		"$project": bson.M{
+			"transactions": bson.M{
+				"$filter": bson.M{
+					"input": "$transactions",
+					"as":    "tt",
+					"cond": bson.M{"$and": []interface{}{
+						bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
+						bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+					},
+					},
 				},
 			},
 		},
 	}
 	groupGiveTokens := bson.M{
-		"$group": bson.M{
-			"filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
-				},
+		"$project": bson.M{
+			"transactions": bson.M{
+				"$filter": bson.M{
+					"input": "$transactions",
+					"as":    "tt",
+					"cond": bson.M{"$and": []interface{}{
+						bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
+						bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
+					},
+					},
 				},
 			},
 		},
 	}
 	groupTokens := bson.M{
-		"$group": bson.M{
-			"filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-				},
+		"$project": bson.M{
+			"transactions": bson.M{
+				"$filter": bson.M{
+					"input": "$transactions",
+					"as":    "tt",
+					"cond": bson.M{"$and": []interface{}{
+						bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
+						bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+					},
+					},
 				},
 			},
 		},
 	}
+
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
 		t.Errorf("could not match data")
 	} else {
 		fmt.Println(matchTicks)
 	}
+
 	err = c.Pipe([]bson.M{sortTimestamp}).All(&sortTicks)
 	if err != nil {
 		t.Errorf("could not sort by timestamp")
 	} else {
 		fmt.Println(sortTimestamp)
 	}
-	mgoError := c.Pipe([]bson.M{groupGetTokens, groupGiveTokens, groupTokens}).All(&filterTicks).Error()
-	if mgoError != "" {
-		t.Errorf(mgoError)
+
+	err = c.Pipe([]bson.M{groupGetTokens, groupGiveTokens, groupTokens}).All(&filterTicks)
+	if err != nil {
+		t.Errorf("could not group tokens")
 	} else {
 		fmt.Println(filterTicks)
 	}
+
 }
 
 
