@@ -7,14 +7,15 @@ import (
 	"math/big"
 )
 
-func (history *MongoHistory) AggregateTransactions(block int64) ([]types.Tick, error) {
+type Transactions struct {
+	Transactions   []types.Transaction `json:"transactions" bson:"transactions"`
+}
+
+func (history *MongoHistory) AggregateTransactions(block int64, transactions []Transactions) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	var transactions []struct {
-		Transactions []types.Transaction `json:"transactions" bson:"transactions"`
-	}
 
 	var ticks []types.Tick
 

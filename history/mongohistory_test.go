@@ -4,6 +4,7 @@ import (
 	"testing"
 	"github.com/DexyProject/dexy-go/types"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -11,9 +12,6 @@ const (
 	block = 4862998
 )
 
-type Transactions struct {
-	Transactions   []types.Transaction `json:"transactions" bson:"transactions"`
-}
 
 var trans1 = []types.Transaction{
 	{
@@ -116,18 +114,71 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
-	c := mgoConnection.session.DB(DBName).C(FileName)
-	err = c.Insert(historyData)
-	if err != nil {
-		t.Errorf("could not insert data")
-	}
+	matchTicks := []bson.M{}
+	sortTicks := []bson.M{}
+	filterTicks := []bson.M{}
 
-	ticks, err := mgoConnection.AggregateTransactions(block)
-	if err != nil {
-		t.Errorf("aggregate transactions returned nil")
-		fmt.Print(err)
+	c := mgoConnection.session.DB(DBName).C(FileName)
+	// Test mgo queries
+	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
+	sortTimestamp := bson.M{"$sort": bson.M{"transactions.timestamp": -1}}
+	groupGetTokens := bson.M{
+		"$group": bson.M{
+			"filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$and": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
 	}
-	fmt.Println(ticks)
+	groupGiveTokens := bson.M{
+		"$group": bson.M{
+			"filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$and": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
+	}
+	groupTokens := bson.M{
+		"$group": bson.M{
+			"filter": bson.M{
+				"input": "$transactions",
+				"as":    "tt",
+				"cond": bson.M{"$and": []interface{}{
+					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
+					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
+				},
+				},
+			},
+		},
+	}
+	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
+	if err != nil {
+		t.Errorf("could not match data")
+	} else {
+		fmt.Println(matchTicks)
+	}
+	err = c.Pipe([]bson.M{sortTimestamp}).All(&sortTicks)
+	if err != nil {
+		t.Errorf("could not sort by timestamp")
+	} else {
+		fmt.Println(sortTimestamp)
+	}
+	mgoError := c.Pipe([]bson.M{groupGetTokens, groupGiveTokens, groupTokens}).All(&filterTicks).Error()
+	if mgoError != "" {
+		t.Errorf(mgoError)
+	} else {
+		fmt.Println(filterTicks)
+	}
 }
 
 
