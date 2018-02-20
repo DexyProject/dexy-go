@@ -31,10 +31,15 @@ func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
 
+	if balance.String() == "0" {
+		return false, nil
+	}
+
 	onOrders, err := b.Balances.OnOrders(o.User, o.Give.Token)
 	if err != nil {
 		return false, fmt.Errorf("balances error: %v", err.Error())
 	}
 
-	return new(big.Int).Add(&onOrders.Int, balance).Cmp(&o.Give.Amount.Int) >= 0, nil
+	// (balances - onOrders) >= amount
+	return new(big.Int).Sub(balance, &onOrders.Int).Cmp(&o.Give.Amount.Int) >= 0, nil
 }
