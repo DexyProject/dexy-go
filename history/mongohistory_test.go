@@ -106,6 +106,7 @@ var trans1 = []types.Transaction{
  	{trans1},
  }
 
+
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection, err := NewMongoHistory(connection)
 	if err != nil {
@@ -114,59 +115,14 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
-	matchTicks := []bson.M{}
+	var matchTicks []types.Transaction
 	sortTicks := []bson.M{}
-	filterTicks := []bson.M{}
 
 	c := mgoConnection.session.DB(DBName).C(FileName)
 	// Test mgo queries
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
 	sortTimestamp := bson.M{"$sort": bson.M{"transactions.timestamp": -1}}
-	groupGetTokens := bson.M{
-		"$project": bson.M{
-			"transactions": bson.M{
-				"$filter": bson.M{
-					"input": "$transactions",
-					"as":    "tt",
-					"cond": bson.M{"$and": []interface{}{
-						bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
-						bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-					},
-					},
-				},
-			},
-		},
-	}
-	groupGiveTokens := bson.M{
-		"$project": bson.M{
-			"transactions": bson.M{
-				"$filter": bson.M{
-					"input": "$transactions",
-					"as":    "tt",
-					"cond": bson.M{"$and": []interface{}{
-						bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
-						bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
-					},
-					},
-				},
-			},
-		},
-	}
-	groupTokens := bson.M{
-		"$project": bson.M{
-			"transactions": bson.M{
-				"$filter": bson.M{
-					"input": "$transactions",
-					"as":    "tt",
-					"cond": bson.M{"$and": []interface{}{
-						bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
-						bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-					},
-					},
-				},
-			},
-		},
-	}
+
 
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
@@ -181,14 +137,6 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	} else {
 		fmt.Println(sortTimestamp)
 	}
-
-	err = c.Pipe([]bson.M{groupGetTokens, groupGiveTokens, groupTokens}).All(&filterTicks)
-	if err != nil {
-		t.Errorf("could not group tokens")
-	} else {
-		fmt.Println(filterTicks)
-	}
-
 }
 
 
@@ -200,8 +148,6 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 	if openIndex == 0 || closeIndex == 0 {
 		t.Errorf("could not calculate open and close indices")
 	}
-
-	//fmt.Println(openIndex, closeIndex)
 }
 
 func TestCalcOpenClosePrice(t *testing.T) {
@@ -212,8 +158,6 @@ func TestCalcOpenClosePrice(t *testing.T) {
 	if openPrice == 0 || closePrice == 0 {
 		t.Errorf("could not calculate open and close prices")
 	}
-	//fmt.Println("open:", openPrice, "close:", closePrice)
-
 }
 
 func TestGetPrices(t *testing.T) {
@@ -221,8 +165,6 @@ func TestGetPrices(t *testing.T) {
 	if err == nil {
 		t.Errorf("could not generate prices")
 	}
-
-	//fmt.Println("transactionindex, price:", err)
 }
 
 func TestGetPair(t *testing.T) {
@@ -230,8 +172,6 @@ func TestGetPair(t *testing.T) {
 	if (types.Pair{}) == newPair {
 		t.Errorf("could not generate pair from transactions")
 	}
-
-	//fmt.Println("pair:", newPair)
 }
 
 func TestCalcHighLow(t *testing.T) {
@@ -240,12 +180,17 @@ func TestCalcHighLow(t *testing.T) {
 	if high == 0 || low == 0 {
 		t.Errorf("could not retrieve high and low prices")
 	}
-
-	//fmt.Println("high:",high, "low:",low)
 }
 
 func BytesNew(bytes string) (types.Bytes) {
 	b := types.Bytes{}
 	b.UnmarshalText([]byte(bytes))
 	return b
+}
+
+func TestGroupTokens(t *testing.T) {
+	groupTokens(historyData[1].Transactions)
+	if historyData[1].Transactions == nil {
+		t.Error("could not group tokens")
+	}
 }

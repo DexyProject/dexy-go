@@ -20,53 +20,14 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []T
 	var ticks []types.Tick
 
 	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
-	sortTimestamp := bson.M{"$sort": bson.M{"$transactions.timestamp": -1}}
-	groupGetTokens := bson.M{
-		"$group": bson.M{
-			"$filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.get.token", "$$tt.get.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-				},
-				},
-			},
-		},
-	}
-	groupGiveTokens := bson.M{
-		"$group": bson.M{
-			"$filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.give.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.give.token", types.ETH_ADDRESS}},
-				},
-				},
-			},
-		},
-	}
-	groupTokens := bson.M{
-		"$group": bson.M{
-			"$filter": bson.M{
-				"input": "$transactions",
-				"as":    "tt",
-				"cond": bson.M{"$and": []interface{}{
-					bson.M{"$eq": []interface{}{"$$tt.give.token", "$$tt.get.token"}},
-					bson.M{"$ne": []interface{}{"$$tt.get.token", types.ETH_ADDRESS}},
-				},
-				},
-			},
-		},
-	}
 
-	err := c.Pipe([]bson.M{matchBlock, sortTimestamp, groupGetTokens, groupGiveTokens, groupTokens}).All(&transactions)
+	err := c.Pipe([]bson.M{matchBlock}).All(&transactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 	for _, tt := range transactions {
+		groupTokens(tt.Transactions)
 		pair := getPair(tt.Transactions)
 		volume := calcVolume(tt.Transactions)
 		prices := getPrices(tt.Transactions)
@@ -83,7 +44,6 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []T
 
 func calcVolume(transactions []types.Transaction) *big.Int {
 	volume := new(big.Int)
-
 	for _, tt := range transactions {
 		if tt.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
 			volume.Add(volume, &tt.Give.Amount.Int)
@@ -131,7 +91,6 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 			closeIndex = tt.TransactionIndex}
 	}
 
-
 	return openIndex, closeIndex
 }
 
@@ -155,4 +114,27 @@ func getPair(transactions []types.Transaction) types.Pair {
 	}
 	newPair = types.Pair{types.HexToAddress(types.ETH_ADDRESS), transactions[1].Get.Token}
 	return newPair
+}
+
+func groupTokens(transactions []types.Transaction) {
+	// x == x, x!=base, x==y, and x!= base, y=y and y!=base
+	for _, t := range transactions {
+		for i, x := range transactions {
+			if t.Give.Token == x.Give.Token && t.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
+				copy(transactions[i:], transactions[i+1:])
+				transactions[len(transactions)-1] = types.Transaction{}
+				transactions = transactions[:len(transactions)-1]
+			}
+			if t.Give.Token == x.Get.Token && t.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
+				copy(transactions[i:], transactions[i+1:])
+				transactions[len(transactions)-1] = types.Transaction{}
+				transactions = transactions[:len(transactions)-1]
+			}
+			if t.Get.Token == x.Get.Token && t.Get.Token != types.HexToAddress(types.ETH_ADDRESS) {
+				copy(transactions[i:], transactions[i+1:])
+				transactions[len(transactions)-1] = types.Transaction{}
+				transactions = transactions[:len(transactions)-1]
+			}
+		}
+	}
 }
