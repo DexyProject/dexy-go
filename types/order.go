@@ -50,7 +50,7 @@ func (o *Order) generateHash() {
 	hash.Write(o.Get.Amount.U256()[:])
 	hash.Write(o.Give.Token.Address[:])
 	hash.Write(o.Give.Amount.U256()[:])
-	hash.Write(NewInt(o.Expires.UnixMilli()).U256()[:])
+	hash.Write(NewInt(o.Expires.Unix()).U256()[:])
 	hash.Write(NewInt(o.Nonce).U256()[:])
 	hash.Write(o.User.Address[:])
 	hash.Write(o.Exchange.Address[:])
