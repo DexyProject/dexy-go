@@ -15,10 +15,7 @@ func UnixMilli(millie int64) Timestamp {
 }
 
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	ts := t.Time.Unix()
-	stamp := fmt.Sprint(ts)
-
-	return []byte(stamp), nil
+	return []byte(fmt.Sprint(t.UnixMilli())), nil
 }
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
