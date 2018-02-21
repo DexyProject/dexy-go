@@ -23,16 +23,16 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      Hash    `json:"hash,omitempty" bson:"_id"`
-	Price     string  `json:"price,omitempty" bson:"price"`
-	Give      Trade   `json:"give" bson:"give"`
-	Get       Trade   `json:"get" bson:"get"`
-	Expires   int64   `json:"expires" bson:"expires"`
-	Nonce     int64   `json:"nonce" bson:"nonce"`
-	User      Address `json:"user" bson:"user"`
-	Exchange  Address `json:"exchange" bson:"exchange"`
-	Signature EC      `json:"signature" bson:"signature"`
-	Filled    Int     `json:"filled,omitempty" bson:"filled"`
+	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
+	Price     string    `json:"price,omitempty" bson:"price"`
+	Give      Trade     `json:"give" bson:"give"`
+	Get       Trade     `json:"get" bson:"get"`
+	Expires   Timestamp `json:"expires" bson:"expires"`
+	Nonce     int64     `json:"nonce" bson:"nonce"`
+	User      Address   `json:"user" bson:"user"`
+	Exchange  Address   `json:"exchange" bson:"exchange"`
+	Signature EC        `json:"signature" bson:"signature"`
+	Filled    Int       `json:"filled,omitempty" bson:"filled"`
 }
 
 func (o *Order) OrderHash() Hash {
@@ -50,7 +50,7 @@ func (o *Order) generateHash() {
 	hash.Write(o.Get.Amount.U256()[:])
 	hash.Write(o.Give.Token.Address[:])
 	hash.Write(o.Give.Amount.U256()[:])
-	hash.Write(NewInt(o.Expires).U256()[:])
+	hash.Write(NewInt(o.Expires.UnixMilli()).U256()[:])
 	hash.Write(NewInt(o.Nonce).U256()[:])
 	hash.Write(o.User.Address[:])
 	hash.Write(o.Exchange.Address[:])
@@ -71,7 +71,7 @@ func (o *Order) Validate() error {
 		return fmt.Errorf("token addresses are identical")
 	}
 
-	if o.Expires <= time.Now().Unix() {
+	if !o.Expires.After(time.Now()) {
 		return fmt.Errorf("invalid expires time: %v", o.Expires)
 	}
 
