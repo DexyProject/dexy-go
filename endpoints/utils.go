@@ -1,12 +1,12 @@
 package endpoints
 
 import (
+	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
-	"net/http"
-	"fmt"
 )
 
 func GetLimit(limit string) int {
