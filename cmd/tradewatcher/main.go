@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/exchange"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
@@ -44,18 +45,18 @@ func main() {
 	}
 
 	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
+  
+	channel := make(chan *consumers.TradedMessage)
 
-	tf := watchers.TradeWatcher{
-		History:   hist,
-		Exchange:  *ex,
-		Orderbook: ob,
-		Ethereum:  conn,
-	}
+	tc := consumers.NewTradedConsumer(ex, conn, channel)
+	tf := watchers.NewTradeWatcher(hist, ex, ob, channel)
 
-	err = tf.Watch()
+	err = tc.StartConsuming()
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
+
+	tf.Watch()
 }
 
 func deferOnPanic() {

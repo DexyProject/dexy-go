@@ -53,3 +53,17 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 
 	return transactions
 }
+
+func (history *MongoHistory) InsertTransaction(transaction types.Transaction) error {
+	session := history.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	err := c.Insert(transaction)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
