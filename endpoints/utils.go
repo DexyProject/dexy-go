@@ -5,6 +5,8 @@ import (
 
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
+	"net/http"
+	"fmt"
 )
 
 func GetLimit(limit string) int {
@@ -26,4 +28,10 @@ func GetUser(user string) *types.Address {
 
 	addr := types.HexToAddress(user)
 	return &addr
+}
+
+func returnError(w http.ResponseWriter, err string, code int) {
+	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(fmt.Sprintf("{\"error\": \"%v\"}", err)))
 }
