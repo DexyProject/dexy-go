@@ -2,43 +2,38 @@ package history
 
 import (
 	"github.com/DexyProject/dexy-go/types"
+	"math/big"
 	"gopkg.in/mgo.v2/bson"
 	"fmt"
-	"math/big"
 )
 
-type Transactions struct {
-	Transactions   []types.Transaction `json:"transactions" bson:"transactions"`
-}
-
-func (history *MongoHistory) AggregateTransactions(block int64, transactions []Transactions) ([]types.Tick, error) {
+func (history *MongoHistory) AggregateTransactions(block int64, transactions []types.Transaction) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
 	var ticks []types.Tick
+	var matchedTransactions []types.Transaction
 
 	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
 
-	err := c.Pipe([]bson.M{matchBlock}).All(&transactions)
+	err := c.Pipe([]bson.M{matchBlock}).All(&matchedTransactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
-	for _, tt := range transactions {
-		groupTokens(tt.Transactions)
-		pair := getPair(tt.Transactions)
-		volume := calcVolume(tt.Transactions)
-		prices := getPrices(tt.Transactions)
-		openIndex, closeIndex := calcOpenCloseIndex(tt.Transactions)
-		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
-		high, low := calcHighLow(prices)
 
-		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
+	groupTokens(matchedTransactions)
+	pair := getPair(matchedTransactions)
+	volume := calcVolume(matchedTransactions)
+	prices := getPrices(matchedTransactions)
+	openIndex, closeIndex := calcOpenCloseIndex(matchedTransactions)
+	openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
+	high, low := calcHighLow(prices)
+
+	ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
 		Close: closePrice, High: high, Low: low})
-	}
-
 	return ticks, nil
 }
 
@@ -116,25 +111,15 @@ func getPair(transactions []types.Transaction) types.Pair {
 	return newPair
 }
 
-func groupTokens(transactions []types.Transaction) {
-	// x == x, x!=base, x==y, and x!= base, y=y and y!=base
+func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction{
+	var m map[types.Address][]types.Transaction
+	m = make(map[types.Address][]types.Transaction)
 	for _, t := range transactions {
-		for i, x := range transactions {
-			if t.Give.Token == x.Give.Token && t.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
-				copy(transactions[i:], transactions[i+1:])
-				transactions[len(transactions)-1] = types.Transaction{}
-				transactions = transactions[:len(transactions)-1]
-			}
-			if t.Give.Token == x.Get.Token && t.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
-				copy(transactions[i:], transactions[i+1:])
-				transactions[len(transactions)-1] = types.Transaction{}
-				transactions = transactions[:len(transactions)-1]
-			}
-			if t.Get.Token == x.Get.Token && t.Get.Token != types.HexToAddress(types.ETH_ADDRESS) {
-				copy(transactions[i:], transactions[i+1:])
-				transactions[len(transactions)-1] = types.Transaction{}
-				transactions = transactions[:len(transactions)-1]
-			}
+		if t.Get.Token == types.HexToAddress(types.ETH_ADDRESS) {
+			m[t.Give.Token] = append(m[t.Give.Token], t)
+		} else {
+			m[t.Get.Token] = append(m[t.Get.Token], t)
 		}
 	}
+	return m
 }

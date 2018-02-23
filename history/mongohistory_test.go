@@ -5,6 +5,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
+	"encoding/json"
 )
 
 const (
@@ -101,11 +102,6 @@ var trans1 = []types.Transaction{
 
  }
 
- var historyData = []Transactions {
- 	{trans1},
- 	{trans1},
- }
-
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection, err := NewMongoHistory(connection)
@@ -137,14 +133,21 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	} else {
 		fmt.Println(sortTimestamp)
 	}
+	ticks, err := mgoConnection.AggregateTransactions(block, trans1)
+	if ticks == nil {
+		t.Errorf("could not aggregate transactions")
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
+	b, err := json.Marshal(ticks)
+	fmt.Println(string(b))
 }
 
 
 func TestCalcOpenCloseIndex(t *testing.T) {
 	var openIndex, closeIndex uint
-	for _, tt := range historyData {
-		openIndex, closeIndex = calcOpenCloseIndex(tt.Transactions)
-	}
+	openIndex, closeIndex = calcOpenCloseIndex(trans1)
 	if openIndex == 0 || closeIndex == 0 {
 		t.Errorf("could not calculate open and close indices")
 	}
@@ -152,8 +155,8 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 
 func TestCalcOpenClosePrice(t *testing.T) {
 	var openPrice, closePrice float64
-	prices := getPrices(historyData[1].Transactions)
-	openIndex, closeIndex := calcOpenCloseIndex(historyData[1].Transactions)
+	prices := getPrices(trans1)
+	openIndex, closeIndex := calcOpenCloseIndex(trans1)
 	openPrice, closePrice = calcOpenClosePrice(prices, openIndex, closeIndex)
 	if openPrice == 0 || closePrice == 0 {
 		t.Errorf("could not calculate open and close prices")
@@ -161,21 +164,21 @@ func TestCalcOpenClosePrice(t *testing.T) {
 }
 
 func TestGetPrices(t *testing.T) {
-	err := getPrices(historyData[1].Transactions)
+	err := getPrices(trans1)
 	if err == nil {
 		t.Errorf("could not generate prices")
 	}
 }
 
 func TestGetPair(t *testing.T) {
-	newPair := getPair(historyData[1].Transactions)
+	newPair := getPair(trans1)
 	if (types.Pair{}) == newPair {
 		t.Errorf("could not generate pair from transactions")
 	}
 }
 
 func TestCalcHighLow(t *testing.T) {
-	prices := getPrices(historyData[1].Transactions)
+	prices := getPrices(trans1)
 	high, low := calcHighLow(prices)
 	if high == 0 || low == 0 {
 		t.Errorf("could not retrieve high and low prices")
@@ -188,9 +191,3 @@ func BytesNew(bytes string) (types.Bytes) {
 	return b
 }
 
-func TestGroupTokens(t *testing.T) {
-	groupTokens(historyData[1].Transactions)
-	if historyData[1].Transactions == nil {
-		t.Error("could not group tokens")
-	}
-}

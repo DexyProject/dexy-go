@@ -31,4 +31,4 @@ func NewTransaction(trade exchange.ExchangeInterfaceTraded, timestamp Int) Trans
 			Token:  Address{Address: trade.TokenGet},
 			Amount: Int{Int: *trade.AmountGet},
 		},
-}
+}}
