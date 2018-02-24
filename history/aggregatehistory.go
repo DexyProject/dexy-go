@@ -34,7 +34,8 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []t
 		high, low := calcHighLow(prices)
 
 		ticks = append(ticks,
-			types.Tick{Pair: pair,
+			types.Tick{
+				Pair: pair,
 				Block: block,
 				Volume: types.Int{*volume},
 				Open: openPrice,
@@ -50,10 +51,10 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []t
 func calcVolume(transactions []types.Transaction) *big.Int {
 	volume := new(big.Int)
 	for _, tt := range transactions {
-		if tt.Give.Token != types.HexToAddress(types.ETH_ADDRESS) {
+		switch {
+		case tt.Give.Token != types.HexToAddress(types.ETH_ADDRESS):
 			volume.Add(volume, &tt.Give.Amount.Int)
-		}
-		if tt.Get.Token != types.HexToAddress(types.ETH_ADDRESS) {
+		case tt.Get.Token != types.HexToAddress(types.ETH_ADDRESS):
 			volume.Add(volume, &tt.Get.Amount.Int)
 		}
 	}
@@ -64,10 +65,10 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 func calcHighLow(prices []types.Price) (float64, float64) {
 	high, low := prices[0].Price, prices[0].Price
 	for _, p := range prices {
-		if high < p.Price {
+		switch {
+		case high < p.Price:
 			high = p.Price
-		}
-		if low > p.Price {
+		case low > p.Price:
 			low = p.Price
 		}
 	}
@@ -89,11 +90,12 @@ func getPrices(transactions []types.Transaction) []types.Price {
 func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
 	for _, tt := range transactions {
-		if openIndex > tt.TransactionIndex {
-			openIndex = tt.TransactionIndex
+		switch {
+		case openIndex > tt.TransactionIndex:
+				openIndex = tt.TransactionIndex
+		case closeIndex < tt.TransactionIndex:
+				closeIndex = tt.TransactionIndex
 		}
-		if closeIndex < tt.TransactionIndex {
-			closeIndex = tt.TransactionIndex}
 	}
 
 	return openIndex, closeIndex
@@ -102,9 +104,10 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for _, tt := range prices {
-		if tt.TransactionIndex == OpenIndex {
-			openPrice = tt.Price
-		} else if tt.TransactionIndex == CloseIndex {
+		switch {
+		case tt.TransactionIndex == OpenIndex:
+				openPrice = tt.Price
+		case tt.TransactionIndex == CloseIndex:
 			closePrice = tt.Price
 		}
 	}
