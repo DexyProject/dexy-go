@@ -275,4 +275,3 @@ func BytesNew(bytes string) (types.Bytes) {
 	b.UnmarshalText([]byte(bytes))
 	return b
 }
-
