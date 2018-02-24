@@ -11,7 +11,6 @@ import (
 const (
 	DBName   = "tradehistory"
 	FileName = "history"
-
 )
 
 type MongoHistory struct {
@@ -27,8 +26,6 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 
 	return &MongoHistory{connection: connection, session: session}, nil
 }
-
-
 
 func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
 	session := history.session.Copy()

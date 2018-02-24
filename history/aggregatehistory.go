@@ -33,9 +33,15 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []t
 		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
 
-		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
-			Close: closePrice, High: high, Low: low})
-
+		ticks = append(ticks,
+			types.Tick{Pair: pair,
+				Block: block,
+				Volume: types.Int{*volume},
+				Open: openPrice,
+				Close: closePrice,
+				High: high,
+				Low: low,
+			})
 	}
 
 	return ticks, nil

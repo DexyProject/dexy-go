@@ -73,7 +73,7 @@ func setupOrderBookEndpoints(ethereum string, mongo string, r *mux.Router) {
 	}
 
 	validator, err := setupBalanceValidator(ethereum, mongo)
-  if err != nil {
+	if err != nil {
 		log.Fatalf("validator error: %v", err.Error())
 	}
 
