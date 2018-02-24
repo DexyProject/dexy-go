@@ -214,8 +214,12 @@ func TestMultiToken(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
+	multiTokenMap := groupTokens(multiToken)
+	if len(multiTokenMap) <= 1 {
+		t.Errorf("tokens not grouped properly")
+	}
 
+}
 
 func TestCalcOpenCloseIndex(t *testing.T) {
 	var openIndex, closeIndex uint
