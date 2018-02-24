@@ -24,16 +24,20 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []t
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 
-	groupTokens(matchedTransactions)
-	pair := getPair(matchedTransactions)
-	volume := calcVolume(matchedTransactions)
-	prices := getPrices(matchedTransactions)
-	openIndex, closeIndex := calcOpenCloseIndex(matchedTransactions)
-	openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
-	high, low := calcHighLow(prices)
+	mappedTokens := groupTokens(matchedTransactions)
+	for token := range mappedTokens {
+		pair := getPair(token)
+		volume := calcVolume(mappedTokens[token])
+		prices := getPrices(mappedTokens[token])
+		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
+		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
+		high, low := calcHighLow(prices)
 
-	ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
-		Close: closePrice, High: high, Low: low})
+		ticks = append(ticks, types.Tick{Pair: pair, Block: block, Volume: types.Int{*volume}, Open: openPrice,
+			Close: closePrice, High: high, Low: low})
+
+	}
+
 	return ticks, nil
 }
 
@@ -102,12 +106,8 @@ func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float
 	return openPrice, closePrice
 }
 
-func getPair(transactions []types.Transaction) types.Pair {
-	var newPair types.Pair
-	if transactions[1].Give.Token == types.HexToAddress(types.ETH_ADDRESS) {
-		newPair = types.Pair{transactions[1].Get.Token, types.HexToAddress(types.ETH_ADDRESS)}
-	}
-	newPair = types.Pair{types.HexToAddress(types.ETH_ADDRESS), transactions[1].Get.Token}
+func getPair(token types.Address) types.Pair {
+	newPair := types.Pair{types.HexToAddress(types.ETH_ADDRESS), token}
 	return newPair
 }
 
@@ -121,5 +121,6 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 			m[t.Get.Token] = append(m[t.Get.Token], t)
 		}
 	}
+
 	return m
 }

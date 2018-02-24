@@ -98,10 +98,65 @@ var trans1 = []types.Transaction{
 		Give: types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(1324)},
 		Get:  types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(123415)},
 	},
-
-
  }
+var multiToken = []types.Transaction{
+	{
+		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
+		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
+		BlockNumber: 4862998,
+		Timestamp: types.NewInt(1515233752),
+		Taker: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
+		Maker: types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
+		Give: types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Get:  types.Trade{Token: types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), Amount: types.NewInt(3000)},
+	},
+	{
+		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
+		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
+		BlockNumber: 4862998,
+		Timestamp: types.NewInt(1515233752),
+		Taker: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
+		Maker: types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
+		Give: types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Get:  types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
+	},
+	{
+		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
+		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
+		BlockNumber: 4862998,
+		Timestamp: types.NewInt(1515233752),
+		Taker: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
+		Maker: types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
+		Give: types.Trade{Token: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), Amount: types.NewInt(300)},
+		Get:  types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(3000)},
+	},
+	{
+		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
+		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
+		BlockNumber: 4862998,
+		Timestamp: types.NewInt(1515233752),
+		Taker: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
+		Maker: types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
+		Give: types.Trade{Token: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), Amount: types.NewInt(300)},
+		Get:  types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
+	},
+	{
+		TransactionID: BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionIndex: 1,
+		OrderHash: types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
+		BlockNumber: 4862998,
+		Timestamp: types.NewInt(1515233752),
+		Taker: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
+		Maker: types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
+		Give: types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Get:  types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
+	},
 
+}
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection, err := NewMongoHistory(connection)
@@ -112,27 +167,18 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	defer mgoConnection.session.Close()
 
 	var matchTicks []types.Transaction
-	sortTicks := []bson.M{}
 
 	c := mgoConnection.session.DB(DBName).C(FileName)
 	// Test mgo queries
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
-	sortTimestamp := bson.M{"$sort": bson.M{"transactions.timestamp": -1}}
-
 
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
 		t.Errorf("could not match data")
 	} else {
 		fmt.Println(matchTicks)
-	}
+	} // test mongo block matching
 
-	err = c.Pipe([]bson.M{sortTimestamp}).All(&sortTicks)
-	if err != nil {
-		t.Errorf("could not sort by timestamp")
-	} else {
-		fmt.Println(sortTimestamp)
-	}
 	ticks, err := mgoConnection.AggregateTransactions(block, trans1)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
@@ -142,6 +188,32 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	}
 	b, err := json.Marshal(ticks)
 	fmt.Println(string(b))
+}
+
+func TestMultiToken(t *testing.T) {
+	mgoConnection, err := NewMongoHistory(connection)
+	if err != nil {
+		t.Errorf("could not establish new connection")
+	}
+	mgoConnection.session.Clone()
+	defer mgoConnection.session.Close()
+
+	var matchTicks []types.Transaction
+
+	c := mgoConnection.session.DB(DBName).C(FileName)
+	// Test mgo queries
+	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
+	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
+	if err != nil {
+		t.Errorf("could not match data")
+	}
+	ticks, err := mgoConnection.AggregateTransactions(block, multiToken)
+	if ticks == nil {
+		t.Errorf("could not aggregate transactions")
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 
@@ -171,9 +243,13 @@ func TestGetPrices(t *testing.T) {
 }
 
 func TestGetPair(t *testing.T) {
-	newPair := getPair(trans1)
-	if (types.Pair{}) == newPair {
-		t.Errorf("could not generate pair from transactions")
+	var newPair types.Pair
+	m := groupTokens(trans1)
+	for token := range m {
+		newPair = getPair(token)
+		if (types.Pair{}) == newPair {
+			t.Errorf("could not generate pair from transactions")
+		}
 	}
 }
 
@@ -183,6 +259,11 @@ func TestCalcHighLow(t *testing.T) {
 	if high == 0 || low == 0 {
 		t.Errorf("could not retrieve high and low prices")
 	}
+}
+
+func TestGroupTokens(t *testing.T) {
+	m := groupTokens(trans1)
+	fmt.Println(m)
 }
 
 func BytesNew(bytes string) (types.Bytes) {
