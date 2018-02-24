@@ -201,7 +201,7 @@ func TestMultiToken(t *testing.T) {
 	var matchTicks []types.Transaction
 
 	c := mgoConnection.session.DB(DBName).C(FileName)
-	// Test mgo queries
+
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
