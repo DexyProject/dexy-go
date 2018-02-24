@@ -10,7 +10,6 @@ import (
 func (history *MongoHistory) AggregateTransactions(block int64, transactions []types.Transaction) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
-
 	c := session.DB(DBName).C(FileName)
 
 	var ticks []types.Tick
