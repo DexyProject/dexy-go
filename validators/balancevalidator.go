@@ -5,7 +5,7 @@ import (
 	"math/big"
 
 	"github.com/DexyProject/dexy-go/balances"
-	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
@@ -20,7 +20,7 @@ type RPCBalanceValidator struct {
 }
 
 func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
-	ex, err := exchange.NewExchangeInterfaceCaller(o.Exchange.Address, b.Conn)
+	ex, err := contracts.NewVault(o.Exchange.Address, b.Conn) // @todo correct address
 
 	if err != nil {
 		return false, fmt.Errorf("could not connect to contract session")
@@ -31,7 +31,7 @@ func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
 
-	if balance.String() == "0" {
+	if balance.Sign() == 0 {
 		return false, nil
 	}
 

@@ -30,7 +30,7 @@ type Order struct {
 	Expires   Timestamp `json:"expires" bson:"expires"`
 	Nonce     int64     `json:"nonce" bson:"nonce"`
 	User      Address   `json:"user" bson:"user"`
-	Exchange  Address   `json:"exchange" bson:"exchange"`
+	Exchange  Address   `json:"contracts" bson:"contracts"`
 	Signature EC        `json:"signature" bson:"signature"`
 	Filled    Int       `json:"filled,omitempty" bson:"filled"`
 }
