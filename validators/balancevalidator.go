@@ -7,7 +7,6 @@ import (
 	"github.com/DexyProject/dexy-go/balances"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 type BalanceValidator interface {
@@ -15,18 +14,19 @@ type BalanceValidator interface {
 }
 
 type RPCBalanceValidator struct {
-	Conn     bind.ContractBackend
-	Balances balances.Balances
+	vault    contracts.Vault
+	balances balances.Balances
+}
+
+func NewRPCBalanceValidator(vault contracts.Vault, balances balances.Balances) *RPCBalanceValidator {
+	return &RPCBalanceValidator{
+		vault:    vault,
+		balances: balances,
+	}
 }
 
 func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
-	ex, err := contracts.NewVault(o.Exchange.Address, b.Conn) // @todo correct address
-
-	if err != nil {
-		return false, fmt.Errorf("could not connect to contract session")
-	}
-
-	balance, err := ex.BalanceOf(nil, o.Give.Token.Address, o.User.Address)
+	balance, err := b.vault.BalanceOf(nil, o.Give.Token.Address, o.User.Address)
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract")
 	}
@@ -35,7 +35,7 @@ func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
 		return false, nil
 	}
 
-	onOrders, err := b.Balances.OnOrders(o.User, o.Give.Token)
+	onOrders, err := b.balances.OnOrders(o.User, o.Give.Token)
 	if err != nil {
 		return false, fmt.Errorf("balances error: %v", err.Error())
 	}

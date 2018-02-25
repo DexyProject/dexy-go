@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	ex, err := contracts.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
+	ex, err := contracts.NewExchange(types.HexToAddress(*addr).Address, conn)
 
 	channel := make(chan *consumers.TradedMessage)
 
