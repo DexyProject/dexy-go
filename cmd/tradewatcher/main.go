@@ -45,6 +45,7 @@ func main() {
 	}
 
 	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
+
 	channel := make(chan *consumers.TradedMessage)
 
 	tc := consumers.NewTradedConsumer(ex, conn, channel)

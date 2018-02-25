@@ -1,13 +1,28 @@
 package history
 
 import (
-	"github.com/DexyProject/dexy-go/types"
-	"math/big"
-	"gopkg.in/mgo.v2/bson"
 	"fmt"
+	"github.com/DexyProject/dexy-go/types"
+	"gopkg.in/mgo.v2/bson"
+	"math/big"
+	"gopkg.in/mgo.v2"
 )
 
-func (history *MongoHistory) AggregateTransactions(block int64, transactions []types.Transaction) ([]types.Tick, error) {
+type HistoryAggregation struct {
+	connection string
+	session *mgo.Session
+}
+
+func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
+	session, err := mgo.Dial(connection)
+	if err != nil {
+		return nil, fmt.Errorf("could not connect to mongo database")
+	}
+
+	return &HistoryAggregation{connection: connection, session: session}, nil
+}
+
+func (history *HistoryAggregation) AggregateTransactions(block int64, transactions []types.Transaction) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
@@ -32,16 +47,18 @@ func (history *MongoHistory) AggregateTransactions(block int64, transactions []t
 		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
 
-		ticks = append(ticks,
+		ticks = append(
+			ticks,
 			types.Tick{
-				Pair: pair,
-				Block: block,
+				Pair:   pair,
+				Block:  block,
 				Volume: types.Int{*volume},
-				Open: openPrice,
-				Close: closePrice,
-				High: high,
-				Low: low,
-			})
+				Open:   openPrice,
+				Close:  closePrice,
+				High:   high,
+				Low:    low,
+			},
+		)
 	}
 
 	return ticks, nil
@@ -89,11 +106,11 @@ func getPrices(transactions []types.Transaction) []types.Price {
 func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
 	for _, tt := range transactions {
-		switch {
-		case openIndex > tt.TransactionIndex:
-				openIndex = tt.TransactionIndex
-		case closeIndex < tt.TransactionIndex:
-				closeIndex = tt.TransactionIndex
+		if openIndex > tt.TransactionIndex {
+			openIndex = tt.TransactionIndex
+		}
+		if closeIndex < tt.TransactionIndex {
+			closeIndex = tt.TransactionIndex
 		}
 	}
 
@@ -103,10 +120,10 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for _, tt := range prices {
-		switch {
-		case tt.TransactionIndex == OpenIndex:
-				openPrice = tt.Price
-		case tt.TransactionIndex == CloseIndex:
+		if tt.TransactionIndex == OpenIndex {
+			openPrice = tt.Price
+		}
+		if tt.TransactionIndex == CloseIndex {
 			closePrice = tt.Price
 		}
 	}
@@ -119,7 +136,7 @@ func getPair(token types.Address) types.Pair {
 	return newPair
 }
 
-func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction{
+func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
 	var m map[types.Address][]types.Transaction
 	m = make(map[types.Address][]types.Transaction)
 	for _, t := range transactions {
