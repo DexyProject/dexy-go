@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"math/big"
 	"gopkg.in/mgo.v2"
+	"time"
 )
 
 type HistoryAggregation struct {
@@ -48,8 +49,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, transactio
 		high, low := calcHighLow(prices)
 
 		ticks = append(
-			ticks,
-			types.Tick{
+			ticks, types.Tick{
 				Pair:   pair,
 				Block:  block,
 				Volume: types.Int{*volume},
@@ -57,6 +57,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, transactio
 				Close:  closePrice,
 				High:   high,
 				Low:    low,
+				Timestamp: int(time.Now().Unix()),
 			},
 		)
 	}
@@ -120,10 +121,11 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for _, tt := range prices {
-		if tt.TransactionIndex == OpenIndex {
+		switch tt.TransactionIndex {
+		case OpenIndex:
 			openPrice = tt.Price
-		}
-		if tt.TransactionIndex == CloseIndex {
+
+		case CloseIndex:
 			closePrice = tt.Price
 		}
 	}
