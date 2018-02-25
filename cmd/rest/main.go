@@ -36,7 +36,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupOrderBookEndpoints(*ethNode, *mongo, common.HexToAddress(*vaultaddr), r)
+	v, err := setupBalanceValidator(*ethNode, *mongo, common.HexToAddress(*vaultaddr))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	setupOrderBookEndpoints(*mongo, v, r)
 	setupHistoryEndpoints(*mongo, r)
 
 	http.Handle("/", r)
@@ -69,18 +74,13 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 	r.HandleFunc("/trades", endpoint.Handle).Methods("GET").Queries("token", "")
 }
 
-func setupOrderBookEndpoints(ethereum string, mongo string, addr common.Address, r *mux.Router) {
+func setupOrderBookEndpoints(mongo string, v validators.BalanceValidator, r *mux.Router) {
 	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	validator, err := setupBalanceValidator(ethereum, mongo, addr)
-	if err != nil {
-		log.Fatalf("validator error: %v", err.Error())
-	}
-
-	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: validator}
+	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: v}
 
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
