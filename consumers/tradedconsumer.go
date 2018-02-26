@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -12,7 +12,8 @@ import (
 )
 
 type TradedConsumer struct {
-	exchange *exchange.ExchangeInterface
+	exchange *contracts.Exchange
+
 	conn     *ethclient.Client
 
 	out  chan<- *TradedMessage
@@ -26,7 +27,7 @@ type TradedConsumer struct {
 	blocks map[common.Hash]types.Int
 }
 
-func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
+func NewTradedConsumer(ex *contracts.Exchange, conn *ethclient.Client, out chan<- *TradedMessage) TradedConsumer {
 	return TradedConsumer{
 		exchange: ex,
 		conn:     conn,
@@ -39,7 +40,7 @@ func NewTradedConsumer(ex *exchange.ExchangeInterface, conn *ethclient.Client, o
 
 func (tc *TradedConsumer) StartConsuming() error {
 
-	sink := make(chan *exchange.ExchangeInterfaceTraded)
+	sink := make(chan *contracts.ExchangeTraded)
 
 	sub, err := tc.exchange.WatchTraded(nil, sink, make([][32]byte, 0))
 	if err != nil {
@@ -59,7 +60,7 @@ func (tc *TradedConsumer) StopConsuming() {
 	close(tc.stop)
 }
 
-func (tc *TradedConsumer) consume(sink <-chan *exchange.ExchangeInterfaceTraded) {
+func (tc *TradedConsumer) consume(sink <-chan *contracts.ExchangeTraded) {
 	for {
 		select {
 		case trade := <-sink:
@@ -98,7 +99,7 @@ func (tc *TradedConsumer) blockTimestamp(hash common.Hash) (*types.Int, error) {
 	return &b, nil
 }
 
-func (tc *TradedConsumer) handleTrade(trade *exchange.ExchangeInterfaceTraded) {
+func (tc *TradedConsumer) handleTrade(trade *contracts.ExchangeTraded) {
 	time, err := tc.blockTimestamp(trade.Raw.BlockHash)
 	if err != nil {
 		// @todo think about how we can handle this gracefully
