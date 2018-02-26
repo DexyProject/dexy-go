@@ -1,6 +1,6 @@
 package types
 
-import "github.com/DexyProject/dexy-go/exchange"
+import "github.com/DexyProject/dexy-go/contracts"
 
 type Transaction struct {
 	TransactionID    Bytes   `json:"tx" bson:"_id"`
@@ -14,7 +14,7 @@ type Transaction struct {
 	Get              Trade   `json:"get" bson:"get"`
 }
 
-func NewTransaction(trade exchange.ExchangeInterfaceTraded, timestamp Int) Transaction {
+func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
 	return Transaction{
 		TransactionID:    Bytes{Bytes: trade.Raw.TxHash.Bytes()},
 		TransactionIndex: trade.Raw.Index,

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/DexyProject/dexy-go/consumers"
-	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -21,11 +21,11 @@ func main() {
 
 	ethNode := flag.String("ethnode", "", "ethereum node address")
 	mongo := flag.String("mongo", "", "mongodb connection string")
-	addr := flag.String("addr", "", "exchange address")
+	addr := flag.String("addr", "", "contracts address")
 
 	flag.Parse()
 
-	if *ethNode == "" || *mongo == "" || *addr == "" {
+	if flag.NArg() != 3 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
+	ex, err := contracts.NewExchange(types.HexToAddress(*addr).Address, conn)
 
 	channel := make(chan *consumers.TradedMessage)
 
