@@ -25,7 +25,7 @@ func main() {
 
 	flag.Parse()
 
-	if *ethNode == "" || *mongo == "" || *addr == "" {
+	if flag.NArg() != 3 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}

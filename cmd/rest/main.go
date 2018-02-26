@@ -23,15 +23,13 @@ func main() {
 
 	defer deferOnPanic()
 
-	r := mux.NewRouter()
-
 	ethNode := flag.String("ethnode", "", "ethereum node address")
 	mongo := flag.String("mongo", "", "mongodb connection string")
 	vaultaddr := flag.String("vault", "", "vault address")
 
 	flag.Parse()
 
-	if *ethNode == "" || *mongo == "" || *vaultaddr == "" {
+	if flag.NArg() != 3 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -41,9 +39,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	r := mux.NewRouter()
 	setupOrderBookEndpoints(*mongo, v, r)
 	setupHistoryEndpoints(*mongo, r)
-
 	http.Handle("/", r)
 
 	headersOk := handlers.AllowedHeaders([]string{
