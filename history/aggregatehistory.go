@@ -43,9 +43,9 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, transactio
 	for token := range mappedTokens {
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])
-		prices := getPrices(mappedTokens[token])
+		prices, txindex := getPrices(mappedTokens[token])
 		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
-		openPrice, closePrice := calcOpenClosePrice(prices, openIndex, closeIndex)
+		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
 
 		ticks = append(
@@ -79,29 +79,30 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 	return volume
 }
 
-func calcHighLow(prices []types.Price) (float64, float64) {
-	high, low := prices[0].Price, prices[0].Price
+func calcHighLow(prices []float64) (float64, float64) {
+	high, low := prices[0], prices[0]
 	for _, p := range prices {
 		switch {
-		case high < p.Price:
-			high = p.Price
-		case low > p.Price:
-			low = p.Price
+		case high < p:
+			high = p
+		case low > p:
+			low = p
 		}
 	}
 
 	return high, low
 }
 
-func getPrices(transactions []types.Transaction) []types.Price {
-	var prices []types.Price
+func getPrices(transactions []types.Transaction) ([]float64, []uint) {
+	var prices []float64
+	var txindex []uint
 	for _, tt := range transactions {
 		newPrice, _ := tt.Get.CalcPrice(tt.Give, types.HexToAddress(types.ETH_ADDRESS))
-		priceStruct := types.Price{tt.TransactionIndex, newPrice}
-		prices = append(prices, priceStruct)
+		prices = append(prices, newPrice)
+		txindex = append(txindex, tt.TransactionIndex)
 	}
 
-	return prices
+	return prices, txindex
 }
 
 func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
@@ -118,15 +119,15 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	return openIndex, closeIndex
 }
 
-func calcOpenClosePrice(prices []types.Price, OpenIndex, CloseIndex uint) (float64, float64) {
+func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
-	for _, tt := range prices {
-		switch tt.TransactionIndex {
+	for i, tt := range txindex {
+		switch tt {
 		case OpenIndex:
-			openPrice = tt.Price
+			openPrice = prices[i]
 
 		case CloseIndex:
-			closePrice = tt.Price
+			closePrice = prices[i]
 		}
 	}
 
