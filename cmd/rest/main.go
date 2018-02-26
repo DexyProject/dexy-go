@@ -31,7 +31,7 @@ func main() {
 
 	flag.Parse()
 
-	if *ethNode == "" || *mongo == "" {
+	if *ethNode == "" || *mongo == "" || *vaultaddr == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -58,7 +58,7 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	err := http.ListenAndServe(":12312", handlers.CORS(originsOk, headersOk, methodsOk)(r))
+	err = http.ListenAndServe(":12312", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
 		log.Fatalf("Listen: %s", err.Error())
 	}
