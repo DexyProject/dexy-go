@@ -2,11 +2,12 @@ package history
 
 import (
 	"fmt"
+	"math/big"
+	"time"
+
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"math/big"
-	"time"
 )
 
 type HistoryAggregation struct {
