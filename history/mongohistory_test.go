@@ -3,9 +3,10 @@ package history
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2/bson"
-	"testing"
 )
 
 const (
@@ -229,17 +230,17 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 
 func TestCalcOpenClosePrice(t *testing.T) {
 	var openPrice, closePrice float64
-	prices := getPrices(trans1)
+	prices, txindex := getPrices(trans1)
 	openIndex, closeIndex := calcOpenCloseIndex(trans1)
-	openPrice, closePrice = calcOpenClosePrice(prices, openIndex, closeIndex)
+	openPrice, closePrice = calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 	if openPrice == 0 || closePrice == 0 {
 		t.Errorf("could not calculate open and close prices")
 	}
 }
 
 func TestGetPrices(t *testing.T) {
-	err := getPrices(trans1)
-	if err == nil {
+	err, txindex := getPrices(trans1)
+	if err, txindex == nil {
 		t.Errorf("could not generate prices")
 	}
 }
@@ -256,7 +257,7 @@ func TestGetPair(t *testing.T) {
 }
 
 func TestCalcHighLow(t *testing.T) {
-	prices := getPrices(trans1)
+	prices, _ := getPrices(trans1)
 	high, low := calcHighLow(prices)
 	if high == 0 || low == 0 {
 		t.Errorf("could not retrieve high and low prices")
