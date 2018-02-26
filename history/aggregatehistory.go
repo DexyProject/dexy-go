@@ -3,15 +3,15 @@ package history
 import (
 	"fmt"
 	"github.com/DexyProject/dexy-go/types"
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"math/big"
-	"gopkg.in/mgo.v2"
 	"time"
 )
 
 type HistoryAggregation struct {
 	connection string
-	session *mgo.Session
+	session    *mgo.Session
 }
 
 func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
@@ -50,13 +50,13 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, transactio
 
 		ticks = append(
 			ticks, types.Tick{
-				Pair:   pair,
-				Block:  block,
-				Volume: types.Int{*volume},
-				Open:   openPrice,
-				Close:  closePrice,
-				High:   high,
-				Low:    low,
+				Pair:      pair,
+				Block:     block,
+				Volume:    types.Int{*volume},
+				Open:      openPrice,
+				Close:     closePrice,
+				High:      high,
+				Low:       low,
 				Timestamp: int(time.Now().Unix()),
 			},
 		)
