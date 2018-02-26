@@ -1,9 +1,9 @@
 package types
 
 import (
-	"time"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type Timestamp struct {
