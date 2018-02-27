@@ -24,7 +24,7 @@ type Orders struct {
 
 type Order struct {
 	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
-	Price     string    `json:"price,omitempty" bson:"price"`
+	Price     string    `json:"-" bson:"price"`
 	Give      Trade     `json:"give" bson:"give"`
 	Get       Trade     `json:"get" bson:"get"`
 	Expires   Timestamp `json:"expires" bson:"expires"`
@@ -50,7 +50,7 @@ func (o *Order) generateHash() {
 	hash.Write(o.Get.Amount.U256()[:])
 	hash.Write(o.Give.Token.Address[:])
 	hash.Write(o.Give.Amount.U256()[:])
-	hash.Write(NewInt(o.Expires.UnixMilli()).U256()[:])
+	hash.Write(NewInt(o.Expires.Unix()).U256()[:])
 	hash.Write(NewInt(o.Nonce).U256()[:])
 	hash.Write(o.User.Address[:])
 	hash.Write(o.Exchange.Address[:])

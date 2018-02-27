@@ -15,7 +15,6 @@ Returns Asks and Bids for a specified ```token```
   [
     {
       "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
-      "price": "0.01",
       "get": {
         "token": "0x0000000000000000000000000000000000000000",
         "amount": "3000000000000000000"
@@ -39,7 +38,6 @@ Returns Asks and Bids for a specified ```token```
   "bids": [
     {
       "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
-      "price": "0.01",
       "get": {
         "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
         "amount": "300000000000000000000"
@@ -72,7 +70,6 @@ Returns order by the ```hash```
 ```json
 {
   "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
-  "price": "0.01",
   "get": {
     "token": "0x0000000000000000000000000000000000000000",
     "amount": "3000000000000000000"

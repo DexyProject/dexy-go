@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/DexyProject/dexy-go/consumers"
-	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
@@ -12,13 +12,13 @@ import (
 
 type TradeWatcher struct {
 	history   history.History
-	exchange  *exchange.ExchangeInterface
+	exchange  *contracts.Exchange
 	orderbook orderbook.OrderBook
 
 	in <-chan *consumers.TradedMessage
 }
 
-func NewTradeWatcher(history history.History, exchange *exchange.ExchangeInterface, book orderbook.OrderBook, in <-chan *consumers.TradedMessage) TradeWatcher {
+func NewTradeWatcher(history history.History, exchange *contracts.Exchange, book orderbook.OrderBook, in <-chan *consumers.TradedMessage) TradeWatcher {
 	return TradeWatcher{
 		history:   history,
 		exchange:  exchange,

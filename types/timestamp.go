@@ -1,21 +1,17 @@
 package types
 
 import (
-	"time"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 type Timestamp struct {
 	time.Time
 }
 
-func UnixMilli(millie int64) Timestamp {
-	return Timestamp{time.Unix(0, millie*int64(time.Millisecond))}
-}
-
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprint(t.UnixMilli())), nil
+	return []byte(fmt.Sprint(t.Unix())), nil
 }
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
@@ -24,11 +20,7 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	t.Time = time.Unix(0, int64(ts)*int64(time.Millisecond))
+	t.Time = time.Unix(int64(ts), 0)
 
 	return nil
-}
-
-func (t Timestamp) UnixMilli() int64 {
-	return t.UnixNano() / int64(time.Millisecond)
 }
