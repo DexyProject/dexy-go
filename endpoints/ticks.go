@@ -6,6 +6,7 @@ import (
 
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/types"
+	"log"
 )
 
 type Ticks struct {
@@ -17,11 +18,15 @@ func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	token := query.Get("token")
-	addr := types.HexToAddress(token)
+	if token == types.ETH_ADDRESS {
+		log.Printf("token request is 0x0")
+		rw.WriteHeader(http.StatusBadRequest)
+	}
 
+	addr := types.HexToAddress(token)
 	h, err := ticks.Ticks.FetchTicks(addr)
 	if err != nil {
-		// @todo error handling
+		log.Printf("could not fetch ticks: %v", err)
 		rw.WriteHeader(http.StatusBadRequest)
 	}
 
