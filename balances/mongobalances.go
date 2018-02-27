@@ -15,8 +15,8 @@ type MongoBalances struct {
 }
 
 const (
-	DBName   = "OrderBook"
-	FileName = "Orders"
+	DBName   = "dexy"
+	FileName = "orders"
 )
 
 func NewMongoBalances(connection string) (*MongoBalances, error) {
