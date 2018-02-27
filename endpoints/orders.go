@@ -32,8 +32,8 @@ func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
 	address := types.HexToAddress(token)
 
 	o := types.Orders{}
-	o.Asks = orders.OrderBook.Asks(address, nil, limit)
-	o.Bids = orders.OrderBook.Bids(address, nil, limit)
+	o.Asks = orders.OrderBook.Asks(address, limit)
+	o.Bids = orders.OrderBook.Bids(address, limit)
 
 	json.NewEncoder(rw).Encode(o)
 }
