@@ -2,7 +2,6 @@ package watchers
 
 import (
 	"github.com/DexyProject/dexy-go/orderbook"
-	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/consumers"
 )
 
@@ -27,10 +26,7 @@ func (cw *CancelledWatcher) Watch() {
 }
 
 func (cw *CancelledWatcher) handle(msg consumers.Message) {
-	hash := types.Hash{}
-	hash.SetBytes(msg.(*consumers.CancelledMessage).Hash.Bytes[:])
-
-	ok := cw.orderbook.RemoveOrder(hash)
+	ok := cw.orderbook.RemoveOrder(msg.(*consumers.CancelledMessage).Hash)
 	if !ok {
 		msg.Reject()
 		return

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/DexyProject/dexy-go/consumers"
-	"github.com/DexyProject/dexy-go/exchange"
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/watchers"
@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	ex, err := exchange.NewExchangeInterface(types.HexToAddress(*addr).Address, conn)
+	ex, err := contracts.NewExchange(types.HexToAddress(*addr).Address, conn)
 
 	channel := make(chan *consumers.CancelledMessage)
 

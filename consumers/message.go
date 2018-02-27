@@ -28,13 +28,13 @@ func (tm TradedMessage) Reject() {
 
 
 type CancelledMessage struct {
-	Hash types.Bytes
+	Hash types.Hash
 
-	ack    chan<- types.Bytes
-	reject chan<- types.Bytes
+	ack    chan<- types.Hash
+	reject chan<- types.Hash
 }
 
-func NewCancelledMessage(hash types.Bytes, ack, reject chan<- types.Bytes) *CancelledMessage {
+func NewCancelledMessage(hash types.Hash, ack, reject chan<- types.Hash) *CancelledMessage {
 	return &CancelledMessage{Hash: hash, ack: ack, reject: reject}
 }
 
