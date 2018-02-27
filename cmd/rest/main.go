@@ -80,6 +80,7 @@ func setupOrderBookEndpoints(mongo string, v validators.BalanceValidator, r *mux
 
 	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: v}
 
+	r.HandleFunc("/orderbook", orders.GetOrderBook).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")

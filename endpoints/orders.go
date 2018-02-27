@@ -19,6 +19,25 @@ type Orders struct {
 	BalanceValidator validators.BalanceValidator
 }
 
+func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	token := query.Get("token")
+	limit := GetLimit(query.Get("limit"))
+
+	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
+		returnError(rw, "invalid token", http.StatusBadRequest)
+		return
+	}
+
+	address := types.HexToAddress(token)
+
+	o := types.Orders{}
+	o.Asks = orders.OrderBook.Asks(address, limit)
+	o.Bids = orders.OrderBook.Bids(address, limit)
+
+	json.NewEncoder(rw).Encode(o)
+}
+
 func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
@@ -33,11 +52,9 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("user"))
 
-	o := types.Orders{}
 	address := types.HexToAddress(token)
 
-	o.Asks = orders.OrderBook.Asks(address, user, limit)
-	o.Bids = orders.OrderBook.Bids(address, user, limit)
+	o := orders.OrderBook.GetOrders(address, user, limit)
 
 	json.NewEncoder(rw).Encode(o)
 }
