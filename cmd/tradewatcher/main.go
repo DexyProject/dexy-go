@@ -25,7 +25,7 @@ func main() {
 
 	flag.Parse()
 
-	if flag.NArg() != 3 {
+	if flag.NFlag() != 3 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
