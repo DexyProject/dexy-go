@@ -14,8 +14,8 @@ type MongoOrderBook struct {
 }
 
 const (
-	DBName   = "OrderBook"
-	FileName = "Orders"
+	DBName   = "dexy"
+	FileName = "orders"
 )
 
 func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
