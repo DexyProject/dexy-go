@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DBName   = "TradeHistory"
-	FileName = "History"
+	DBName   = "dexy"
+	FileName = "history"
 )
 
 type MongoHistory struct {
