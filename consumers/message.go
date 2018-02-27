@@ -26,7 +26,6 @@ func (tm TradedMessage) Reject() {
 	tm.reject <- tm.Transaction.TransactionID
 }
 
-
 type CancelledMessage struct {
 	Hash types.Hash
 
