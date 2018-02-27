@@ -25,3 +25,22 @@ func (tm TradedMessage) Ack() {
 func (tm TradedMessage) Reject() {
 	tm.reject <- tm.Transaction.TransactionID
 }
+
+type CancelledMessage struct {
+	Hash types.Hash
+
+	ack    chan<- types.Hash
+	reject chan<- types.Hash
+}
+
+func NewCancelledMessage(hash types.Hash, ack, reject chan<- types.Hash) *CancelledMessage {
+	return &CancelledMessage{Hash: hash, ack: ack, reject: reject}
+}
+
+func (cm CancelledMessage) Ack() {
+	cm.ack <- cm.Hash
+}
+
+func (cm CancelledMessage) Reject() {
+	cm.reject <- cm.Hash
+}
