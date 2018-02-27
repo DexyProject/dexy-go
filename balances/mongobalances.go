@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -13,11 +14,6 @@ type MongoBalances struct {
 	connection string
 	session    *mgo.Session
 }
-
-const (
-	DBName   = "dexy"
-	FileName = "orders"
-)
 
 func NewMongoBalances(connection string) (*MongoBalances, error) {
 	session, err := mgo.Dial(connection)
@@ -32,7 +28,7 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 	session := balances.session.Copy()
 	defer session.Close()
 
-	c := session.DB(DBName).C(FileName)
+	c := session.DB(orderbook.DBName).C(orderbook.FileName)
 
 	var result []struct {
 		Give struct {
