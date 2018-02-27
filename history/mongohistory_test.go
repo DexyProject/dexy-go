@@ -230,7 +230,7 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 
 func TestGetPrices(t *testing.T) {
 	err, txindex := getPrices(trans1)
-	if err, txindex == nil {
+	if err == nil || txindex == nil {
 		t.Errorf("could not generate prices")
 	}
 }
