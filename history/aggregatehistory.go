@@ -3,7 +3,6 @@ package history
 import (
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
@@ -58,7 +57,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, transactio
 				Close:     closePrice,
 				High:      high,
 				Low:       low,
-				Timestamp: int(time.Now().Unix()),
+				Timestamp: mappedTokens[token][1].Timestamp,
 			},
 		)
 	}

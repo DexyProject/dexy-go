@@ -8,7 +8,7 @@ type Tick struct {
 	Close     float64 `json:"close" bson:"close"`
 	High      float64 `json:"high" bson:"high"`
 	Low       float64 `json:"low" bson:"low"`
-	Timestamp int     `json:"timestamp" bson:"timestamp"`
+	Timestamp Int     `json:"timestamp" bson:"timestamp"`
 }
 
 type Pair struct {
