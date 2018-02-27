@@ -6,3 +6,4 @@ db.orders.createIndex({ "get.token": 1 });
 db.orders.createIndex({ "give.token": 1 });
 
 db.history.createIndex({ timestamp: 1 });
+db.history.createIndex({ block: 1 });
