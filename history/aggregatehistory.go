@@ -23,23 +23,24 @@ func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
 	return &HistoryAggregation{connection: connection, session: session}, nil
 }
 
-func (history *HistoryAggregation) AggregateTransactions(block int64, transactions []types.Transaction) ([]types.Tick, error) {
+func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
+
 	var ticks []types.Tick
-	var matchedTransactions []types.Transaction
+	var transactions []types.Transaction
 
 	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
 
-	err := c.Pipe([]bson.M{matchBlock}).All(&matchedTransactions)
+	err := c.Pipe([]bson.M{matchBlock}).All(&transactions)
 
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 
-	mappedTokens := groupTokens(matchedTransactions)
+	mappedTokens := groupTokens(transactions)
 	for token := range mappedTokens {
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])

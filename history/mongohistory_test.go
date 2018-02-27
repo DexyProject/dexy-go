@@ -166,9 +166,9 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	defer mgoConnection.session.Close()
 
 	var matchTicks []types.Transaction
-
 	c := mgoConnection.session.DB(DBName).C(FileName)
-	// Test mgo queries
+
+	insertData(trans1)
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
 
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
@@ -178,7 +178,7 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 		fmt.Println(matchTicks)
 	} // test mongo block matching
 
-	ticks, err := mgoConnection.AggregateTransactions(block, trans1)
+	ticks, err := mgoConnection.AggregateTransactions(block)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
@@ -198,15 +198,15 @@ func TestMultiToken(t *testing.T) {
 	defer mgoConnection.session.Close()
 
 	var matchTicks []types.Transaction
-
 	c := mgoConnection.session.DB(DBName).C(FileName)
+	insertData(multiToken)
 
 	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
 		t.Errorf("could not match data")
 	}
-	ticks, err := mgoConnection.AggregateTransactions(block, multiToken)
+	ticks, err := mgoConnection.AggregateTransactions(block)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
@@ -244,4 +244,23 @@ func BytesNew(bytes string) types.Bytes {
 	b := types.Bytes{}
 	b.UnmarshalText([]byte(bytes))
 	return b
+}
+
+func insertData(transactions []types.Transaction) error {
+	mgoConnection, err := NewHistoryAggregation(connection)
+	if err != nil {
+		return fmt.Errorf("could not establish new connection")
+	}
+	mgoConnection.session.Clone()
+	defer mgoConnection.session.Close()
+	c := mgoConnection.session.DB(DBName).C(FileName)
+
+	for _, t := range transactions {
+		err := c.Insert(t)
+		if err != nil {
+			return fmt.Errorf("could not insert transaction")
+		}
+	}
+
+	return nil
 }
