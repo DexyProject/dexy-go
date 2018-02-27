@@ -83,10 +83,10 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 func calcHighLow(prices []float64) (float64, float64) {
 	high, low := prices[0], prices[0]
 	for _, p := range prices {
-		switch {
-		case high < p:
+		if high < p {
 			high = p
-		case low > p:
+		}
+		if low > p {
 			low = p
 		}
 	}
@@ -126,7 +126,6 @@ func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex 
 		switch tt {
 		case OpenIndex:
 			openPrice = prices[i]
-
 		case CloseIndex:
 			closePrice = prices[i]
 		}
@@ -136,13 +135,11 @@ func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex 
 }
 
 func getPair(token types.Address) types.Pair {
-	newPair := types.Pair{types.HexToAddress(types.ETH_ADDRESS), token}
-	return newPair
+	return types.Pair{types.HexToAddress(types.ETH_ADDRESS), token}
 }
 
 func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
-	var m map[types.Address][]types.Transaction
-	m = make(map[types.Address][]types.Transaction)
+	m := make(map[types.Address][]types.Transaction)
 	for _, t := range transactions {
 		if t.Get.Token == types.HexToAddress(types.ETH_ADDRESS) {
 			m[t.Give.Token] = append(m[t.Give.Token], t)

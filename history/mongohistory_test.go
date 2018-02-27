@@ -228,39 +228,10 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 	}
 }
 
-func TestCalcOpenClosePrice(t *testing.T) {
-	var openPrice, closePrice float64
-	prices, txindex := getPrices(trans1)
-	openIndex, closeIndex := calcOpenCloseIndex(trans1)
-	openPrice, closePrice = calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
-	if openPrice == 0 || closePrice == 0 {
-		t.Errorf("could not calculate open and close prices")
-	}
-}
-
 func TestGetPrices(t *testing.T) {
 	err, txindex := getPrices(trans1)
 	if err, txindex == nil {
 		t.Errorf("could not generate prices")
-	}
-}
-
-func TestGetPair(t *testing.T) {
-	var newPair types.Pair
-	m := groupTokens(trans1)
-	for token := range m {
-		newPair = getPair(token)
-		if (types.Pair{}) == newPair {
-			t.Errorf("could not generate pair from transactions")
-		}
-	}
-}
-
-func TestCalcHighLow(t *testing.T) {
-	prices, _ := getPrices(trans1)
-	high, low := calcHighLow(prices)
-	if high == 0 || low == 0 {
-		t.Errorf("could not retrieve high and low prices")
 	}
 }
 
