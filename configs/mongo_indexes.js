@@ -1,6 +1,8 @@
-use OrderBook;
+use dexy;
 
-db.Orders.createIndex({ expires: 1 }, {expireAfterSeconds: 0});
-db.Orders.createIndex({ price: 1 });
-db.Orders.createIndex({ "get.token": 1 });
-db.Orders.createIndex({ "give.token": 1 });
+db.orders.createIndex({ expires: 1 }, {expireAfterSeconds: 0});
+db.orders.createIndex({ price: 1 });
+db.orders.createIndex({ "get.token": 1 });
+db.orders.createIndex({ "give.token": 1 });
+
+db.history.createIndex({ timestamp: 1 });
