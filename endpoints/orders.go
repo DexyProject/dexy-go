@@ -26,8 +26,7 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	token := query.Get("token")
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		// @todo error body
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "invalid token", http.StatusBadRequest)
 		return
 	}
 
@@ -65,35 +64,33 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "badly formatted order", http.StatusBadRequest)
 		return
 	}
 
 	ok, err := orders.BalanceValidator.CheckBalance(o)
 	if err != nil {
 		log.Printf("checking balance failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
+		returnError(rw, "balance check failed", http.StatusInternalServerError)
 		return
 	}
 
 	if !ok {
-		rw.WriteHeader(http.StatusBadRequest)
 		log.Print("insufficient balance to place order")
-		// @todo
+		returnError(rw, "insufficient balance to place order", http.StatusBadRequest)
 		return
 	}
 
 	err = o.Validate()
 	if err != nil {
 		log.Printf("validating order failed: %v", err)
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "validation failed", http.StatusBadRequest)
 		return
 	}
 
 	price, err := calculatePrice(o)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "price error", http.StatusBadRequest)
 		return
 	}
 
@@ -101,7 +98,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
 		log.Printf("InsertOrder failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
+		returnError(rw, "internal error", http.StatusInternalServerError)
 		return
 	}
 

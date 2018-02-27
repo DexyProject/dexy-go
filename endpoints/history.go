@@ -20,8 +20,7 @@ func (history *History) Handle(rw http.ResponseWriter, r *http.Request) {
 	token := query.Get("token")
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		// @todo error body
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "invalid token", http.StatusBadRequest)
 		return
 	}
 

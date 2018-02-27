@@ -15,8 +15,8 @@ script:
   - npm run $TASK
 
 script:
-    - go vet -x $(go list ./... | grep -v /exchange/)
-    - $HOME/gopath/bin/golint $(go list ./... | grep -v /exchange/)
+    - go vet -x $(go list ./... | grep -v /contracts/)
+    - $HOME/gopath/bin/golint $(go list ./... | grep -v /contracts/)
     - go test -v ./... -bench=. -cover
 
 notifications:

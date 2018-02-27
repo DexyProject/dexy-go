@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DBName   = "tradehistory"
+	DBName   = "dexy"
 	FileName = "history"
 )
 
