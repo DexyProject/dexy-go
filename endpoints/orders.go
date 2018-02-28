@@ -19,6 +19,25 @@ type Orders struct {
 	BalanceValidator validators.BalanceValidator
 }
 
+func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	token := query.Get("token")
+	limit := GetLimit(query.Get("limit"))
+
+	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
+		returnError(rw, "invalid token", http.StatusBadRequest)
+		return
+	}
+
+	address := types.HexToAddress(token)
+
+	o := types.Orders{}
+	o.Asks = orders.OrderBook.Asks(address, limit)
+	o.Bids = orders.OrderBook.Bids(address, limit)
+
+	json.NewEncoder(rw).Encode(o)
+}
+
 func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
@@ -26,19 +45,16 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	token := query.Get("token")
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		// @todo error body
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "invalid token", http.StatusBadRequest)
 		return
 	}
 
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("user"))
 
-	o := types.Orders{}
 	address := types.HexToAddress(token)
 
-	o.Asks = orders.OrderBook.Asks(address, user, limit)
-	o.Bids = orders.OrderBook.Bids(address, user, limit)
+	o := orders.OrderBook.GetOrders(address, user, limit)
 
 	json.NewEncoder(rw).Encode(o)
 }
@@ -65,35 +81,33 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "badly formatted order", http.StatusBadRequest)
 		return
 	}
 
 	ok, err := orders.BalanceValidator.CheckBalance(o)
 	if err != nil {
 		log.Printf("checking balance failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		// @todo
+		returnError(rw, "balance check failed", http.StatusInternalServerError)
 		return
 	}
 
 	if !ok {
-		rw.WriteHeader(http.StatusBadRequest)
 		log.Print("insufficient balance to place order")
-		// @todo
+		returnError(rw, "insufficient balance to place order", http.StatusBadRequest)
 		return
 	}
 
 	err = o.Validate()
 	if err != nil {
 		log.Printf("validating order failed: %v", err)
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "validation failed", http.StatusBadRequest)
 		return
 	}
 
 	price, err := calculatePrice(o)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		returnError(rw, "price error", http.StatusBadRequest)
 		return
 	}
 
@@ -101,7 +115,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
 		log.Printf("InsertOrder failed: %v", err)
-		rw.WriteHeader(http.StatusInternalServerError)
+		returnError(rw, "internal error", http.StatusInternalServerError)
 		return
 	}
 

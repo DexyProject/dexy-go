@@ -14,8 +14,8 @@ type MongoOrderBook struct {
 }
 
 const (
-	DBName   = "OrderBook"
-	FileName = "Orders"
+	DBName   = "dexy"
+	FileName = "orders"
 )
 
 func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
@@ -65,35 +65,52 @@ func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) Bids(token types.Address, user *types.Address, limit int) []types.Order {
-	var orders []types.Order
+func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, limit int) []types.Order {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	q := bson.M{
+		"$or": []bson.M{
+			{"give.token": token},
+			{"get.token": token},
+		},
+	}
+
+	if user != nil {
+		q["user"] = user
+	}
+
+	orders := make([]types.Order, 0)
+	c.Find(q).Sort("-expires").Limit(limit).All(&orders)
+
+	return orders
+}
+
+func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
 	q := bson.M{"get.token": token}
-	if user != nil {
-		q["user"] = user
-	}
 
+	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
 
 	return orders
 }
 
-func (ob *MongoOrderBook) Asks(token types.Address, user *types.Address, limit int) []types.Order {
-	var orders []types.Order
+func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
 	q := bson.M{"give.token": token}
-	if user != nil {
-		q["user"] = user
-	}
 
+	orders := make([]types.Order, 0)
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
 
 	return orders

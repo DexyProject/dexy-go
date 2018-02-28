@@ -18,9 +18,23 @@ Usage of main.go
     	ethereum node address
   -mongo string
     	mongodb connection string
+  -vault string
+    	vault address
 ```
 
 ### Trade Watcher
+
+```
+Usage of main.go
+  -addr string
+    	exchange address
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
+### Cancelled Watcher
 
 ```
 Usage of main.go
