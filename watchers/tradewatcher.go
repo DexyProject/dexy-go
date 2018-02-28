@@ -35,19 +35,19 @@ func (tf *TradeWatcher) Watch() {
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
 			msg.Reject()
-			return
+			continue
 		}
 
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
 			msg.Reject()
-			return
+			continue
 		}
 
 		err = tf.handleFill(tx, filled)
 		if err != nil {
 			msg.Reject()
-			return
+			continue
 		}
 
 		msg.Ack()
