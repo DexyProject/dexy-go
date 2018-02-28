@@ -66,7 +66,6 @@ func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 }
 
 func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, limit int) []types.Order  {
-	var orders []types.Order
 	session := ob.session.Copy()
 	defer session.Close()
 
@@ -83,13 +82,13 @@ func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, li
 		q["user"] = user
 	}
 
+	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-expires").Limit(limit).All(&orders)
 
 	return orders
 }
 
 func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
-	var orders []types.Order
 	session := ob.session.Copy()
 	defer session.Close()
 
@@ -97,13 +96,13 @@ func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 
 	q := bson.M{"get.token": token}
 
+	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
 
 	return orders
 }
 
 func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
-	var orders []types.Order
 	session := ob.session.Copy()
 	defer session.Close()
 
@@ -111,6 +110,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
 
 	q := bson.M{"give.token": token}
 
+	orders := make([]types.Order, 0)
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
 
 	return orders
