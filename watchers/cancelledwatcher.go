@@ -1,8 +1,8 @@
 package watchers
 
 import (
-	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/consumers"
+	"github.com/DexyProject/dexy-go/orderbook"
 )
 
 type CancelledWatcher struct {
@@ -20,7 +20,7 @@ func NewCancelledWatcher(book orderbook.OrderBook, in <-chan *consumers.Cancelle
 
 func (cw *CancelledWatcher) Watch() {
 	for {
-		msg := <- cw.in
+		msg := <-cw.in
 		go cw.handle(msg)
 	}
 }

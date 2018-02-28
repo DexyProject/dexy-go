@@ -65,7 +65,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, limit int) []types.Order  {
+func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, limit int) []types.Order {
 	session := ob.session.Copy()
 	defer session.Close()
 
