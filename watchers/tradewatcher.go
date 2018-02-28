@@ -8,6 +8,7 @@ import (
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"log"
 )
 
 type TradeWatcher struct {
@@ -34,18 +35,21 @@ func (tf *TradeWatcher) Watch() {
 
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
+			log.Printf("tx rejected insert: %s", err)
 			msg.Reject()
 			continue
 		}
 
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
+			log.Printf("tx rejected filled amount: %s", err)
 			msg.Reject()
 			continue
 		}
 
 		err = tf.handleFill(tx, filled)
 		if err != nil {
+			log.Printf("tx rejected handle: %s", err)
 			msg.Reject()
 			continue
 		}
