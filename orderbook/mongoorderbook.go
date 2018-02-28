@@ -97,7 +97,7 @@ func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 	q := bson.M{"get.token": token}
 
 	orders := make([]types.Order, 0)
-	c.Find(q).Sort("-price").Limit(limit).All(&orders)
+	c.Find(q).Sort("price").Limit(limit).All(&orders)
 
 	return orders
 }
