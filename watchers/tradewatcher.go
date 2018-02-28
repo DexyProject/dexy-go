@@ -2,13 +2,13 @@ package watchers
 
 import (
 	"errors"
+	"log"
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
-	"log"
 )
 
 type TradeWatcher struct {
