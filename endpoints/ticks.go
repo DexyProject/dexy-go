@@ -19,15 +19,16 @@ func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	token := query.Get("token")
 	if token == types.ETH_ADDRESS {
-		log.Printf("token request is 0x0")
 		rw.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	addr := types.HexToAddress(token)
 	h, err := ticks.Ticks.FetchTicks(addr)
 	if err != nil {
-		log.Printf("could not fetch ticks: %v", err)
+		log.Printf("could not fetch ticks: %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(h)

@@ -97,4 +97,5 @@ func (t *Trade) CalcPrice(g Trade, base Address) (float64, error) {
 	}
 	price, _ := new(big.Float).Quo(gFloat, tFloat).Float64()
 	return price, nil
+
 }
