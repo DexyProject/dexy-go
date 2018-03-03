@@ -2,10 +2,12 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"strings"
 	"time"
 
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
@@ -84,6 +86,8 @@ func (o *Order) Validate() error {
 }
 
 func (t *Trade) CalcPrice(g Trade, base Address) (float64, error) {
+	var erc20 contracts.ERC20
+	decimals, _ := erc20.Decimals(nil)
 	if t.Amount.Sign() <= 0 || g.Amount.Sign() <= 0 {
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
@@ -91,11 +95,14 @@ func (t *Trade) CalcPrice(g Trade, base Address) (float64, error) {
 	tFloat := new(big.Float).SetInt(&t.Amount.Int)
 	gFloat := new(big.Float).SetInt(&g.Amount.Int)
 
+	decimalsFloat := float64(decimals)
 	if t.Token == base {
 		price, _ := new(big.Float).Quo(tFloat, gFloat).Float64()
+		price = price * math.Pow(10.0, decimalsFloat)
 		return price, nil
 	}
 	price, _ := new(big.Float).Quo(gFloat, tFloat).Float64()
+	price = price * math.Pow(10.0, decimalsFloat)
 	return price, nil
 
 }
