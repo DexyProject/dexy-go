@@ -98,11 +98,9 @@ func (t *Trade) CalcPrice(g Trade, base Address) (float64, error) {
 	decimalsFloat := float64(decimals)
 	if t.Token == base {
 		price, _ := new(big.Float).Quo(tFloat, gFloat).Float64()
-		price = price / math.Pow(10.0, decimalsFloat)
-		return price, nil
+		return (price / math.Pow(10.0, decimalsFloat)), nil
 	}
 	price, _ := new(big.Float).Quo(gFloat, tFloat).Float64()
-	price = price / math.Pow(10.0, decimalsFloat)
-	return price, nil
+	return (price / math.Pow(10.0, decimalsFloat)), nil
 
 }
