@@ -4,45 +4,39 @@ import (
 	"fmt"
 	"math/big"
 
+	"math"
+
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/DexyProject/dexy-go/contracts"
-	"math"
 )
 
 type HistoryAggregation struct {
 	connection string
 	session    *mgo.Session
+	erc20      contracts.ERC20
+	decimals   map[types.Address]uint8
 }
 
-type ERC20DecimalsCalc struct {
-	erc20 contracts.ERC20
-	decimals map[types.Address]uint8
-}
-
-func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
+func NewHistoryAggregation(connection string, erc20 contracts.ERC20) (*HistoryAggregation, error) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &HistoryAggregation{connection: connection, session: session}, nil
-}
-
-func NewERC20DecimalsCalc(erc20 contracts.ERC20) *ERC20DecimalsCalc {
-	return &ERC20DecimalsCalc{
-		erc20: erc20,
-		decimals: make(map[types.Address]uint8),
-	}
+	return &HistoryAggregation{
+		connection: connection,
+		session:    session,
+		erc20:      erc20,
+		decimals:   make(map[types.Address]uint8),
+	}, nil
 }
 
 func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.Tick, error) {
-	ERC20DecimalsCalc := NewERC20DecimalsCalc(contracts.ERC20{})
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
-
 
 	var ticks []types.Tick
 	var transactions []types.Transaction
@@ -59,7 +53,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 	for token := range mappedTokens {
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])
-		prices, txindex := getPrices(mappedTokens[token], ERC20DecimalsCalc)
+		prices, txindex := history.getPrices(mappedTokens[token])
 		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
 		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
@@ -109,18 +103,6 @@ func calcHighLow(prices []float64) (float64, float64) {
 	return high, low
 }
 
-func getPrices(transactions []types.Transaction, erc20 *ERC20DecimalsCalc) ([]float64, []uint) {
-	var prices []float64
-	var txindex []uint
-	for _, tt := range transactions {
-		newPrice, _ := erc20.CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS))
-		prices = append(prices, newPrice)
-		txindex = append(txindex, tt.TransactionIndex)
-	}
-
-	return prices, txindex
-}
-
 func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
 	for _, tt := range transactions {
@@ -166,8 +148,8 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 	return m
 }
 
-func (e *ERC20DecimalsCalc) CalcPrice(t types.Transaction, base types.Address) (float64, error) {
-	decimals, err := e.erc20.Decimals(nil)
+func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Address) (float64, error) {
+	decimals, err := history.erc20.Decimals(nil)
 	if err != nil {
 		return 0.0, fmt.Errorf("could not get decimals() from contract")
 	}
@@ -181,10 +163,22 @@ func (e *ERC20DecimalsCalc) CalcPrice(t types.Transaction, base types.Address) (
 	decimalsFloat := float64(decimals)
 	if t.Get.Token == base {
 		price, _ := new(big.Float).Quo(getFloat, giveFloat).Float64()
-		e.decimals[t.Give.Token] = decimals
+		history.decimals[t.Give.Token] = decimals
 		return (price / math.Pow(10.0, decimalsFloat)), nil
 	}
 	price, _ := new(big.Float).Quo(giveFloat, getFloat).Float64()
-	e.decimals[t.Get.Token] = decimals
+	history.decimals[t.Get.Token] = decimals
 	return (price / math.Pow(10.0, decimalsFloat)), nil
+}
+
+func (history *HistoryAggregation) getPrices(transactions []types.Transaction) ([]float64, []uint) {
+	var prices []float64
+	var txindex []uint
+	for _, tt := range transactions {
+		newPrice, _ := history.CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS))
+		prices = append(prices, newPrice)
+		txindex = append(txindex, tt.TransactionIndex)
+	}
+
+	return prices, txindex
 }
