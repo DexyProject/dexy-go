@@ -6,7 +6,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type Block struct {
@@ -14,14 +16,14 @@ type Block struct {
 }
 
 type BlockConsumer struct {
-	client rpc.Client
+	client *ethclient.Client
 
-	channel chan Block
+	channel chan *types.Header
 
-	sub *rpc.ClientSubscription
+	sub ethereum.Subscription
 }
 
-func NewBlockConsumer(client rpc.Client, channel chan Block) BlockConsumer {
+func NewBlockConsumer(client *ethclient.Client, channel chan *types.Header) BlockConsumer {
 	return BlockConsumer{client: client, channel: channel}
 }
 
@@ -29,21 +31,14 @@ func (bc *BlockConsumer) StartConsuming() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	sub, err := bc.client.EthSubscribe(ctx, bc.channel, "newBlocks")
+	sub, err := bc.client.SubscribeNewHead(ctx, bc.channel)
 	if err != nil {
 		return fmt.Errorf("subscribe error: %s", err.Error())
 	}
 
 	bc.sub = sub
 
-	var lastBlock Block
-	if err := bc.client.CallContext(ctx, &lastBlock, "eth_getBlockByNumber", "latest"); err != nil {
-		fmt.Println("can't get latest block:", err)
-		return fmt.Errorf("can't get latest block: %s", err.Error())
-	}
-
-	bc.channel <- lastBlock
-	return fmt.Errorf("connection lost: %s", (<-bc.sub.Err()).Error())
+	return nil
 }
 
 func (bc *BlockConsumer) StopConsuming() {
