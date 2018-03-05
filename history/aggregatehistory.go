@@ -15,20 +15,19 @@ import (
 type HistoryAggregation struct {
 	connection string
 	session    *mgo.Session
-	erc20      contracts.ERC20
 	decimals   map[types.Address]uint8
 }
 
-func NewHistoryAggregation(connection string, erc20 contracts.ERC20) (*HistoryAggregation, error) {
+func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
+
 	return &HistoryAggregation{
 		connection: connection,
 		session:    session,
-		erc20:      erc20,
 		decimals:   make(map[types.Address]uint8),
 	}, nil
 }
@@ -51,9 +50,13 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 
 	mappedTokens := groupTokens(transactions)
 	for token := range mappedTokens {
+		erc20, err := contracts.NewERC20(token.Address, nil)
+		if err != nil {
+			return nil, fmt.Errorf("could not generate contract")
+		}
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])
-		prices, txindex := history.getPrices(mappedTokens[token])
+		prices, txindex := history.getPrices(mappedTokens[token], erc20)
 		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
 		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
@@ -132,7 +135,7 @@ func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex 
 }
 
 func getPair(token types.Address) types.Pair {
-	return types.Pair{types.HexToAddress(types.ETH_ADDRESS), token}
+	return types.Pair{token, types.HexToAddress(types.ETH_ADDRESS)}
 }
 
 func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
@@ -148,8 +151,8 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 	return m
 }
 
-func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Address) (float64, error) {
-	decimals, err := history.erc20.Decimals(nil)
+func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Address, erc20 *contracts.ERC20) (float64, error) {
+	decimals, err := erc20.Decimals(nil)
 	if err != nil {
 		return 0.0, fmt.Errorf("could not get decimals() from contract")
 	}
@@ -171,11 +174,11 @@ func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Add
 	return (price / math.Pow(10.0, decimalsFloat)), nil
 }
 
-func (history *HistoryAggregation) getPrices(transactions []types.Transaction) ([]float64, []uint) {
+func (history *HistoryAggregation) getPrices(transactions []types.Transaction, erc20 *contracts.ERC20) ([]float64, []uint) {
 	var prices []float64
 	var txindex []uint
 	for _, tt := range transactions {
-		newPrice, _ := history.CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS))
+		newPrice, _ := history.CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), erc20)
 		prices = append(prices, newPrice)
 		txindex = append(txindex, tt.TransactionIndex)
 	}
