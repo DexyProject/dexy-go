@@ -49,11 +49,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 
 	mappedTokens := groupTokens(transactions)
 	for token := range mappedTokens {
-		erc20, err := contracts.NewERC20(token.Address, nil)
-		if err != nil {
-			return nil, err
-		}
-		decimals, err := history.cacheDecimals(token, erc20)
+		decimals, err := history.cacheDecimals(token)
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +179,11 @@ func getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []u
 	return prices, txindex
 }
 
-func (history *HistoryAggregation) cacheDecimals(token types.Address, erc20 *contracts.ERC20) (uint8, error) {
+func (history *HistoryAggregation) cacheDecimals(token types.Address) (uint8, error) {
+	erc20, err := contracts.NewERC20(token.Address, nil)
+	if err != nil {
+		return 0.0, fmt.Errorf("could not initialize contract")
+	}
 	if _, ok := history.decimals[token]; ok {
 		return history.decimals[token], nil
 	}
