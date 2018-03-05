@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -28,17 +27,14 @@ func NewBlockConsumer(client *ethclient.Client, channel chan *types.Header) Bloc
 }
 
 func (bc *BlockConsumer) StartConsuming() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	sub, err := bc.client.SubscribeNewHead(ctx, bc.channel)
+	sub, err := bc.client.SubscribeNewHead(context.Background(), bc.channel)
 	if err != nil {
 		return fmt.Errorf("subscribe error: %s", err.Error())
 	}
 
 	bc.sub = sub
 
-	return fmt.Errorf("connection lost: %s", (<-bc.sub.Err()).Error())
+	return nil
 }
 
 func (bc *BlockConsumer) StopConsuming() {
