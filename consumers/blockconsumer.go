@@ -38,7 +38,7 @@ func (bc *BlockConsumer) StartConsuming() error {
 
 	bc.sub = sub
 
-	return nil
+	return fmt.Errorf("connection lost: %s", (<-bc.sub.Err()).Error())
 }
 
 func (bc *BlockConsumer) StopConsuming() {
