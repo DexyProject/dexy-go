@@ -3,7 +3,6 @@ package history
 import (
 	"fmt"
 	"math/big"
-
 	"math"
 
 	"github.com/DexyProject/dexy-go/contracts"
