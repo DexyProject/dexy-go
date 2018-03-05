@@ -51,11 +51,15 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 	for token := range mappedTokens {
 		erc20, err := contracts.NewERC20(token.Address, nil)
 		if err != nil {
-			return nil, fmt.Errorf("could not generate contract")
+			return nil, err
+		}
+		decimals, err := history.cacheDecimals(token, erc20)
+		if err != nil {
+			return nil, err
 		}
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])
-		prices, txindex := history.getPrices(mappedTokens[token], erc20)
+		prices, txindex := getPrices(mappedTokens[token], decimals)
 		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
 		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
@@ -150,11 +154,7 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 	return m
 }
 
-func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Address, erc20 *contracts.ERC20) (float64, error) {
-	decimals, err := erc20.Decimals(nil)
-	if err != nil {
-		return 0.0, fmt.Errorf("could not get decimals() from contract")
-	}
+func CalcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
 	if t.Give.Amount.Sign() <= 0 || t.Get.Amount.Sign() <= 0 {
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
@@ -165,22 +165,32 @@ func (history *HistoryAggregation) CalcPrice(t types.Transaction, base types.Add
 	decimalsFloat := float64(decimals)
 	if t.Get.Token == base {
 		price, _ := new(big.Float).Quo(getFloat, giveFloat).Float64()
-		history.decimals[t.Give.Token] = decimals
 		return (price / math.Pow(10.0, decimalsFloat)), nil
 	}
 	price, _ := new(big.Float).Quo(giveFloat, getFloat).Float64()
-	history.decimals[t.Get.Token] = decimals
 	return (price / math.Pow(10.0, decimalsFloat)), nil
 }
 
-func (history *HistoryAggregation) getPrices(transactions []types.Transaction, erc20 *contracts.ERC20) ([]float64, []uint) {
+func getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
 	var prices []float64
 	var txindex []uint
 	for _, tt := range transactions {
-		newPrice, _ := history.CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), erc20)
+		newPrice, _ := CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
 		prices = append(prices, newPrice)
 		txindex = append(txindex, tt.TransactionIndex)
 	}
 
 	return prices, txindex
+}
+
+func (history *HistoryAggregation) cacheDecimals(token types.Address, erc20 *contracts.ERC20) (uint8, error) {
+	if _, ok := history.decimals[token]; ok {
+		return history.decimals[token], nil
+	}
+	decimals, err := erc20.Decimals(nil)
+	if err != nil {
+		return 0.0, fmt.Errorf("could not get decimals() from contract")
+	}
+	history.decimals[token] = decimals
+	return decimals, nil
 }
