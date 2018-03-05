@@ -228,13 +228,6 @@ func TestCalcOpenCloseIndex(t *testing.T) {
 	}
 }
 
-func TestGetPrices(t *testing.T) {
-	err, txindex := getPrices(trans1)
-	if err == nil || txindex == nil {
-		t.Errorf("could not generate prices")
-	}
-}
-
 func TestGroupTokens(t *testing.T) {
 	m := groupTokens(trans1)
 	fmt.Println(m)

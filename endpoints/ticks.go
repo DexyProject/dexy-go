@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"log"
+
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/types"
-	"log"
 )
 
 type Ticks struct {
