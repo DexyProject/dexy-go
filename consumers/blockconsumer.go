@@ -15,11 +15,9 @@ type Block struct {
 }
 
 type BlockConsumer struct {
-	client *ethclient.Client
-
+	client  *ethclient.Client
 	channel chan *types.Header
-
-	sub ethereum.Subscription
+	sub     ethereum.Subscription
 }
 
 func NewBlockConsumer(client *ethclient.Client, channel chan *types.Header) BlockConsumer {
