@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"math"
 
-	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -31,7 +30,7 @@ func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
 	}, nil
 }
 
-func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.Tick, error) {
+func (history *HistoryAggregation) AggregateTransactions(block int64, repository *TokensRepository) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
@@ -49,7 +48,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 
 	mappedTokens := groupTokens(transactions)
 	for token := range mappedTokens {
-		decimals, err := history.cacheDecimals(token)
+		decimals, err := repository.Decimals(token)
 		if err != nil {
 			return nil, err
 		}
@@ -177,20 +176,4 @@ func getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []u
 	}
 
 	return prices, txindex
-}
-
-func (history *HistoryAggregation) cacheDecimals(token types.Address) (uint8, error) {
-	erc20, err := contracts.NewERC20(token.Address, nil)
-	if err != nil {
-		return 0.0, fmt.Errorf("could not initialize contract")
-	}
-	if _, ok := history.decimals[token]; ok {
-		return history.decimals[token], nil
-	}
-	decimals, err := erc20.Decimals(nil)
-	if err != nil {
-		return 0.0, fmt.Errorf("could not get decimals() from contract")
-	}
-	history.decimals[token] = decimals
-	return decimals, nil
 }

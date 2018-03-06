@@ -159,6 +159,7 @@ var multiToken = []types.Transaction{
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection, err := NewHistoryAggregation(connection)
+	repository := NewTokensRepository()
 	if err != nil {
 		t.Errorf("could not establish new connection")
 	}
@@ -178,7 +179,7 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 		fmt.Println(matchTicks)
 	} // test mongo block matching
 
-	ticks, err := mgoConnection.AggregateTransactions(block)
+	ticks, err := mgoConnection.AggregateTransactions(block, repository)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
@@ -197,6 +198,7 @@ func TestMultiToken(t *testing.T) {
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
+	repository := NewTokensRepository()
 	var matchTicks []types.Transaction
 	c := mgoConnection.session.DB(DBName).C(FileName)
 	insertData(multiToken)
@@ -206,7 +208,7 @@ func TestMultiToken(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not match data")
 	}
-	ticks, err := mgoConnection.AggregateTransactions(block)
+	ticks, err := mgoConnection.AggregateTransactions(block, repository)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
