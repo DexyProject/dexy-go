@@ -27,12 +27,12 @@ func NewMongoTicks(connection string) (*MongoTicks, error) {
 	return &MongoTicks{connection: connection, session: session}, nil
 }
 
-func (tq *MongoTicks) InsertTick(NewTick types.Tick) error {
+func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {
 	session := tq.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	err := c.Insert(NewTick)
+	err := c.Insert(ticks)
 	if err != nil {
 		return fmt.Errorf("could not insert tick data")
 	}
