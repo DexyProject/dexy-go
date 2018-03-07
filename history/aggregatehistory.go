@@ -133,7 +133,7 @@ func (history *HistoryAggregation) calcOpenClosePrice(prices []float64, txindex 
 }
 
 func (history *HistoryAggregation) getPair(token types.Address) types.Pair {
-	return types.Pair{token, types.HexToAddress(types.ETH_ADDRESS)}
+	return types.Pair{Quote: token, Base: types.HexToAddress(types.ETH_ADDRESS)}
 }
 
 func (history *HistoryAggregation) groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
@@ -158,15 +158,18 @@ func (history *HistoryAggregation) calcPrice(t types.Transaction, base types.Add
 	getFloat, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
 	decimalsFloat := float64(decimals)
 
+	baseAmount := 0.0
+	quoteAmount := 0.0
+
 	if t.Get.Token == base {
-		getFloat = getFloat / math.Pow(10.0, 18.0)
-		giveFloat = giveFloat / math.Pow(10.0, decimalsFloat)
-		return (getFloat / giveFloat), nil
+		baseAmount = getFloat / math.Pow(10.0, 18.0)
+		quoteAmount = giveFloat / math.Pow(10.0, decimalsFloat)
+	} else {
+		quoteAmount = getFloat / math.Pow(10.0, 18.0)
+		baseAmount = giveFloat / math.Pow(10.0, decimalsFloat)
 	}
 
-	getFloat = getFloat / math.Pow(10.0, decimalsFloat)
-	giveFloat = giveFloat / math.Pow(10.0, 18.0)
-	return (giveFloat / getFloat), nil
+	return baseAmount / quoteAmount, nil
 }
 
 func (history *HistoryAggregation) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
