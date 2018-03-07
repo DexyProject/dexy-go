@@ -12,6 +12,8 @@ The dexy go server is made up of several components.
 
 ### REST 
 
+This command is used to run the rest API. This includes all endpoints documented [here](docs).
+
 ```
 Usage of main.go
   -ethnode string
@@ -24,6 +26,8 @@ Usage of main.go
 
 ### Trade Watcher
 
+This command is responsible for monitoring and indexing trades, this will update the orderbook as well as insert transactions into the history.
+
 ```
 Usage of main.go
   -addr string
@@ -35,6 +39,8 @@ Usage of main.go
 ```
 
 ### Cancelled Watcher
+
+This command is responsible for monitoring which orders have been cancelled, these will then be removed from the orderbook.
 
 ```
 Usage of main.go
