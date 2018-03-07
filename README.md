@@ -46,6 +46,16 @@ Usage of main.go
     	mongodb connection string
 ```
 
+### Ticker worker
+
+```
+Usage of main.go
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
 ### Balance Monitor
 
 ## Authors
