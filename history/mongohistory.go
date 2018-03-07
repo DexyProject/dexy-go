@@ -33,7 +33,6 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 
 	c := session.DB(DBName).C(FileName)
 
-
 	q := bson.M{
 		"$or": []bson.M{
 			{"give.token": token},
