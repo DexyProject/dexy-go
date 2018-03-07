@@ -14,7 +14,7 @@ import (
 )
 
 // ERC20ABI is the input ABI used to generate the binding from.
-const ERC20ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"decimals\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ERC20ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ERC20Bin is the compiled bytecode used for deploying new contracts.
 const ERC20Bin = `0x`
@@ -29,13 +29,14 @@ func DeployERC20(auth *bind.TransactOpts, backend bind.ContractBackend) (common.
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	return address, tx, &ERC20{ERC20Caller: ERC20Caller{contract: contract}, ERC20Transactor: ERC20Transactor{contract: contract}}, nil
+	return address, tx, &ERC20{ERC20Caller: ERC20Caller{contract: contract}, ERC20Transactor: ERC20Transactor{contract: contract}, ERC20Filterer: ERC20Filterer{contract: contract}}, nil
 }
 
 // ERC20 is an auto generated Go binding around an Ethereum contract.
 type ERC20 struct {
 	ERC20Caller     // Read-only binding to the contract
 	ERC20Transactor // Write-only binding to the contract
+	ERC20Filterer   // Log filterer for contract events
 }
 
 // ERC20Caller is an auto generated read-only Go binding around an Ethereum contract.
@@ -45,6 +46,11 @@ type ERC20Caller struct {
 
 // ERC20Transactor is an auto generated write-only Go binding around an Ethereum contract.
 type ERC20Transactor struct {
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
+}
+
+// ERC20Filterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type ERC20Filterer struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
@@ -87,16 +93,16 @@ type ERC20TransactorRaw struct {
 
 // NewERC20 creates a new instance of ERC20, bound to a specific deployed contract.
 func NewERC20(address common.Address, backend bind.ContractBackend) (*ERC20, error) {
-	contract, err := bindERC20(address, backend, backend)
+	contract, err := bindERC20(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &ERC20{ERC20Caller: ERC20Caller{contract: contract}, ERC20Transactor: ERC20Transactor{contract: contract}}, nil
+	return &ERC20{ERC20Caller: ERC20Caller{contract: contract}, ERC20Transactor: ERC20Transactor{contract: contract}, ERC20Filterer: ERC20Filterer{contract: contract}}, nil
 }
 
 // NewERC20Caller creates a new read-only instance of ERC20, bound to a specific deployed contract.
 func NewERC20Caller(address common.Address, caller bind.ContractCaller) (*ERC20Caller, error) {
-	contract, err := bindERC20(address, caller, nil)
+	contract, err := bindERC20(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,20 +111,29 @@ func NewERC20Caller(address common.Address, caller bind.ContractCaller) (*ERC20C
 
 // NewERC20Transactor creates a new write-only instance of ERC20, bound to a specific deployed contract.
 func NewERC20Transactor(address common.Address, transactor bind.ContractTransactor) (*ERC20Transactor, error) {
-	contract, err := bindERC20(address, nil, transactor)
+	contract, err := bindERC20(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &ERC20Transactor{contract: contract}, nil
 }
 
+// NewERC20Filterer creates a new log filterer instance of ERC20, bound to a specific deployed contract.
+func NewERC20Filterer(address common.Address, filterer bind.ContractFilterer) (*ERC20Filterer, error) {
+	contract, err := bindERC20(address, nil, nil, filterer)
+	if err != nil {
+		return nil, err
+	}
+	return &ERC20Filterer{contract: contract}, nil
+}
+
 // bindERC20 binds a generic wrapper to an already deployed contract.
-func bindERC20(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindERC20(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(ERC20ABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -213,7 +228,7 @@ func (_ERC20 *ERC20CallerSession) BalanceOf(owner common.Address) (*big.Int, err
 
 // Decimals is a free data retrieval call binding the contract method 0x313ce567.
 //
-// Solidity: function decimals() constant returns(decimals uint8)
+// Solidity: function decimals() constant returns(uint8)
 func (_ERC20 *ERC20Caller) Decimals(opts *bind.CallOpts) (uint8, error) {
 	var (
 		ret0 = new(uint8)
@@ -225,14 +240,14 @@ func (_ERC20 *ERC20Caller) Decimals(opts *bind.CallOpts) (uint8, error) {
 
 // Decimals is a free data retrieval call binding the contract method 0x313ce567.
 //
-// Solidity: function decimals() constant returns(decimals uint8)
+// Solidity: function decimals() constant returns(uint8)
 func (_ERC20 *ERC20Session) Decimals() (uint8, error) {
 	return _ERC20.Contract.Decimals(&_ERC20.CallOpts)
 }
 
 // Decimals is a free data retrieval call binding the contract method 0x313ce567.
 //
-// Solidity: function decimals() constant returns(decimals uint8)
+// Solidity: function decimals() constant returns(uint8)
 func (_ERC20 *ERC20CallerSession) Decimals() (uint8, error) {
 	return _ERC20.Contract.Decimals(&_ERC20.CallOpts)
 }

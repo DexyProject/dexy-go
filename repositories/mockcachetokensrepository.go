@@ -8,6 +8,10 @@ type MockCacheTokensRepository struct {
 	decimals map[types.Address]uint8
 }
 
+func NewMockCacheTokensRepository() *MockCacheTokensRepository {
+	return &MockCacheTokensRepository{decimals: make(map[types.Address]uint8)}
+}
+
 func (m *MockCacheTokensRepository) GetDecimals(token types.Address) (uint8, error) {
 	return m.decimals[token], nil
 }

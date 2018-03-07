@@ -38,17 +38,17 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 	var ticks []types.Tick
 	var transactions []types.Transaction
 
-	matchBlock := bson.M{"$match": bson.M{"$transactions.block": block}}
+	matchBlock := bson.M{"$match": bson.M{"block": block}}
 
 	err := c.Pipe([]bson.M{matchBlock}).All(&transactions)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve transactions")
+		return nil, fmt.Errorf("could not retrieve transactions: %s", err)
 	}
 
 	mappedTokens := history.groupTokens(transactions)
 	for token := range mappedTokens {
-		decimals, err := history.repository.Decimals(token)
+		decimals, err := history.repository.GetDecimals(token)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 				Close:     closePrice,
 				High:      high,
 				Low:       low,
-				Timestamp: mappedTokens[token][1].Timestamp,
+				Timestamp: mappedTokens[token][0].Timestamp,
 			},
 		)
 	}
