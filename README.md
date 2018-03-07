@@ -34,6 +34,18 @@ Usage of main.go
     	mongodb connection string
 ```
 
+### Cancelled Watcher
+
+```
+Usage of main.go
+  -addr string
+    	exchange address
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
 ### Balance Monitor
 
 ## Authors

@@ -8,7 +8,6 @@ import (
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
-	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/watchers"
@@ -21,17 +20,13 @@ func main() {
 
 	ethNode := flag.String("ethnode", "", "ethereum node address")
 	mongo := flag.String("mongo", "", "mongodb connection string")
-	addr := flag.String("addr", "", "contracts address")
+	addr := flag.String("addr", "", "exchange address")
 
 	flag.Parse()
 
-	if flag.NFlag() != 3 {
+	if *ethNode == "" || *mongo == "" || *addr == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
-	}
-
-	hist, err := history.NewMongoHistory(*mongo)
-	if err != nil {
 	}
 
 	conn, err := ethclient.Dial(*ethNode)
@@ -46,17 +41,17 @@ func main() {
 
 	ex, err := contracts.NewExchange(types.HexToAddress(*addr).Address, conn)
 
-	channel := make(chan *consumers.TradedMessage)
+	channel := make(chan *consumers.CancelledMessage)
 
-	tc := consumers.NewTradedConsumer(ex, conn, channel)
-	tf := watchers.NewTradeWatcher(hist, ex, ob, channel)
+	cc := consumers.NewCancelledConsumer(ex, channel)
+	cw := watchers.NewCancelledWatcher(ob, channel)
 
-	err = tc.StartConsuming()
+	err = cc.StartConsuming()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tf.Watch()
+	cw.Watch()
 }
 
 func deferOnPanic() {

@@ -2,6 +2,7 @@ package watchers
 
 import (
 	"errors"
+	"log"
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
@@ -34,20 +35,23 @@ func (tf *TradeWatcher) Watch() {
 
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
+			log.Printf("tx rejected insert: %s", err)
 			msg.Reject()
-			return
+			continue
 		}
 
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
+			log.Printf("tx rejected filled amount: %s", err)
 			msg.Reject()
-			return
+			continue
 		}
 
 		err = tf.handleFill(tx, filled)
 		if err != nil {
+			log.Printf("tx rejected handle: %s", err)
 			msg.Reject()
-			return
+			continue
 		}
 
 		msg.Ack()

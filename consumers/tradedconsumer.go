@@ -35,6 +35,7 @@ func NewTradedConsumer(ex *contracts.Exchange, conn *ethclient.Client, out chan<
 		stop:     make(chan struct{}),
 		ack:      make(chan types.Bytes),
 		reject:   make(chan types.Bytes),
+		blocks:   make(map[common.Hash]types.Int),
 	}
 }
 

@@ -33,7 +33,6 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 
 	c := session.DB(DBName).C(FileName)
 
-	var transactions []types.Transaction
 
 	q := bson.M{
 		"$or": []bson.M{
@@ -46,6 +45,7 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 		q["user"] = user
 	}
 
+	transactions := make([]types.Transaction, 0)
 	c.Find(q).Sort("-timestamp").Limit(limit).All(&transactions)
 
 	return transactions
