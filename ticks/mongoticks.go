@@ -45,7 +45,7 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	var results []types.Tick
+	results := make([]types.Tick, 0)
 
 	q := bson.M{
 		"$or": []bson.M{
