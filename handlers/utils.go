@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetLimit(limit string) int {
+func getLimit(limit string) int {
 	if len(limit) != 0 && limit != "0" {
 
 		u, err := strconv.Atoi(limit)
@@ -18,7 +18,7 @@ func GetLimit(limit string) int {
 	return 100
 }
 
-func GetUser(user string) *common.Address {
+func getUser(user string) *common.Address {
 	if user == "" || !common.IsHexAddress(user) {
 		return nil
 	}

@@ -14,7 +14,7 @@ import (
 type TradedConsumer struct {
 	exchange *contracts.Exchange
 
-	conn     *ethclient.Client
+	conn *ethclient.Client
 
 	out  chan<- *TradedMessage
 	stop chan struct{}

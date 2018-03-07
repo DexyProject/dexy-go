@@ -2,9 +2,10 @@ package history
 
 import (
 	"fmt"
-	"math/big"
 	"math"
+	"math/big"
 
+	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -13,7 +14,6 @@ import (
 type HistoryAggregation struct {
 	connection string
 	session    *mgo.Session
-	decimals   map[types.Address]uint8
 }
 
 func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
@@ -22,15 +22,13 @@ func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-
 	return &HistoryAggregation{
 		connection: connection,
 		session:    session,
-		decimals:   make(map[types.Address]uint8),
 	}, nil
 }
 
-func (history *HistoryAggregation) AggregateTransactions(block int64, repository *TokensRepository) ([]types.Tick, error) {
+func (history *HistoryAggregation) AggregateTransactions(block int64, repository *repositories.CacheTokensRepository) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
@@ -149,28 +147,31 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 	return m
 }
 
-func CalcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
+func calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
 	if t.Give.Amount.Sign() <= 0 || t.Get.Amount.Sign() <= 0 {
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
 
-	giveFloat := new(big.Float).SetInt(&t.Give.Amount.Int)
-	getFloat := new(big.Float).SetInt(&t.Get.Amount.Int)
-
+	giveFloat, _ := new(big.Float).SetInt(&t.Give.Amount.Int).Float64()
+	getFloat, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
 	decimalsFloat := float64(decimals)
+
 	if t.Get.Token == base {
-		price, _ := new(big.Float).Quo(getFloat, giveFloat).Float64()
-		return (price / math.Pow(10.0, decimalsFloat)), nil
+		getFloat = getFloat / math.Pow(10.0, 18.0)
+		giveFloat = giveFloat / math.Pow(10.0, decimalsFloat)
+		return (getFloat / giveFloat), nil
 	}
-	price, _ := new(big.Float).Quo(giveFloat, getFloat).Float64()
-	return (price / math.Pow(10.0, decimalsFloat)), nil
+
+	getFloat = getFloat / math.Pow(10.0, decimalsFloat)
+	giveFloat = giveFloat / math.Pow(10.0, 18.0)
+	return (giveFloat / getFloat), nil
 }
 
 func getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
 	var prices []float64
 	var txindex []uint
 	for _, tt := range transactions {
-		newPrice, _ := CalcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
+		newPrice, _ := calcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
 		prices = append(prices, newPrice)
 		txindex = append(txindex, tt.TransactionIndex)
 	}

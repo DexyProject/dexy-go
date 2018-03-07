@@ -1,0 +1,14 @@
+package repositories
+
+import (
+	"fmt"
+	"github.com/DexyProject/dexy-go/types"
+)
+
+type MockCacheTokensRepository struct {
+	decimals map[types.Address]uint8
+}
+
+func (m *MockCacheTokensRepository) GetDecimals(token types.Address) uint8 {
+	return m.decimals[token]
+}

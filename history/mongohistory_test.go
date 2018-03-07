@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -159,7 +160,7 @@ var multiToken = []types.Transaction{
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	mgoConnection, err := NewHistoryAggregation(connection)
-	repository := NewTokensRepository()
+	repository := &repositories.MockCacheTokensRepository{}
 	if err != nil {
 		t.Errorf("could not establish new connection")
 	}
@@ -175,17 +176,17 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
 	if err != nil {
 		t.Errorf("could not match data")
-	} else {
-		fmt.Println(matchTicks)
-	} // test mongo block matching
+	}
 
 	ticks, err := mgoConnection.AggregateTransactions(block, repository)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
+
 	if err != nil {
-		fmt.Println(err)
+		t.Error(err)
 	}
+
 	b, err := json.Marshal(ticks)
 	fmt.Println(string(b))
 }
@@ -198,7 +199,7 @@ func TestMultiToken(t *testing.T) {
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
-	repository := NewTokensRepository()
+	repository, err := repositories.NewTokensRepository()
 	var matchTicks []types.Transaction
 	c := mgoConnection.session.DB(DBName).C(FileName)
 	insertData(multiToken)
@@ -208,18 +209,20 @@ func TestMultiToken(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not match data")
 	}
+
 	ticks, err := mgoConnection.AggregateTransactions(block, repository)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
+
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	multiTokenMap := groupTokens(multiToken)
 	if len(multiTokenMap) <= 1 {
 		t.Errorf("tokens not grouped properly")
 	}
-
 }
 
 func TestCalcOpenCloseIndex(t *testing.T) {
