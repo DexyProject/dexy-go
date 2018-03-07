@@ -52,7 +52,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, repository
 		}
 		pair := getPair(token)
 		volume := calcVolume(mappedTokens[token])
-		prices, txindex := getPrices(mappedTokens[token], decimals)
+		prices, txindex := history.getPrices(mappedTokens[token], decimals)
 		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
 		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
 		high, low := calcHighLow(prices)
@@ -167,7 +167,7 @@ func calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64
 	return (giveFloat / getFloat), nil
 }
 
-func getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
+func (history *HistoryAggregation) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
 	var prices []float64
 	var txindex []uint
 	for _, tt := range transactions {
