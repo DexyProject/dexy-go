@@ -44,18 +44,18 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, repository
 		return nil, fmt.Errorf("could not retrieve transactions")
 	}
 
-	mappedTokens := groupTokens(transactions)
+	mappedTokens := history.groupTokens(transactions)
 	for token := range mappedTokens {
 		decimals, err := repository.Decimals(token)
 		if err != nil {
 			return nil, err
 		}
-		pair := getPair(token)
-		volume := calcVolume(mappedTokens[token])
+		pair := history.getPair(token)
+		volume := history.calcVolume(mappedTokens[token])
 		prices, txindex := history.getPrices(mappedTokens[token], decimals)
-		openIndex, closeIndex := calcOpenCloseIndex(mappedTokens[token])
-		openPrice, closePrice := calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
-		high, low := calcHighLow(prices)
+		openIndex, closeIndex := history.calcOpenCloseIndex(mappedTokens[token])
+		openPrice, closePrice := history.calcOpenClosePrice(prices, txindex, openIndex, closeIndex)
+		high, low := history.calcHighLow(prices)
 
 		ticks = append(
 			ticks, types.Tick{
@@ -74,7 +74,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, repository
 	return ticks, nil
 }
 
-func calcVolume(transactions []types.Transaction) *big.Int {
+func (history *HistoryAggregation) calcVolume(transactions []types.Transaction) *big.Int {
 	volume := new(big.Int)
 	for _, tt := range transactions {
 		switch {
@@ -88,7 +88,7 @@ func calcVolume(transactions []types.Transaction) *big.Int {
 	return volume
 }
 
-func calcHighLow(prices []float64) (float64, float64) {
+func (history *HistoryAggregation) calcHighLow(prices []float64) (float64, float64) {
 	high, low := prices[0], prices[0]
 	for _, p := range prices {
 		if high < p {
@@ -102,7 +102,7 @@ func calcHighLow(prices []float64) (float64, float64) {
 	return high, low
 }
 
-func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
+func (history *HistoryAggregation) calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	openIndex, closeIndex := transactions[0].TransactionIndex, transactions[0].TransactionIndex
 	for _, tt := range transactions {
 		if openIndex > tt.TransactionIndex {
@@ -116,7 +116,7 @@ func calcOpenCloseIndex(transactions []types.Transaction) (uint, uint) {
 	return openIndex, closeIndex
 }
 
-func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex uint) (float64, float64) {
+func (history *HistoryAggregation) calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for i, tt := range txindex {
 		switch tt {
@@ -130,11 +130,11 @@ func calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex 
 	return openPrice, closePrice
 }
 
-func getPair(token types.Address) types.Pair {
+func (history *HistoryAggregation) getPair(token types.Address) types.Pair {
 	return types.Pair{token, types.HexToAddress(types.ETH_ADDRESS)}
 }
 
-func groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
+func (history *HistoryAggregation) groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
 	m := make(map[types.Address][]types.Transaction)
 	for _, t := range transactions {
 		if t.Get.Token == types.HexToAddress(types.ETH_ADDRESS) {
@@ -147,7 +147,7 @@ func groupTokens(transactions []types.Transaction) map[types.Address][]types.Tra
 	return m
 }
 
-func calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
+func (history *HistoryAggregation) calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
 	if t.Give.Amount.Sign() <= 0 || t.Get.Amount.Sign() <= 0 {
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
@@ -171,7 +171,7 @@ func (history *HistoryAggregation) getPrices(transactions []types.Transaction, d
 	var prices []float64
 	var txindex []uint
 	for _, tt := range transactions {
-		newPrice, _ := calcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
+		newPrice, _ := history.calcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
 		prices = append(prices, newPrice)
 		txindex = append(txindex, tt.TransactionIndex)
 	}
