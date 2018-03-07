@@ -12,12 +12,12 @@ import (
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/DexyProject/dexy-go/ticks"
 )
 
 func main() {
