@@ -154,22 +154,18 @@ func (history *HistoryAggregation) calcPrice(t types.Transaction, base types.Add
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
 
-	giveFloat, _ := new(big.Float).SetInt(&t.Give.Amount.Int).Float64()
-	getFloat, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
-	decimalsFloat := float64(decimals)
+	give, _ := new(big.Float).SetInt(&t.Give.Amount.Int).Float64()
+	get, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
 
-	baseAmount := 0.0
-	quoteAmount := 0.0
+	baseAmount := get
+	quoteAmount := give
 
 	if t.Get.Token == base {
-		baseAmount = getFloat / math.Pow(10.0, 18.0)
-		quoteAmount = giveFloat / math.Pow(10.0, decimalsFloat)
-	} else {
-		quoteAmount = getFloat / math.Pow(10.0, 18.0)
-		baseAmount = giveFloat / math.Pow(10.0, decimalsFloat)
+		baseAmount = get
+		quoteAmount = give
 	}
 
-	return baseAmount / quoteAmount, nil
+	return (baseAmount / math.Pow(10.0, 18.0)) / (quoteAmount / math.Pow(10.0, float64(decimals))), nil
 }
 
 func (history *HistoryAggregation) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
