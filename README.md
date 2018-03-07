@@ -54,6 +54,8 @@ Usage of main.go
 
 ### Ticker worker
 
+This command is monitors the blocks, and generates new ticks for every block.
+
 ```
 Usage of main.go
   -ethnode string
