@@ -170,6 +170,7 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not establish new connection")
 	}
+
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
