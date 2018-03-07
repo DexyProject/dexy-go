@@ -222,7 +222,7 @@ func TestMultiToken(t *testing.T) {
 		t.Errorf("could not match data")
 	}
 
-	ticks, err := mgoConnection.AggregateTransactions(block, repository)
+	ticks, err := mgoConnection.AggregateTransactions(block)
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
