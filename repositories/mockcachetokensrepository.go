@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"github.com/DexyProject/dexy-go/types"
 )
 
