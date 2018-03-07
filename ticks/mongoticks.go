@@ -47,14 +47,7 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 	c := session.DB(DBName).C(FileName)
 	results := make([]types.Tick, 0)
 
-	q := bson.M{
-		"$or": []bson.M{
-			{"give.token": token},
-			{"get.token": token},
-		},
-	}
-
-	err := c.Find(q).All(&results)
+	err := c.Find(bson.M{"pair.quote": token}).All(&results)
 	if err != nil {
 		return nil, fmt.Errorf("could not fetch ticks")
 	}

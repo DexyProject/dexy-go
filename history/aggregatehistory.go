@@ -157,8 +157,8 @@ func (history *HistoryAggregation) calcPrice(t types.Transaction, base types.Add
 	give, _ := new(big.Float).SetInt(&t.Give.Amount.Int).Float64()
 	get, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
 
-	baseAmount := get
-	quoteAmount := give
+	baseAmount := give
+	quoteAmount := get
 
 	if t.Get.Token == base {
 		baseAmount = get
