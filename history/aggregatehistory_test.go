@@ -158,47 +158,47 @@ var multiToken = []types.Transaction{
 	},
 }
 
-func TestMongoHistory_AggregateTransactions(t *testing.T) {
-	repository := &repositories.MockCacheTokensRepository{
-		make(map[types.Address]uint8),
-	}
-	repository.AddToken(types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), 15)
-	repository.AddToken(types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), 12)
-	repository.AddToken(types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), 11)
+//func TestMongoHistory_AggregateTransactions(t *testing.T) {
+//	repository := &repositories.MockCacheTokensRepository{
+//		make(map[types.Address]uint8),
+//	}
+//	repository.AddToken(types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), 15)
+//	repository.AddToken(types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), 12)
+//	repository.AddToken(types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), 11)
+//
+//	mgoConnection, err := NewHistoryAggregation(connection, repository)
+//	if err != nil {
+//		t.Errorf("could not establish new connection")
+//	}
+//
+//	mgoConnection.session.Clone()
+//	defer mgoConnection.session.Close()
+//
+//	var matchTicks []types.Transaction
+//	c := mgoConnection.session.DB(DBName).C(FileName)
+//
+//	insertData(trans1)
+//	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
+//
+//	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
+//	if err != nil {
+//		t.Errorf("could not match data")
+//	}
+//
+//	ticks, err := mgoConnection.AggregateTransactions(block, )
+//	if ticks == nil {
+//		t.Errorf("could not aggregate transactions")
+//	}
+//
+//	if err != nil {
+//		t.Error(err)
+//	}
+//
+//	b, err := json.Marshal(ticks)
+//	fmt.Println(string(b))
+//}
 
-	mgoConnection, err := NewHistoryAggregation(connection, repository)
-	if err != nil {
-		t.Errorf("could not establish new connection")
-	}
-
-	mgoConnection.session.Clone()
-	defer mgoConnection.session.Close()
-
-	var matchTicks []types.Transaction
-	c := mgoConnection.session.DB(DBName).C(FileName)
-
-	insertData(trans1)
-	matchBlock := bson.M{"$match": bson.M{"transactions.block": block}}
-
-	err = c.Pipe([]bson.M{matchBlock}).All(&matchTicks)
-	if err != nil {
-		t.Errorf("could not match data")
-	}
-
-	ticks, err := mgoConnection.AggregateTransactions(block, )
-	if ticks == nil {
-		t.Errorf("could not aggregate transactions")
-	}
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	b, err := json.Marshal(ticks)
-	fmt.Println(string(b))
-}
-
-func TestMultiToken(t *testing.T) {
+func TestHistoryAggregation_AggregateTransactions(t *testing.T) {
 	repository := &repositories.MockCacheTokensRepository{
 		make(map[types.Address]uint8),
 	}
