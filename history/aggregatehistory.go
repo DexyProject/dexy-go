@@ -14,9 +14,10 @@ import (
 type HistoryAggregation struct {
 	connection string
 	session    *mgo.Session
+	repository repositories.TokenRepository
 }
 
-func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
+func NewHistoryAggregation(connection string, repository repositories.TokenRepository) (*HistoryAggregation, error) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongo database")
@@ -25,10 +26,11 @@ func NewHistoryAggregation(connection string) (*HistoryAggregation, error) {
 	return &HistoryAggregation{
 		connection: connection,
 		session:    session,
+		repository: repository,
 	}, nil
 }
 
-func (history *HistoryAggregation) AggregateTransactions(block int64, repository *repositories.CacheTokensRepository) ([]types.Tick, error) {
+func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.Tick, error) {
 	session := history.session.Clone()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
@@ -46,7 +48,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64, repository
 
 	mappedTokens := history.groupTokens(transactions)
 	for token := range mappedTokens {
-		decimals, err := repository.Decimals(token)
+		decimals, err := history.repository.Decimals(token)
 		if err != nil {
 			return nil, err
 		}

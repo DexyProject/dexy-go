@@ -159,8 +159,14 @@ var multiToken = []types.Transaction{
 }
 
 func TestMongoHistory_AggregateTransactions(t *testing.T) {
-	mgoConnection, err := NewHistoryAggregation(connection)
-	repository := &repositories.MockCacheTokensRepository{}
+	repository := &repositories.MockCacheTokensRepository{
+		make(map[types.Address]uint8),
+	}
+	repository.AddToken(types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), 15)
+	repository.AddToken(types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), 12)
+	repository.AddToken(types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), 11)
+
+	mgoConnection, err := NewHistoryAggregation(connection, repository)
 	if err != nil {
 		t.Errorf("could not establish new connection")
 	}
@@ -178,7 +184,7 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 		t.Errorf("could not match data")
 	}
 
-	ticks, err := mgoConnection.AggregateTransactions(block, repository)
+	ticks, err := mgoConnection.AggregateTransactions(block, )
 	if ticks == nil {
 		t.Errorf("could not aggregate transactions")
 	}
@@ -192,14 +198,20 @@ func TestMongoHistory_AggregateTransactions(t *testing.T) {
 }
 
 func TestMultiToken(t *testing.T) {
-	mgoConnection, err := NewHistoryAggregation(connection)
+	repository := &repositories.MockCacheTokensRepository{
+		make(map[types.Address]uint8),
+	}
+	repository.AddToken(types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), 15)
+	repository.AddToken(types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), 12)
+	repository.AddToken(types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), 11)
+
+	mgoConnection, err := NewHistoryAggregation(connection, repository)
 	if err != nil {
 		t.Errorf("could not establish new connection")
 	}
 	mgoConnection.session.Clone()
 	defer mgoConnection.session.Close()
 
-	repository, err := repositories.NewTokensRepository()
 	var matchTicks []types.Transaction
 	c := mgoConnection.session.DB(DBName).C(FileName)
 	insertData(multiToken)

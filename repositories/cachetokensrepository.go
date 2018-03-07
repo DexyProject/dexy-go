@@ -9,7 +9,7 @@ import (
 )
 
 type TokenRepository interface {
-	Decimals(token types.Address) (uint8, error)
+	GetDecimals(token types.Address) (uint8, error)
 }
 
 type CacheTokensRepository struct {
@@ -17,7 +17,7 @@ type CacheTokensRepository struct {
 	decimals   map[types.Address]uint8
 }
 
-func NewTokensRepository(connection string) (*CacheTokensRepository, error) {
+func NewCacheTokensRepository(connection string) (*CacheTokensRepository, error) {
 	conn, err := ethclient.Dial(connection)
 	if err != nil {
 		return nil, fmt.Errorf("could not dial ethclient")
@@ -29,7 +29,7 @@ func NewTokensRepository(connection string) (*CacheTokensRepository, error) {
 	}, nil
 }
 
-func (repository *CacheTokensRepository) Decimals(token types.Address) (uint8, error) {
+func (repository *CacheTokensRepository) GetDecimals(token types.Address) (uint8, error) {
 	if _, ok := repository.decimals[token]; ok {
 		return repository.decimals[token], nil
 	}
