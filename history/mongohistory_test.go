@@ -231,23 +231,10 @@ func TestMultiToken(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	multiTokenMap := groupTokens(multiToken)
+	multiTokenMap := mgoConnection.groupTokens(multiToken)
 	if len(multiTokenMap) <= 1 {
 		t.Errorf("tokens not grouped properly")
 	}
-}
-
-func TestCalcOpenCloseIndex(t *testing.T) {
-	var openIndex, closeIndex uint
-	openIndex, closeIndex = calcOpenCloseIndex(trans1)
-	if openIndex == 0 || closeIndex == 0 {
-		t.Errorf("could not calculate open and close indices")
-	}
-}
-
-func TestGroupTokens(t *testing.T) {
-	m := groupTokens(trans1)
-	fmt.Println(m)
 }
 
 func BytesNew(bytes string) types.Bytes {
@@ -257,7 +244,7 @@ func BytesNew(bytes string) types.Bytes {
 }
 
 func insertData(transactions []types.Transaction) error {
-	mgoConnection, err := NewHistoryAggregation(connection)
+	mgoConnection, err := NewHistoryAggregation(connection, nil)
 	if err != nil {
 		return fmt.Errorf("could not establish new connection")
 	}
