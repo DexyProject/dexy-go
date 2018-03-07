@@ -6,7 +6,6 @@ import (
 
 	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/types"
-	"log"
 )
 
 const (
