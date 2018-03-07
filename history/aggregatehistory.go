@@ -79,10 +79,10 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 func (history *HistoryAggregation) calcVolume(transactions []types.Transaction) *big.Int {
 	volume := new(big.Int)
 	for _, tt := range transactions {
-		switch {
-		case tt.Give.Token != types.HexToAddress(types.ETH_ADDRESS):
+		switch types.HexToAddress(types.ETH_ADDRESS) {
+		case tt.Give.Token:
 			volume.Add(volume, &tt.Give.Amount.Int)
-		case tt.Get.Token != types.HexToAddress(types.ETH_ADDRESS):
+		case tt.Get.Token:
 			volume.Add(volume, &tt.Get.Amount.Int)
 		}
 	}
