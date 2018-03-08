@@ -7,3 +7,6 @@ db.orders.createIndex({ "give.token": 1 });
 
 db.history.createIndex({ timestamp: 1 });
 db.history.createIndex({ block: 1 });
+
+db.ticks.createIndex({ "pair.quote": 1 });
+db.ticks.createIndex({ timestamp: 1 });

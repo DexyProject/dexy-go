@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DBName   = "TickData"
-	FileName = "Ticks"
+	DBName   = "dexy"
+	FileName = "ticks"
 )
 
 type MongoTicks struct {
@@ -27,14 +27,18 @@ func NewMongoTicks(connection string) (*MongoTicks, error) {
 	return &MongoTicks{connection: connection, session: session}, nil
 }
 
-func (tq *MongoTicks) InsertTick(NewTick types.Tick) error {
+func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {
 	session := tq.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	err := c.Insert(NewTick)
-	if err != nil {
-		return fmt.Errorf("could not insert tick data")
+
+	// @todo insert many
+	for i := range ticks {
+		err := c.Insert(ticks[i])
+		if err != nil {
+			return fmt.Errorf("could not insert tick data: %s", err.Error())
+		}
 	}
 
 	return nil
