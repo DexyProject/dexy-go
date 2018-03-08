@@ -118,13 +118,14 @@ func (history *HistoryAggregation) calcOpenCloseIndex(transactions []types.Trans
 	return openIndex, closeIndex
 }
 
-func (history *HistoryAggregation) calcOpenClosePrice(prices []float64, txindex []uint, OpenIndex, CloseIndex uint) (float64, float64) {
+func (history *HistoryAggregation) calcOpenClosePrice(prices []float64, txindex []uint, openIndex, closeIndex uint) (float64, float64) {
 	var openPrice, closePrice float64
 	for i, tt := range txindex {
-		switch tt {
-		case OpenIndex:
+		if tt == openIndex {
 			openPrice = prices[i]
-		case CloseIndex:
+		}
+
+		if tt == closeIndex {
 			closePrice = prices[i]
 		}
 	}
