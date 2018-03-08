@@ -12,6 +12,7 @@ import (
 	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func main() {
@@ -30,7 +31,12 @@ func main() {
 
 	channel := make(chan *types.Header)
 
-	bc := consumers.NewBlockConsumer(nil, channel)
+	conn, err := ethclient.Dial(*ethNode)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	bc := consumers.NewBlockConsumer(conn, channel)
 
 	repo, err := repositories.NewCacheTokensRepository(*ethNode)
 	if err != nil {
@@ -62,6 +68,11 @@ func main() {
 		t, err := aggregation.AggregateTransactions(head.Number.Int64())
 		if err != nil {
 			log.Printf("failed aggregating transactions: %s", err.Error())
+		}
+
+		if len(t) == 0 {
+			log.Printf("no ticks for block: %s", head.Number.String())
+			continue
 		}
 
 		err = tickdb.InsertTicks(t)

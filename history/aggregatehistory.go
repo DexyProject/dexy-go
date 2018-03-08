@@ -35,7 +35,7 @@ func (history *HistoryAggregation) AggregateTransactions(block int64) ([]types.T
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
-	var ticks []types.Tick
+	ticks := make([]types.Tick, 0)
 	var transactions []types.Transaction
 
 	matchBlock := bson.M{"$match": bson.M{"block": block}}
