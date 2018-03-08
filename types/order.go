@@ -29,16 +29,17 @@ type Orders struct {
 }
 
 type Order struct {
-	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
-	Price     string    `json:"-" bson:"price"`
-	Give      Trade     `json:"give" bson:"give"`
-	Get       Trade     `json:"get" bson:"get"`
-	Expires   Timestamp `json:"expires" bson:"expires"`
-	Nonce     int64     `json:"nonce" bson:"nonce"`
-	User      Address   `json:"user" bson:"user"`
-	Exchange  Address   `json:"exchange" bson:"exchange"`
-	Signature EC        `json:"signature" bson:"signature"`
-	Filled    Int       `json:"filled,omitempty" bson:"filled"`
+	Hash      Hash        `json:"hash,omitempty" bson:"_id"`
+	Price     string      `json:"-" bson:"price"`
+	Give      Trade       `json:"give" bson:"give"`
+	Get       Trade       `json:"get" bson:"get"`
+	Expires   Timestamp   `json:"expires" bson:"expires"`
+	Nonce     int64       `json:"nonce" bson:"nonce"`
+	User      Address     `json:"user" bson:"user"`
+	Exchange  Address     `json:"exchange" bson:"exchange"`
+	Signature EC          `json:"signature" bson:"signature"`
+	Filled    Int         `json:"filled,omitempty" bson:"filled"`
+	Status    OrderStatus `json:"status,omitempty" bson:"status"`
 }
 
 func (o *Order) OrderHash() Hash {

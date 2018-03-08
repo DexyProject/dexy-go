@@ -31,7 +31,8 @@ Returns Asks and Bids for a specified ```token```
         "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
         "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
         "sig_mode": 0
-      }
+      },
+      "status":"OPEN"
     }
   ],
   "bids": [
@@ -54,7 +55,8 @@ Returns Asks and Bids for a specified ```token```
         "r": "0x61a3ed31b43c8780e905a260a35faefcc527be7516aa11c0256729b5b351bc33",
         "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254",
         "sig_mode": 0
-      }
+      },
+      "status":"OPEN"
     }
   ]
 }
@@ -90,7 +92,8 @@ Returns orders ```token```
       "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
       "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
       "sig_mode": 0
-    }
+    },
+    "status":"OPEN"
   },
   {
     "hash": "0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A",
@@ -111,7 +114,8 @@ Returns orders ```token```
       "r": "0x61a3ed31b43c8780e905a260a35faefcc527be7516aa11c0256729b5b351bc33",
       "s": "0x40349190569279751135161d22529dc25add4f6069af05be04cacbda2ace2254",
       "sig_mode": 0
-    }
+    },
+    "status":"OPEN"
   }
 ]
 ```
@@ -142,7 +146,8 @@ Returns order by the ```hash```
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
     "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
     "sig_mode": 0
-  }
+  },
+  "status":"OPEN"
 }
 ```
 
@@ -171,14 +176,22 @@ Adds a new order to the order book.
     "r": "0x9242685bf161793cc25603c231bc2f568eb630ea16aa137d2664ac8038825608",
     "s": "0x4f8ae3bd7535248d0bd448298cc2e2071e56992d0774dc340c368ae950852ada",
     "sig_mode": 0
-  }
+  },
+  "status":"OPEN"
 }
 ```
 
 #### Sig Modes
 
-| Value | Meaning                                                                                                         |
-|-------|-----------------------------------------------------------------------------------------------------------------|
-| 0     | Messages signed using the ```eth_signTypedData``` method                                                        |
-| 1     | Messages signed using geth, this will append the ```\x19Ethereum Signed Message:\n32``` prefix when verifying   |
+| Value | Meaning                                                                                                             |
+|-------|---------------------------------------------------------------------------------------------------------------------|
+| 0     | Messages signed using the ```eth_signTypedData``` method                                                            |
+| 1     | Messages signed using geth, this will append the ```\x19Ethereum Signed Message:\n32``` prefix when verifying       |
 | 2     | Messages signed using a trezor, this will append the ```\x19Ethereum Signed Message:\n\x20``` prefix when verifying |
+
+#### Order Status
+
+| Value       | Meaning                                                                  |
+|-------------|--------------------------------------------------------------------------|
+| OPEN        | Order is available for taking.                                           |
+| UNDERFUNDED | Order creator does not have enough funds to allow the order to be taken. |
