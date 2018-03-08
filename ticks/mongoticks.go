@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DBName   = "TickData"
-	FileName = "Ticks"
+	DBName   = "dexy"
+	FileName = "ticks"
 )
 
 type MongoTicks struct {
