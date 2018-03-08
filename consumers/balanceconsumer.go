@@ -3,6 +3,7 @@ package consumers
 import (
 	"github.com/DexyProject/dexy-go/contracts"
 	"log"
+	"fmt"
 )
 
 type BalanceConsumer struct {
@@ -11,8 +12,15 @@ type BalanceConsumer struct {
 
 func (bc *BalanceConsumer) StartConsuming() error {
 
-	sub, err := bc.vault.WatchDeposited(nil, nil, nil) // @todo
-	sub, err := bc.vault.WatchWithdrawn(nil, nil, nil) // @todo
+	deposit, err := bc.vault.WatchDeposited(nil, nil, nil) // @todo
+	if err != nil {
+		return fmt.Errorf("failed to watch deposited: %s", err.Error())
+	}
+
+	withdraw, err := bc.vault.WatchWithdrawn(nil, nil, nil) // @todo
+	if err != nil {
+		return fmt.Errorf("failed to watch withdrawn: %s", err.Error())
+	}
 
 	return nil
 }
