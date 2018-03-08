@@ -112,6 +112,8 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	o.Price = price
+	o.Status = types.OPEN
+
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
 		log.Printf("InsertOrder failed: %v", err)

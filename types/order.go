@@ -16,6 +16,7 @@ type OrderStatus string
 
 const (
 	UNDERFUNDED OrderStatus = "UNDERFUNDED"
+	OPEN                    = "OPEN"
 )
 
 type Trade struct {
