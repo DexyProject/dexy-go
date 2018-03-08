@@ -12,6 +12,12 @@ import (
 
 var ORDER_HASH_SCHEME = NewHash("0xa8da5e6ea8c46a0516b3a2e3b010f264e8334214f4b37ff5f2bc8a2dd3f32be1")
 
+type OrderStatus string
+
+const (
+	UNDERFUNDED OrderStatus = "UNDERFUNDED"
+)
+
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
 	Amount Int     `json:"amount" bson:"amount"`
