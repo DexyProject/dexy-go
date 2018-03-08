@@ -41,7 +41,10 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 	}
 
 	if user != nil {
-		q["user"] = user
+		q["$or"] = []bson.M{
+			{"taker": user},
+			{"maker": user},
+		}
 	}
 
 	transactions := make([]types.Transaction, 0)
