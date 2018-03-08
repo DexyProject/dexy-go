@@ -75,6 +75,8 @@ func main() {
 			continue
 		}
 
+		log.Printf("inserting ticks for block: %s", head.Number.String())
+
 		err = tickdb.InsertTicks(t)
 		if err != nil {
 			log.Printf("failed to insert ticks: %s", err.Error())
