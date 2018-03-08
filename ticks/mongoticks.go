@@ -6,6 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 const (
@@ -32,9 +33,13 @@ func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	err := c.Insert(ticks)
-	if err != nil {
-		return fmt.Errorf("could not insert tick data")
+
+	// @todo insert many
+	for i := range ticks {
+		err := c.Insert(ticks[i])
+		if err != nil {
+			return fmt.Errorf("could not insert tick data: %s", err.Error())
+		}
 	}
 
 	return nil
