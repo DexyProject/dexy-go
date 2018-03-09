@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 
+	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
@@ -17,6 +18,7 @@ import (
 type Orders struct {
 	OrderBook        orderbook.OrderBook
 	BalanceValidator validators.BalanceValidator
+	vault            contracts.Vault
 }
 
 func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
@@ -82,6 +84,19 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
 		returnError(rw, "badly formatted order", http.StatusBadRequest)
+		return
+	}
+
+	approved, err := orders.vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
+	if err != nil {
+		log.Printf("checking vault approval failed: %v", err)
+		returnError(rw, "vault approval failed to check", http.StatusInternalServerError)
+		return
+	}
+
+	if !approved {
+		log.Printf("vault is not approved")
+		returnError(rw, "vault is not approved", http.StatusBadRequest)
 		return
 	}
 
