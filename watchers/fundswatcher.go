@@ -3,10 +3,13 @@ package watchers
 import (
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/balances"
 )
 
 type FundsWatcher struct {
 	vault contracts.Vault
+
+	balances balances.Balances
 
 	withdraws, deposits <-chan consumers.BalanceChange
 }
@@ -28,7 +31,11 @@ func (fw *FundsWatcher) handleWithdraw(change consumers.BalanceChange) {
 
 	// @todo call on orders
 
-	onOrders := 0
+	onOrders, err := fw.balances.OnOrders(change.User, change.Token)
+	if err != nil {
+
+	}
+
 	balance := 0
 
 	if onOrders < balance {

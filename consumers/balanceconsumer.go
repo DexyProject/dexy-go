@@ -10,6 +10,7 @@ import (
 
 type BalanceChange struct {
 	User   types.Address
+	Token  types.Address
 	Amount types.Int
 }
 
@@ -64,9 +65,16 @@ func (bc *BalanceConsumer) consume(deposited chan *contracts.VaultDeposited, wit
 }
 
 func balanceChangeForDeposit(deposit contracts.VaultDeposited) BalanceChange {
-	return BalanceChange{User: types.Address{Address: deposit.User}, Amount: types.Int{Int: *deposit.Amount}}
+	return BalanceChange{
+		User: types.Address{Address: deposit.User},
+		Token: types.Address{Address: deposit.Token},
+		Amount: types.Int{Int: *deposit.Amount},
+	}
 }
 
 func balanceChangeForWithdraw(withdraw contracts.VaultWithdrawn) BalanceChange {
-	return BalanceChange{User: types.Address{Address: withdraw.User}, Amount: types.Int{Int: *withdraw.Amount}}
-}
+	return BalanceChange{
+		User: types.Address{Address: withdraw.User},
+		Token: types.Address{Address: withdraw.Token},
+		Amount: types.Int{Int: *withdraw.Amount},
+	}}
