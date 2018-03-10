@@ -14,7 +14,6 @@ type FundsWatcher struct {
 }
 
 func (fw *FundsWatcher) Watch() {
-
 	for {
 		select {
 		case withdraw := <-fw.withdraws:
