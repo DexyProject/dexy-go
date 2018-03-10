@@ -2,18 +2,24 @@ package consumers
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/event"
 )
+
+type BalanceChange struct {
+	User   types.Address
+	Amount types.Int
+}
 
 type BalanceConsumer struct {
 	vault *contracts.Vault
 
 	stop chan struct{}
 
-	withdraw, deposit event.Subscription
+	withdrawSink, depositSink chan<- BalanceChange
+	withdraw, deposit         event.Subscription
 }
 
 func (bc *BalanceConsumer) StartConsuming() error {
@@ -48,11 +54,19 @@ func (bc *BalanceConsumer) consume(deposited chan *contracts.VaultDeposited, wit
 	for {
 		select {
 		case deposit := <-deposited:
-			log.Print(deposit)
+			bc.withdrawSink <- balanceChangeForDeposit(*deposit)
 		case withdraw := <-withdrawn:
-			log.Print(withdraw)
+			bc.withdrawSink <- balanceChangeForWithdraw(*withdraw)
 		case <-bc.stop:
 			return
 		}
 	}
+}
+
+func balanceChangeForDeposit(deposit contracts.VaultDeposited) BalanceChange {
+	return BalanceChange{User: types.Address{Address: deposit.User}, Amount: types.Int{Int: *deposit.Amount}}
+}
+
+func balanceChangeForWithdraw(withdraw contracts.VaultWithdrawn) BalanceChange {
+	return BalanceChange{User: types.Address{Address: withdraw.User}, Amount: types.Int{Int: *withdraw.Amount}}
 }

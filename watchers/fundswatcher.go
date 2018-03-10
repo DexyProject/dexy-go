@@ -13,7 +13,6 @@ func (fw *FundsWatcher) handleWithdraw() {
 
 	withdrawn := 0
 
-
 	// @todo call on orders
 
 	onOrders := 0
