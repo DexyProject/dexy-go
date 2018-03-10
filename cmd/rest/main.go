@@ -12,6 +12,7 @@ import (
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -42,6 +43,7 @@ func main() {
 	r := mux.NewRouter()
 	setupOrderBookEndpoints(*mongo, v, r)
 	setupHistoryEndpoints(*mongo, r)
+	setupTickEndpoint(*mongo, r)
 	http.Handle("/", r)
 
 	headersOk := handlers.AllowedHeaders([]string{
@@ -84,6 +86,17 @@ func setupOrderBookEndpoints(mongo string, v validators.BalanceValidator, r *mux
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
+}
+
+func setupTickEndpoint(mongo string, r *mux.Router) {
+	tickdb, err := ticks.NewMongoTicks(mongo)
+	if err != nil {
+		log.Fatalf("tickdb error: %s", err.Error())
+	}
+
+	t := endpoints.Ticks{Ticks: tickdb}
+
+	r.HandleFunc("/ticks", t.GetTicks).Methods("GET", "HEAD").Queries("token", "")
 }
 
 func setupBalanceValidator(ethereum string, mongo string, addr common.Address) (validators.BalanceValidator, error) {

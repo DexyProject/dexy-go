@@ -5,6 +5,6 @@ import (
 )
 
 type Ticks interface {
-	InsertTick(NewTick types.Tick) error
+	InsertTicks(ticks []types.Tick) error
 	FetchTicks(token types.Address) ([]types.Tick, error)
 }

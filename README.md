@@ -52,6 +52,18 @@ Usage of main.go
     	mongodb connection string
 ```
 
+### Ticker worker
+
+This command is monitors the blocks, and generates new ticks for every block.
+
+```
+Usage of main.go
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
 ### Balance Monitor
 
 ## Authors
