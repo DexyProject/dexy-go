@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bash
 
 go build -o out/api cmd/rest/main.go 
 go build -o out/cancelledwatcher cmd/cancelledwatcher/main.go
