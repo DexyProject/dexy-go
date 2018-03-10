@@ -1,12 +1,27 @@
 package watchers
 
-import "github.com/DexyProject/dexy-go/contracts"
+import (
+	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/consumers"
+	"log"
+)
 
 type FundsWatcher struct {
 	vault contracts.Vault
+
+	withdraws, deposits <-chan consumers.BalanceChange
 }
 
 func (fw *FundsWatcher) Watch() {
+
+	for {
+		select {
+		case withdraw := <-fw.withdraws:
+			log.Printf("test: %+v", withdraw)
+		case deposit := <-fw.deposits:
+			log.Printf("test: %+v", deposit)
+		}
+	}
 }
 
 func (fw *FundsWatcher) handleWithdraw() {
