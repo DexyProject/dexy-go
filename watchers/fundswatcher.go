@@ -1,9 +1,10 @@
 package watchers
 
 import (
-	"github.com/DexyProject/dexy-go/contracts"
-	"github.com/DexyProject/dexy-go/consumers"
 	"log"
+
+	"github.com/DexyProject/dexy-go/consumers"
+	"github.com/DexyProject/dexy-go/contracts"
 )
 
 type FundsWatcher struct {
