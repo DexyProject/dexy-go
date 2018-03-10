@@ -54,7 +54,7 @@ func (bc *BalanceConsumer) consume(deposited chan *contracts.VaultDeposited, wit
 	for {
 		select {
 		case deposit := <-deposited:
-			bc.withdrawSink <- balanceChangeForDeposit(*deposit)
+			bc.depositSink <- balanceChangeForDeposit(*deposit)
 		case withdraw := <-withdrawn:
 			bc.withdrawSink <- balanceChangeForWithdraw(*withdraw)
 		case <-bc.stop:
