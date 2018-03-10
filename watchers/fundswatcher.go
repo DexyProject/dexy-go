@@ -1,8 +1,6 @@
 package watchers
 
 import (
-	"log"
-
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
 )
@@ -17,16 +15,16 @@ func (fw *FundsWatcher) Watch() {
 	for {
 		select {
 		case withdraw := <-fw.withdraws:
-			log.Printf("test: %+v", withdraw)
+			go fw.handleWithdraw(withdraw)
 		case deposit := <-fw.deposits:
-			log.Printf("test: %+v", deposit)
+			go fw.handleDeposit(deposit)
 		}
 	}
 }
 
-func (fw *FundsWatcher) handleWithdraw() {
+func (fw *FundsWatcher) handleWithdraw(change consumers.BalanceChange) {
 
-	withdrawn := 0
+	withdrawn := change.Amount
 
 	// @todo call on orders
 
@@ -38,7 +36,7 @@ func (fw *FundsWatcher) handleWithdraw() {
 	}
 }
 
-func (fw *FundsWatcher) handleDeposit() {
+func (fw *FundsWatcher) handleDeposit(change consumers.BalanceChange) {
 
 	// @todo calculate the amount which is underfunded
 
