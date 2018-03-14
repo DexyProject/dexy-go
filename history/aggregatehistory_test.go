@@ -83,7 +83,10 @@ func TestHistoryAggregation_AggregateTransactions(t *testing.T) {
 		t.Error(err)
 	}
 
-	// @todo tests need to be fixed
+	if len(ticks) != 3 {
+		t.Errorf("all tokens not aggregated")
+	}
+
 }
 
 func BytesNew(bytes string) types.Bytes {
