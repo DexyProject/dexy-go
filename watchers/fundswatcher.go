@@ -4,6 +4,7 @@ import (
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/balances"
+	"log"
 )
 
 type FundsWatcher struct {
@@ -44,6 +45,12 @@ func (fw *FundsWatcher) handleWithdraw(change consumers.BalanceChange) {
 }
 
 func (fw *FundsWatcher) handleDeposit(change consumers.BalanceChange) {
+
+	balance, err := fw.vault.BalanceOf(nil, change.Token.Address, change.User.Address)
+	if err != nil {
+		log.Printf("balance error: %s", err.Error())
+		return
+	}
 
 	// @todo calculate the amount which is underfunded
 

@@ -50,3 +50,7 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 
 	return &types.Int{Int: *i}, nil
 }
+
+func (balances *MongoBalances) Underfunded(user types.Address, token types.Address) (*types.Int, error) {
+	return nil, nil
+}
