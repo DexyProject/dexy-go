@@ -35,13 +35,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	v, err := setupBalanceValidator(*ethNode, *mongo, common.HexToAddress(*vaultaddr))
+	v, err := setupVault(*ethNode, common.HexToAddress(*vaultaddr))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bv, err := setupBalanceValidator(v, *mongo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	r := mux.NewRouter()
-	setupOrderBookEndpoints(*mongo, v, r)
+	setupOrderBookEndpoints(*mongo, bv, v, r)
 	setupHistoryEndpoints(*mongo, r)
 	setupTickEndpoint(*mongo, r)
 	http.Handle("/", r)
@@ -74,13 +79,13 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 	r.HandleFunc("/trades", endpoint.Handle).Methods("GET").Queries("token", "")
 }
 
-func setupOrderBookEndpoints(mongo string, v validators.BalanceValidator, r *mux.Router) {
+func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *contracts.Vault, r *mux.Router) {
 	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
 		log.Fatalf("Orderbook error: %v", err.Error())
 	}
 
-	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: v}
+	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: bv, Vault: v}
 
 	r.HandleFunc("/orderbook", orders.GetOrderBook).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
@@ -99,23 +104,23 @@ func setupTickEndpoint(mongo string, r *mux.Router) {
 	r.HandleFunc("/ticks", t.GetTicks).Methods("GET", "HEAD").Queries("token", "")
 }
 
-func setupBalanceValidator(ethereum string, mongo string, addr common.Address) (validators.BalanceValidator, error) {
-	conn, err := ethclient.Dial(ethereum)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
-	}
+func setupBalanceValidator(v *contracts.Vault, mongo string) (validators.BalanceValidator, error) {
 
 	b, err := balances.NewMongoBalances(mongo)
 	if err != nil {
 		return nil, err
 	}
 
-	v, err := contracts.NewVault(addr, conn)
+	return validators.NewRPCBalanceValidator(v, b), nil
+}
+
+func setupVault(ethereum string, addr common.Address) (*contracts.Vault, error) {
+	conn, err := ethclient.Dial(ethereum)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
 	}
 
-	return validators.NewRPCBalanceValidator(*v, b), nil
+	return contracts.NewVault(addr, conn)
 }
 
 func deferOnPanic() {
