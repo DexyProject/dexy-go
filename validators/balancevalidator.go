@@ -14,11 +14,11 @@ type BalanceValidator interface {
 }
 
 type RPCBalanceValidator struct {
-	vault    contracts.Vault
+	vault    *contracts.Vault
 	balances balances.Balances
 }
 
-func NewRPCBalanceValidator(vault contracts.Vault, balances balances.Balances) *RPCBalanceValidator {
+func NewRPCBalanceValidator(vault *contracts.Vault, balances balances.Balances) *RPCBalanceValidator {
 	return &RPCBalanceValidator{
 		vault:    vault,
 		balances: balances,
@@ -28,7 +28,7 @@ func NewRPCBalanceValidator(vault contracts.Vault, balances balances.Balances) *
 func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
 	balance, err := b.vault.BalanceOf(nil, o.Give.Token.Address, o.User.Address)
 	if err != nil {
-		return false, fmt.Errorf("could not get balance from contract")
+		return false, fmt.Errorf("could not get balance from contract: %s", err.Error())
 	}
 
 	if balance.Sign() == 0 {

@@ -18,7 +18,7 @@ import (
 type Orders struct {
 	OrderBook        orderbook.OrderBook
 	BalanceValidator validators.BalanceValidator
-	vault            contracts.Vault
+	Vault            *contracts.Vault
 }
 
 func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	approved, err := orders.vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
+	approved, err := orders.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
 	if err != nil {
 		log.Printf("checking vault approval failed: %v", err)
 		returnError(rw, "vault approval failed to check", http.StatusInternalServerError)
