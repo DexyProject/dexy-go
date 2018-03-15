@@ -134,7 +134,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("inserted new order %s", o.OrderHash())
+	log.Printf("inserted new order %s", o.OrderHash().String())
 
 	rw.WriteHeader(http.StatusCreated)
 }

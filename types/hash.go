@@ -9,16 +9,14 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Hash [32]byte
+type Hash struct {
+	common.Hash
+}
 
 func NewHash(hash string) Hash {
 	h := Hash{}
 	h.SetBytes(common.FromHex(hash))
 	return h
-}
-
-func (h Hash) String() string {
-	return common.ToHex(h[:])
 }
 
 func (h Hash) GetBSON() (interface{}, error) {
@@ -42,9 +40,5 @@ func (h Hash) MarshalJSON() ([]byte, error) {
 }
 
 func (h *Hash) UnmarshalJSON(input []byte) error {
-	return hexutil.UnmarshalFixedJSON(reflect.TypeOf(Hash{}), input, h[:])
-}
-
-func (h *Hash) SetBytes(b []byte) {
-	copy(h[:], b)
+	return hexutil.UnmarshalFixedJSON(reflect.TypeOf(Hash{}), input, h.Hash[:])
 }

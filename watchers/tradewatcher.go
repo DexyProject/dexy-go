@@ -77,7 +77,7 @@ func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) bool {
 }
 
 func (tf *TradeWatcher) orderFilledAmount(maker types.Address, order types.Hash) (types.Int, error) {
-	f, err := tf.exchange.Filled(nil, maker.Address, order)
+	f, err := tf.exchange.Filled(nil, maker.Address, order.Hash)
 	if err != nil {
 		return types.Int{}, err
 	}

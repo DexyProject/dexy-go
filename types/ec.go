@@ -17,16 +17,16 @@ const (
 
 type EC struct {
 	V       int     `json:"v" bson:"v"`
-	R       Bytes   `json:"r" bson:"r"`
-	S       Bytes   `json:"s" bson:"s"`
+	R       Hash    `json:"r" bson:"r"`
+	S       Hash    `json:"s" bson:"s"`
 	SigMode SigMode `json:"sig_mode" bson:"sig_mode"`
 }
 
 func (ec *EC) Verify(address Address, hash Hash) bool {
 
 	sigBytes := make([]byte, 65)
-	copy(sigBytes[32-len(ec.R.Bytes):32], ec.R.Bytes[:])
-	copy(sigBytes[64-len(ec.S.Bytes):64], ec.S.Bytes[:])
+	copy(sigBytes[32-len(ec.R.Hash):32], ec.R.Hash[:])
+	copy(sigBytes[64-len(ec.S.Hash):64], ec.S.Hash[:])
 	sigBytes[64] = byte(ec.V - 27)
 
 	hashBytes := getMessage(hash, ec.SigMode)
@@ -47,11 +47,11 @@ func (ec *EC) Verify(address Address, hash Hash) bool {
 func getMessage(hash Hash, mode SigMode) []byte {
 	switch mode {
 	case TYPED_SIG_EIP:
-		return hash[:]
+		return hash.Hash[:]
 	case GETH:
-		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash[:]...))
+		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash.Hash[:]...))
 	case TREZOR:
-		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n\x20"), hash[:]...))
+		return crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n\x20"), hash.Hash[:]...))
 	}
 
 	return nil

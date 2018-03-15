@@ -10,11 +10,11 @@ type Message interface {
 type TradedMessage struct {
 	Transaction types.Transaction
 
-	ack    chan<- types.Bytes
-	reject chan<- types.Bytes
+	ack    chan<- types.Hash
+	reject chan<- types.Hash
 }
 
-func NewTradedMessage(tx types.Transaction, ack, reject chan<- types.Bytes) *TradedMessage {
+func NewTradedMessage(tx types.Transaction, ack, reject chan<- types.Hash) *TradedMessage {
 	return &TradedMessage{Transaction: tx, ack: ack, reject: reject}
 }
 

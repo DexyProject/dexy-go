@@ -56,7 +56,7 @@ func (o *Order) generateHash() {
 	hash.Write(o.Exchange.Address[:])
 
 	sha := sha3.NewKeccak256()
-	sha.Write(ORDER_HASH_SCHEME[:])
+	sha.Write(ORDER_HASH_SCHEME.Hash[:])
 	sha.Write(hash.Sum(nil))
 
 	o.Hash.SetBytes(sha.Sum(nil))

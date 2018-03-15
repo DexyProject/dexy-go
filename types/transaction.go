@@ -3,7 +3,7 @@ package types
 import "github.com/DexyProject/dexy-go/contracts"
 
 type Transaction struct {
-	TransactionID    Bytes   `json:"tx" bson:"_id"`
+	TransactionID    Hash    `json:"tx" bson:"_id"`
 	TransactionIndex uint    `json:"index" bson:"index"`
 	OrderHash        Hash    `json:"hash" bson:"hash"`
 	BlockNumber      uint64  `json:"block" bson:"block"`
@@ -16,9 +16,9 @@ type Transaction struct {
 
 func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
 	return Transaction{
-		TransactionID:    Bytes{Bytes: trade.Raw.TxHash.Bytes()},
+		TransactionID:    Hash{trade.Raw.TxHash},
 		TransactionIndex: trade.Raw.Index,
-		OrderHash:        trade.Hash,
+		OrderHash:        Hash{trade.Hash},
 		BlockNumber:      trade.Raw.BlockNumber,
 		Timestamp:        timestamp,
 		Taker:            Address{Address: trade.Taker},

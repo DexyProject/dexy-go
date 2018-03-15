@@ -19,8 +19,8 @@ type TradedConsumer struct {
 	out  chan<- *TradedMessage
 	stop chan struct{}
 
-	ack    chan types.Bytes
-	reject chan types.Bytes
+	ack    chan types.Hash
+	reject chan types.Hash
 
 	sub event.Subscription
 
@@ -33,8 +33,8 @@ func NewTradedConsumer(ex *contracts.Exchange, conn *ethclient.Client, out chan<
 		conn:     conn,
 		out:      out,
 		stop:     make(chan struct{}),
-		ack:      make(chan types.Bytes),
-		reject:   make(chan types.Bytes),
+		ack:      make(chan types.Hash),
+		reject:   make(chan types.Hash),
 		blocks:   make(map[common.Hash]types.Int),
 	}
 }
