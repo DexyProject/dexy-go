@@ -3,7 +3,7 @@ package types
 import "github.com/DexyProject/dexy-go/contracts"
 
 type Transaction struct {
-	TransactionID    Hash   `json:"tx" bson:"_id"`
+	TransactionID    Hash    `json:"tx" bson:"_id"`
 	TransactionIndex uint    `json:"index" bson:"index"`
 	OrderHash        Hash    `json:"hash" bson:"hash"`
 	BlockNumber      uint64  `json:"block" bson:"block"`

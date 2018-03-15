@@ -17,8 +17,8 @@ const (
 
 type EC struct {
 	V       int     `json:"v" bson:"v"`
-	R       Hash   `json:"r" bson:"r"`
-	S       Hash   `json:"s" bson:"s"`
+	R       Hash    `json:"r" bson:"r"`
+	S       Hash    `json:"s" bson:"s"`
 	SigMode SigMode `json:"sig_mode" bson:"sig_mode"`
 }
 
