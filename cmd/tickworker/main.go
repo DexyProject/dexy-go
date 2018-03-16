@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/DexyProject/dexy-go/consumers"
-	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/gateways/history"
 	"github.com/DexyProject/dexy-go/repositories"
-	"github.com/DexyProject/dexy-go/ticks"
+	"github.com/DexyProject/dexy-go/gateways/ticks"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )

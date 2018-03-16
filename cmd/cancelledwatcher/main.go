@@ -8,7 +8,7 @@ import (
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/gateways/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/watchers"
 	"github.com/ethereum/go-ethereum/ethclient"

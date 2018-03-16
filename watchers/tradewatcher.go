@@ -6,8 +6,8 @@ import (
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
-	"github.com/DexyProject/dexy-go/history"
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/gateways/history"
+	"github.com/DexyProject/dexy-go/gateways/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 )
 

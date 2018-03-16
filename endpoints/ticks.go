@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DexyProject/dexy-go/ticks"
+	"github.com/DexyProject/dexy-go/gateways/ticks"
 	"github.com/DexyProject/dexy-go/types"
 )
 

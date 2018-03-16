@@ -2,7 +2,7 @@ package watchers
 
 import (
 	"github.com/DexyProject/dexy-go/consumers"
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/gateways/orderbook"
 )
 
 type CancelledWatcher struct {
