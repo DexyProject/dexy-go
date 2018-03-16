@@ -129,7 +129,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
-		log.Printf("InsertOrder failed: %v", err)
+		log.Printf("insert order failed: %v", err)
 		returnError(rw, "internal error", http.StatusInternalServerError)
 		return
 	}
