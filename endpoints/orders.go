@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/DexyProject/dexy-go/contracts"
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/gateways/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"

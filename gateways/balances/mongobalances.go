@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/gateways/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

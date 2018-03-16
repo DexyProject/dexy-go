@@ -13,21 +13,21 @@ const (
 	FileName = "history"
 )
 
-type MongoHistory struct {
+type MongoGatewayHistory struct {
 	connection string
 	session    *mgo.Session
 }
 
-func NewMongoHistory(connection string) (*MongoHistory, error) {
+func NewMongoHistory(connection string) (*MongoGatewayHistory, error) {
 	session, err := mgo.Dial(connection)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &MongoHistory{connection: connection, session: session}, nil
+	return &MongoGatewayHistory{connection: connection, session: session}, nil
 }
 
-func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
+func (history *MongoGatewayHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
 	session := history.session.Copy()
 	defer session.Close()
 
@@ -53,7 +53,7 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 	return transactions
 }
 
-func (history *MongoHistory) InsertTransaction(transaction types.Transaction) error {
+func (history *MongoGatewayHistory) InsertTransaction(transaction types.Transaction) error {
 	session := history.session.Copy()
 	defer session.Close()
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/gateways/history"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 )

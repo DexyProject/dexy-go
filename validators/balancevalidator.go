@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/DexyProject/dexy-go/balances"
+	"github.com/DexyProject/dexy-go/gateways/balances"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/types"
 )
