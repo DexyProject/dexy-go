@@ -163,11 +163,15 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 			},
 			{"$sort": bson.M{"price": 1}},
 			{"$project": bson.M{"token": "$_id", "data": bson.M{"$slice": []interface{}{"$data", 1}}}},
+			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
 	)
 
 	result := []bson.M{}
-	pipe.All(&result)
+	err := pipe.All(&result)
+	if err != nil {
+
+	}
 
 	log.Printf("%+v", result)
 
