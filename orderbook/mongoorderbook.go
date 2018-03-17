@@ -143,3 +143,9 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 
 	return &order
 }
+
+func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
+	m := make([]types.Market, 0)
+
+	return m
+}
