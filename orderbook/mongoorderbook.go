@@ -161,6 +161,17 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 					},
 				},
 			},
+			{
+				"$project": bson.M{
+					"token": bson.M{
+						"$cond": bson.M{
+								"if": bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
+								"then": "$get.token",
+								"else": "$give.token",
+						},
+					},
+				},
+			},
 		},
 	)
 
