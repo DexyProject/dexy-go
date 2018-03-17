@@ -6,6 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 )
 
 type MongoOrderBook struct {
@@ -160,8 +161,10 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 		},
 	)
 
-	result := bson.M{}
+	result := []bson.M{}
 	pipe.All(&result)
+
+	log.Printf("%+v", result)
 
 	return m
 }

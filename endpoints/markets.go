@@ -10,7 +10,7 @@ import (
 )
 
 type Markets struct {
-	OrderBook orderbook.MongoOrderBook
+	OrderBook orderbook.OrderBook
 }
 
 func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) {
@@ -22,7 +22,7 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		returnError(rw, "badly formatted order", http.StatusBadRequest)
+		returnError(rw, "badly formatted token list", http.StatusBadRequest)
 		return
 	}
 
