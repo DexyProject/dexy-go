@@ -159,18 +159,14 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) ([]types.Market, er
 	}
 
 	// @todo for
-	
+
 	log.Printf("%+v", result)
 
 	return m, nil
 }
 
 func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
-	session := ob.session.Copy()
-	defer session.Close()
-
-	c := session.DB(DBName).C(FileName)
-	pipe := c.Pipe(
+	return ob.executeAggregation(
 		[]bson.M{
 			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
 			{
@@ -184,22 +180,10 @@ func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error
 			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
 	)
-
-	result := []bson.M{}
-	err := pipe.All(&result)
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
 }
 
 func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error) {
-	session := ob.session.Copy()
-	defer session.Close()
-
-	c := session.DB(DBName).C(FileName)
-	pipe := c.Pipe(
+	return ob.executeAggregation(
 		[]bson.M{
 			{"$match": bson.M{"get.token": bson.M{"$in": tokens}}},
 			{
@@ -213,6 +197,14 @@ func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error
 			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
 	)
+}
+
+func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	pipe := c.Pipe(pipeline)
 
 	result := []bson.M{}
 	err := pipe.All(&result)
