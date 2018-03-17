@@ -102,7 +102,7 @@ func setupMarketsEndpoints(mongo string, r *mux.Router) {
 
 	markets := endpoints.Markets{OrderBook: ob}
 
-	r.HandleFunc("/markets", markets.GetMarkets).Methods("GET", "HEAD")
+	r.HandleFunc("/markets", markets.GetMarkets).Methods("POST", "HEAD")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {

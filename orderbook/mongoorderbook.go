@@ -155,9 +155,14 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 	pipe := c.Pipe(
 		[]bson.M{
 			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
-			{"$group": bson.M{"_id": "$give.token", "prices": bson.M{"$push": "$price"}}},
+			{
+				"$group": bson.M{
+					"_id": "$give.token",
+					"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+				},
+			},
 			{"$sort": bson.M{"price": 1}},
-			{"$project": bson.M{"token": "$_id", "price": bson.M{"$slice": []interface{}{"$prices", 1}}}},
+			{"$project": bson.M{"token": "$_id", "data": bson.M{"$slice": []interface{}{"$data", 1}}}},
 		},
 	)
 
