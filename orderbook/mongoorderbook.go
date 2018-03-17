@@ -163,6 +163,5 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 	result := bson.M{}
 	pipe.All(&result)
 
-
 	return m
 }
