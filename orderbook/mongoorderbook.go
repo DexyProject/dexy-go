@@ -151,29 +151,18 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 	m := make([]types.Market, 0)
 
 	c := session.DB(DBName).C(FileName)
-	c.Pipe(
+	pipe := c.Pipe(
 		[]bson.M{
-			{
-				"$match": bson.M{
-					"$or": []interface{}{
-						bson.M{"give.token": bson.M{"$in": tokens}},
-						bson.M{"get.token": bson.M{"$in": tokens}},
-					},
-				},
-			},
-			{
-				"$project": bson.M{
-					"token": bson.M{
-						"$cond": bson.M{
-								"if": bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
-								"then": "$get.token",
-								"else": "$give.token",
-						},
-					},
-				},
-			},
+			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
+			{"$group": bson.M{"_id": "$give.token", "prices": bson.M{"$push": "$price"}}},
+			{"$sort": bson.M{"price": 1}},
+			{"$project": bson.M{"token": "$_id", "price": bson.M{"$slice": []interface{}{"$prices", 1}}}},
 		},
 	)
+
+	result := bson.M{}
+	pipe.All(&result)
+
 
 	return m
 }
