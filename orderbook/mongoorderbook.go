@@ -145,11 +145,29 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	return &order
 }
 
-func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
+func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) ([]types.Market, error) {
+	m := make([]types.Market, 0)
+
+	asks, err := ob.getAskMarkets(tokens)
+	if err != nil {
+		return m, err
+	}
+
+	bids, err := ob.getAskMarkets(tokens)
+	if err != nil {
+		return m, err
+	}
+
+	// @todo for
+	
+	log.Printf("%+v", result)
+
+	return m, nil
+}
+
+func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
 	session := ob.session.Copy()
 	defer session.Close()
-
-	m := make([]types.Market, 0)
 
 	c := session.DB(DBName).C(FileName)
 	pipe := c.Pipe(
@@ -170,10 +188,37 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
 	result := []bson.M{}
 	err := pipe.All(&result)
 	if err != nil {
-
+		return result, err
 	}
 
-	log.Printf("%+v", result)
+	return result, nil
+}
 
-	return m
+func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	pipe := c.Pipe(
+		[]bson.M{
+			{"$match": bson.M{"get.token": bson.M{"$in": tokens}}},
+			{
+				"$group": bson.M{
+					"_id": "$get.token",
+					"data": bson.M{"$push": bson.M{"base": "$give.amount", "quote": "$get.amount"}},
+				},
+			},
+			{"$sort": bson.M{"price": 1}},
+			{"$project": bson.M{"token": "$_id", "data": bson.M{"$slice": []interface{}{"$data", 1}}}},
+			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
+		},
+	)
+
+	result := []bson.M{}
+	err := pipe.All(&result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
 }
