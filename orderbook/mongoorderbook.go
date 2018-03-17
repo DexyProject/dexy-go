@@ -145,7 +145,24 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 }
 
 func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) []types.Market {
+	session := ob.session.Copy()
+	defer session.Close()
+
 	m := make([]types.Market, 0)
+
+	c := session.DB(DBName).C(FileName)
+	c.Pipe(
+		[]bson.M{
+			{
+				"$match": bson.M{
+					"$or": []interface{}{
+						bson.M{"give.token": bson.M{"$in": tokens}},
+						bson.M{"get.token": bson.M{"$in": tokens}},
+					},
+				},
+			},
+		},
+	)
 
 	return m
 }

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/types"
 )
 
 type Markets struct {
