@@ -160,8 +160,6 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) ([]types.Market, er
 
 	// @todo for
 
-	log.Printf("%+v", result)
-
 	return m, nil
 }
 
