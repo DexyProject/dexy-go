@@ -6,7 +6,6 @@ type PairAmount struct {
 }
 
 type Market struct {
-	Token Address    `json:"token"`
 	Bid   PairAmount `json:"bid"`
 	Ask   PairAmount `json:"ask"`
 }

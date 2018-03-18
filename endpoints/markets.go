@@ -31,6 +31,11 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	markets := m.OrderBook.GetMarkets(tokens)
+	markets, err := m.OrderBook.GetMarkets(tokens)
+	if err != nil {
+		returnError(rw, "error fetching markets", http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(rw).Encode(markets)
 }
