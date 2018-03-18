@@ -143,3 +143,82 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 
 	return &order
 }
+
+// @todo this is ugly, find a cleaner way at a later stage, possibly move out of OB
+func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]types.Market, error) {
+	m := make(map[types.Address]types.Market)
+
+	asks, err := ob.getAskMarkets(tokens)
+	if err != nil {
+		return m, err
+	}
+
+	bids, err := ob.getBidMarkets(tokens)
+	if err != nil {
+		return m, err
+	}
+
+	for _, ask := range asks {
+		m[types.HexToAddress(ask["token"].(string))] = types.Market{
+			Ask: types.PairAmount{Quote: ask["quote"].(string), Base: ask["base"].(string)},
+		}
+	}
+
+	for _, bids := range bids {
+		m[types.HexToAddress(bids["token"].(string))] = types.Market{
+			Bid: types.PairAmount{Quote: bids["quote"].(string), Base: bids["base"].(string)},
+		}
+	}
+
+	return m, nil
+}
+
+func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
+	return ob.executeAggregation(
+		[]bson.M{
+			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
+			{
+				"$group": bson.M{
+					"_id":  "$give.token",
+					"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+				},
+			},
+			{"$sort": bson.M{"price": 1}},
+			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
+			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
+		},
+	)
+}
+
+func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error) {
+	return ob.executeAggregation(
+		[]bson.M{
+			{"$match": bson.M{"get.token": bson.M{"$in": tokens}}},
+			{
+				"$group": bson.M{
+					"_id":  "$get.token",
+					"data": bson.M{"$push": bson.M{"base": "$give.amount", "quote": "$get.amount"}},
+				},
+			},
+			{"$sort": bson.M{"price": -1}},
+			{"$project": bson.M{"token": "$_id", "data": bson.M{"$slice": []interface{}{"$data", 1}}}},
+			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
+		},
+	)
+}
+
+func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	pipe := c.Pipe(pipeline)
+
+	var result []bson.M
+	err := pipe.All(&result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}

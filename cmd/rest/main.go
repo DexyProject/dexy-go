@@ -47,6 +47,7 @@ func main() {
 
 	r := mux.NewRouter()
 	setupOrderBookEndpoints(*mongo, bv, v, r)
+	setupMarketsEndpoints(*mongo, r)
 	setupHistoryEndpoints(*mongo, r)
 	setupTickEndpoint(*mongo, r)
 	http.Handle("/", r)
@@ -91,6 +92,17 @@ func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *co
 	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
 	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
 	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
+}
+
+func setupMarketsEndpoints(mongo string, r *mux.Router) {
+	ob, err := orderbook.NewMongoOrderBook(mongo)
+	if err != nil {
+		log.Fatalf("Orderbook error: %v", err.Error())
+	}
+
+	markets := endpoints.Markets{OrderBook: ob}
+
+	r.HandleFunc("/markets", markets.GetMarkets).Methods("GET", "HEAD")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {
