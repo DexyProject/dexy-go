@@ -180,13 +180,13 @@ func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error
 	return ob.executeAggregation(
 		[]bson.M{
 			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
+			{"$sort": bson.M{"price": 1}},
 			{
 				"$group": bson.M{
 					"_id":  "$give.token",
 					"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
 				},
 			},
-			{"$sort": bson.M{"price": 1}},
 			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
 			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
