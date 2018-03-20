@@ -16,9 +16,10 @@ type Markets struct {
 func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
+	query := r.URL.Query().Get("tokens")
+
 	tokens := make([]types.Address, 0)
-	err := json.NewDecoder(r.Body).Decode(&tokens)
-	defer r.Body.Close()
+	err := json.Unmarshal([]byte(query), &tokens)
 
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())

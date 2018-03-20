@@ -4,7 +4,8 @@
 
 Returns information for list of ```markets```
 
-### Request Body
+### Parameters
+* **tokens [array]** ```required``` A json encoded array of token addresses. 
 ```json
 ["0xbebb2325ef529e4622761498f1f796d262100768", "0xe85b843180efce2de43aa6adcf04af7bf1f50c79"]
 ```

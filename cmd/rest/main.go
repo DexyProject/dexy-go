@@ -46,6 +46,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	r.NotFoundHandler = http.HandlerFunc(notFound)
+
 	setupOrderBookEndpoints(*mongo, bv, v, r)
 	setupMarketsEndpoints(*mongo, r)
 	setupHistoryEndpoints(*mongo, r)
@@ -102,7 +104,7 @@ func setupMarketsEndpoints(mongo string, r *mux.Router) {
 
 	markets := endpoints.Markets{OrderBook: ob}
 
-	r.HandleFunc("/markets", markets.GetMarkets).Methods("GET", "HEAD")
+	r.HandleFunc("/markets", markets.GetMarkets).Methods("GET", "HEAD").Queries("tokens", "")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {
@@ -133,6 +135,13 @@ func setupVault(ethereum string, addr common.Address) (*contracts.Vault, error) 
 	}
 
 	return contracts.NewVault(addr, conn)
+}
+
+// @todo this should not be here
+func notFound(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusNotFound)
+	rw.Write([]byte(fmt.Sprintf("{\"error\": \"%s\", \"request\": \"%s\"}", "not found", r.Method + " " + r.URL.RequestURI())))
 }
 
 func deferOnPanic() {
