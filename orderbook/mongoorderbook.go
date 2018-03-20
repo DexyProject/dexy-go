@@ -201,7 +201,7 @@ func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error
 				},
 			},
 			{"$sort": bson.M{"price": -1}},
-			{"$project": bson.M{"token": "$_id", "data": bson.M{"$slice": []interface{}{"$data", 1}}}},
+			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
 			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
 	)
