@@ -197,13 +197,13 @@ func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error
 	return ob.executeAggregation(
 		[]bson.M{
 			{"$match": bson.M{"get.token": bson.M{"$in": tokens}}},
+			{"$sort": bson.M{"price": -1}},
 			{
 				"$group": bson.M{
 					"_id":  "$get.token",
 					"data": bson.M{"$push": bson.M{"base": "$give.amount", "quote": "$get.amount"}},
 				},
 			},
-			{"$sort": bson.M{"price": -1}},
 			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
 			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
