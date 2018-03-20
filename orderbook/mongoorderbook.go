@@ -164,9 +164,9 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 		}
 	}
 
-	for _, bids := range bids {
-		m[types.HexToAddress(bids["token"].(string))] = types.Market{
-			Bid: types.PairAmount{Quote: bids["quote"].(string), Base: bids["base"].(string)},
+	for _, bid := range bids {
+		m[types.HexToAddress(bid["token"].(string))] = types.Market{
+			Bid: types.PairAmount{Quote: bid["quote"].(string), Base: bid["base"].(string)},
 		}
 	}
 
