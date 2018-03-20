@@ -168,9 +168,9 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 		if m[types.HexToAddress(bid["token"].(string))] == nil {
 			m[types.HexToAddress(bid["token"].(string))] = &types.Market{}
 		}
-		
-		m[types.HexToAddress(bid["token"].(string))].Ask.Base = bid["base"].(string)
-		m[types.HexToAddress(bid["token"].(string))].Ask.Quote = bid["quote"].(string)
+
+		m[types.HexToAddress(bid["token"].(string))].Bid.Base = bid["base"].(string)
+		m[types.HexToAddress(bid["token"].(string))].Bid.Quote = bid["quote"].(string)
 	}
 
 	return m, nil
