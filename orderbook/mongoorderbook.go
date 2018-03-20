@@ -145,8 +145,8 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 }
 
 // @todo this is ugly, find a cleaner way at a later stage, possibly move out of OB
-func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]types.Market, error) {
-	m := make(map[types.Address]types.Market)
+func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]*types.Market, error) {
+	m := make(map[types.Address]*types.Market)
 
 	asks, err := ob.getAskMarkets(tokens)
 	if err != nil {
@@ -159,15 +159,13 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 	}
 
 	for _, ask := range asks {
-		m[types.HexToAddress(ask["token"].(string))] = types.Market{
-			Ask: types.PairAmount{Quote: ask["quote"].(string), Base: ask["base"].(string)},
-		}
+		m[types.HexToAddress(ask["token"].(string))].Ask.Base = ask["base"].(string)
+		m[types.HexToAddress(ask["token"].(string))].Ask.Quote = ask["quote"].(string)
 	}
 
 	for _, bid := range bids {
-		m[types.HexToAddress(bid["token"].(string))] = types.Market{
-			Bid: types.PairAmount{Quote: bid["quote"].(string), Base: bid["base"].(string)},
-		}
+		m[types.HexToAddress(bid["token"].(string))].Ask.Base = bid["base"].(string)
+		m[types.HexToAddress(bid["token"].(string))].Ask.Quote = bid["quote"].(string)
 	}
 
 	return m, nil
