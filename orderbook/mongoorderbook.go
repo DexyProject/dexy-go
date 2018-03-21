@@ -3,11 +3,11 @@ package orderbook
 import (
 	"fmt"
 
+	"encoding/json"
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"encoding/json"
 	"os"
 )
 
@@ -184,24 +184,59 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
 	return ob.executeAggregation(
 		[]bson.M{
-			{"$match": bson.M{
-				"$or": []bson.M{
+			{
+				"$match": bson.M{
+					"$or": []bson.M{
 						{"give.token": bson.M{"$in": tokens}},
-						{"get.token":  bson.M{"$in": tokens}},
+						{"get.token": bson.M{"$in": tokens}},
 					},
 				},
 			},
-			{"$group": bson.M{
-				"_id": bson.M{
-					"$cond": bson.M{
-						"if": bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}}, "then": "$get.token", "else": "$give.token"},
-				},
-				"bids": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
-				"asks": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+			{
+				"$group": bson.M{
+					"_id": bson.M{
+						"$cond": bson.M{
+							"if":   bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
+							"then": "$get.token",
+							"else": "$give.token",
+						},
+					},
+					"bids": bson.M{
+						"$push": bson.M{
+							"$cond": bson.M{
+								"if": bson.M{
+									"$eq": []string{"$give.token", types.ETH_ADDRESS},
+								},
+								"then": bson.M{"base": "$give.amount", "quote": "$get.amount", "price": "$price"},
+								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
+							},
+						},
+					},
+					"asks": bson.M{
+						"$push": bson.M{
+							"$cond": bson.M{
+								"if": bson.M{
+									"$eq": []string{"$get.token", types.ETH_ADDRESS},
+								},
+								"then": bson.M{"base": "$get.amount", "quote": "$give.amount", "price": "$price"},
+								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
+							},
+						},
+					},
 				},
 			},
-					//"price": 1,
-				//},
+			{
+				"$project": bson.M{
+					"_id":   0,
+					"token": "$_id",
+					"ask":   bson.M{"$arrayElemAt": []interface{}{"$asks", 0}},
+					"bid":   bson.M{"$arrayElemAt": []interface{}{"$bids", -1}},
+				},
+			},
+			//},
+			//},
+			//"price": 1,
+			//},
 			//},
 			//{"$group": bson.M{}},
 			//{
