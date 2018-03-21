@@ -15,13 +15,12 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := err.(Error); ok {
-		err, _ := err.(Error)
-		returnError(w, err.Message, err.Code)
-		return
+	switch e := err.(type) {
+	case Error:
+		returnError(w, e.Message, e.Code)
+	default:
+		returnError(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-
-	returnError(w, "Internal Server Error", http.StatusInternalServerError)
 }
 
 type Error struct {
