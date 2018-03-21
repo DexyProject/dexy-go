@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/DexyProject/dexy-go/contracts"
+	dexyhttp "github.com/DexyProject/dexy-go/http"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
@@ -21,14 +22,13 @@ type Orders struct {
 	Vault            *contracts.Vault
 }
 
-func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
+func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 	limit := GetLimit(query.Get("limit"))
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		returnError(rw, "invalid token", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", types.ETH_ADDRESS), http.StatusBadRequest)
 	}
 
 	address := types.HexToAddress(token)
@@ -38,17 +38,15 @@ func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) {
 	o.Bids = orders.OrderBook.Bids(address, limit)
 
 	json.NewEncoder(rw).Encode(o)
+	return nil
 }
 
-func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
+func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		returnError(rw, "invalid token", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", types.ETH_ADDRESS), http.StatusBadRequest)
 	}
 
 	limit := GetLimit(query.Get("limit"))
@@ -59,88 +57,78 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	o := orders.OrderBook.GetOrders(address, user, limit)
 
 	json.NewEncoder(rw).Encode(o)
+	return nil
 }
 
-func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
+func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 	o := orders.OrderBook.GetOrderByHash(types.NewHash(params["order"]))
 
 	if o == nil {
 		http.NotFound(rw, r)
-		return
+		return nil
 	}
 
 	json.NewEncoder(rw).Encode(o)
+	return nil
 }
 
-func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-
+func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 	var o types.Order
 	err := json.NewDecoder(r.Body).Decode(&o)
 	defer r.Body.Close()
 	if err != nil {
 		log.Printf("unmarshalling json failed: %v", err.Error())
-		returnError(rw, "badly formatted order", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError("badly formatted order", http.StatusBadRequest)
 	}
 
 	approved, err := orders.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
 	if err != nil {
 		log.Printf("checking vault approval failed: %v", err)
-		returnError(rw, "vault approval failed to check", http.StatusInternalServerError)
-		return
+		return dexyhttp.NewError("vault approval failed to check", http.StatusInternalServerError)
 	}
 
 	if !approved {
 		log.Printf("vault is not approved")
-		returnError(rw, "vault is not approved", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError("vault is not approved", http.StatusBadRequest)
 	}
 
 	ok, err := orders.BalanceValidator.CheckBalance(o)
 	if err != nil {
 		log.Printf("checking balance failed: %v", err)
-		returnError(rw, "balance check failed", http.StatusInternalServerError)
-		return
+		return dexyhttp.NewError("balance check failed", http.StatusInternalServerError)
 	}
 
 	if !ok {
 		log.Print("insufficient balance to place order")
-		returnError(rw, "insufficient balance to place order", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError("insufficient balance to place order", http.StatusBadRequest)
 	}
 
 	err = o.Validate()
 	if err != nil {
 		log.Printf("validating order failed: %v", err)
-		returnError(rw, "validation failed", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError("validation failed", http.StatusBadRequest)
 	}
 
 	price, err := calculatePrice(o)
 	if err != nil {
-		returnError(rw, "price error", http.StatusBadRequest)
-		return
+		return dexyhttp.NewError("price error", http.StatusBadRequest)
 	}
 
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
 		log.Printf("insert order failed: %v", err)
-		returnError(rw, "internal error", http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	log.Printf("inserted new order %s", o.OrderHash().String())
 
 	rw.WriteHeader(http.StatusCreated)
+	return nil
 }
 
 func calculatePrice(order types.Order) (string, error) {
-
 	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
 		return "", fmt.Errorf("can not divide by zero")
 	}

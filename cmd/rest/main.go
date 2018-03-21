@@ -12,6 +12,7 @@ import (
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	"github.com/DexyProject/dexy-go/orderbook"
+	dexyhttp "github.com/DexyProject/dexy-go/http"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
@@ -79,7 +80,7 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 	}
 
 	endpoint := endpoints.History{History: h}
-	r.HandleFunc("/trades", endpoint.Handle).Methods("GET").Queries("token", "")
+	r.Handle("/trades", dexyhttp.Handler(endpoint.Handle)).Methods("GET").Queries("token", "")
 }
 
 func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *contracts.Vault, r *mux.Router) {
@@ -90,10 +91,10 @@ func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *co
 
 	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: bv, Vault: v}
 
-	r.HandleFunc("/orderbook", orders.GetOrderBook).Methods("GET", "HEAD").Queries("token", "")
-	r.HandleFunc("/orders", orders.GetOrders).Methods("GET", "HEAD").Queries("token", "")
-	r.HandleFunc("/orders", orders.CreateOrder).Methods("POST")
-	r.HandleFunc("/orders/{order}", orders.GetOrder).Methods("GET", "HEAD")
+	r.Handle("/orderbook", dexyhttp.Handler(orders.GetOrderBook)).Methods("GET", "HEAD").Queries("token", "")
+	r.Handle("/orders", dexyhttp.Handler(orders.GetOrders)).Methods("GET", "HEAD").Queries("token", "")
+	r.Handle("/orders", dexyhttp.Handler(orders.CreateOrder)).Methods("POST")
+	r.Handle("/orders/{order}", dexyhttp.Handler(orders.GetOrder)).Methods("GET", "HEAD")
 }
 
 func setupMarketsEndpoints(mongo string, r *mux.Router) {
@@ -104,7 +105,7 @@ func setupMarketsEndpoints(mongo string, r *mux.Router) {
 
 	markets := endpoints.Markets{OrderBook: ob}
 
-	r.HandleFunc("/markets", markets.GetMarkets).Methods("GET", "HEAD").Queries("tokens", "")
+	r.Handle("/markets", dexyhttp.Handler(markets.GetMarkets)).Methods("GET", "HEAD").Queries("tokens", "")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {
@@ -115,7 +116,7 @@ func setupTickEndpoint(mongo string, r *mux.Router) {
 
 	t := endpoints.Ticks{Ticks: tickdb}
 
-	r.HandleFunc("/ticks", t.GetTicks).Methods("GET", "HEAD").Queries("token", "")
+	r.Handle("/ticks", dexyhttp.Handler(t.GetTicks)).Methods("GET", "HEAD").Queries("token", "")
 }
 
 func setupBalanceValidator(v *contracts.Vault, mongo string) (validators.BalanceValidator, error) {
