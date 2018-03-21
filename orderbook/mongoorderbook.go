@@ -189,9 +189,7 @@ func (ob *MongoOrderBook) getMarkets(tokens []types.Address) ([]bson.M, error) {
 					"bids": bson.M{
 						"$push": bson.M{
 							"$cond": bson.M{
-								"if": bson.M{
-									"$eq": []string{"$give.token", types.ETH_ADDRESS},
-								},
+								"if":   bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
 								"then": bson.M{"base": "$give.amount", "quote": "$get.amount", "price": "$price"},
 								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
 							},
@@ -200,9 +198,7 @@ func (ob *MongoOrderBook) getMarkets(tokens []types.Address) ([]bson.M, error) {
 					"asks": bson.M{
 						"$push": bson.M{
 							"$cond": bson.M{
-								"if": bson.M{
-									"$eq": []string{"$get.token", types.ETH_ADDRESS},
-								},
+								"if":   bson.M{"$eq": []string{"$get.token", types.ETH_ADDRESS}},
 								"then": bson.M{"base": "$get.amount", "quote": "$give.amount", "price": "$price"},
 								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
 							},
