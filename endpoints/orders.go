@@ -42,8 +42,6 @@ func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) erro
 }
 
 func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	query := r.URL.Query()
 	token := query.Get("token")
 
@@ -63,8 +61,6 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 }
 
 func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	params := mux.Vars(r)
 	o := orders.OrderBook.GetOrderByHash(types.NewHash(params["order"]))
 
@@ -78,8 +74,6 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
 }
 
 func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	var o types.Order
 	err := json.NewDecoder(r.Body).Decode(&o)
 	defer r.Body.Close()
@@ -135,7 +129,6 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 }
 
 func calculatePrice(order types.Order) (string, error) {
-
 	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
 		return "", fmt.Errorf("can not divide by zero")
 	}

@@ -16,8 +16,6 @@ type Ticks struct {
 }
 
 func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	query := r.URL.Query()
 	token := query.Get("token")
 	if token == types.ETH_ADDRESS {

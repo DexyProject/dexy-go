@@ -8,6 +8,7 @@ import (
 type Handler func(http.ResponseWriter, *http.Request) error
 
 func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
 	err := fn(w, r)
 	if err == nil {

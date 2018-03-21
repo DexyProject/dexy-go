@@ -15,8 +15,6 @@ type Markets struct {
 }
 
 func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	query := r.URL.Query().Get("tokens")
 
 	tokens := make([]types.Address, 0)

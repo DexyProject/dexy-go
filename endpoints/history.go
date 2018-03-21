@@ -16,8 +16,6 @@ type History struct {
 }
 
 func (history *History) Handle(rw http.ResponseWriter, r *http.Request) error {
-	rw.Header().Set("Content-Type", "application/json")
-
 	query := r.URL.Query()
 	token := query.Get("token")
 
