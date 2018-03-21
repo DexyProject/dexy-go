@@ -31,6 +31,7 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 
 	markets, err := m.OrderBook.GetMarkets(tokens)
 	if err != nil {
+		log.Printf("markets error: %s", err)
 		return dexyhttp.NewError("error fetching markets", http.StatusInternalServerError)
 	}
 
