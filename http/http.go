@@ -36,9 +36,14 @@ func (e Error) Error() string {
 	return e.Message
 }
 
+func NotFound(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusNotFound)
+	rw.Write([]byte(fmt.Sprintf("{\"error\": \"%s\", \"request\": \"%s\"}", "not found", r.Method + " " + r.URL.RequestURI())))
+}
+
 func returnError(w http.ResponseWriter, err string, code int) {
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(fmt.Sprintf("{\"error\": \"%v\"}", err)))
 }
-

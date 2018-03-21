@@ -17,11 +17,6 @@ func NewInt(x int64) Int {
 	return Int{*new(big.Int).SetInt64(x)}
 }
 
-func IntFromString(x string) (*Int, bool) {
-	i, ok := new(Int).SetString(x, 0)
-	return &Int{*i}, ok
-}
-
 func (x Int) GetBSON() (interface{}, error) {
 	return x.Int.String(), nil
 }
