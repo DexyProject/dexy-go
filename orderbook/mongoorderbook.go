@@ -6,6 +6,9 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"log"
+	"encoding/json"
+	"os"
 )
 
 type MongoOrderBook struct {
@@ -149,29 +152,31 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 	m := make(map[types.Address]*types.Market)
 
 	asks, err := ob.getAskMarkets(tokens)
-	if err != nil {
-		return m, err
-	}
-
-	bids, err := ob.getBidMarkets(tokens)
-	if err != nil {
-		return m, err
-	}
-
-	for _, ask := range asks {
-		m[types.HexToAddress(ask["token"].(string))] = &types.Market{
-			Ask: types.PairAmount{Base: ask["base"].(string), Quote: ask["quote"].(string)},
-		}
-	}
-
-	for _, bid := range bids {
-		if m[types.HexToAddress(bid["token"].(string))] == nil {
-			m[types.HexToAddress(bid["token"].(string))] = &types.Market{}
-		}
-
-		m[types.HexToAddress(bid["token"].(string))].Bid.Base = bid["base"].(string)
-		m[types.HexToAddress(bid["token"].(string))].Bid.Quote = bid["quote"].(string)
-	}
+	json.NewEncoder(os.Stdout).Encode(asks)
+	log.Print(err)
+	//if err != nil {
+	//	return m, err
+	//}
+	//
+	//bids, err := ob.getBidMarkets(tokens)
+	//if err != nil {
+	//	return m, err
+	//}
+	//
+	//for _, ask := range asks {
+	//	m[types.HexToAddress(ask["token"].(string))] = &types.Market{
+	//		Ask: types.PairAmount{Base: ask["base"].(string), Quote: ask["quote"].(string)},
+	//	}
+	//}
+	//
+	//for _, bid := range bids {
+	//	if m[types.HexToAddress(bid["token"].(string))] == nil {
+	//		m[types.HexToAddress(bid["token"].(string))] = &types.Market{}
+	//	}
+	//
+	//	m[types.HexToAddress(bid["token"].(string))].Bid.Base = bid["base"].(string)
+	//	m[types.HexToAddress(bid["token"].(string))].Bid.Quote = bid["quote"].(string)
+	//}
 
 	return m, nil
 }
@@ -179,16 +184,34 @@ func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]
 func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
 	return ob.executeAggregation(
 		[]bson.M{
-			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
-			{"$sort": bson.M{"price": 1}},
-			{
-				"$group": bson.M{
-					"_id":  "$give.token",
-					"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+			{"$match": bson.M{
+				"$or": []bson.M{
+						{"give.token": bson.M{"$in": tokens}},
+						{"get.token":  bson.M{"$in": tokens}},
+					},
 				},
 			},
-			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
-			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
+			{"$group": bson.M{
+				"_id": bson.M{
+					"$cond": bson.M{
+						"if": bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}}, "then": "$get.token", "else": "$give.token"},
+				},
+				"bids": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+				"asks": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+				},
+			},
+					//"price": 1,
+				//},
+			//},
+			//{"$group": bson.M{}},
+			//{
+			//	"$group": bson.M{
+			//		"_id":  "$give.token",
+			//		"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+			//	},
+			//},
+			//{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
+			//{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
 		},
 	)
 }
