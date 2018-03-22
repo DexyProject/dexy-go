@@ -76,9 +76,9 @@ func (tc *TradedConsumer) logProcess() {
 	for {
 		select {
 		case tx := <-tc.reject:
-			log.Printf("rejected tx: %s", tx)
+			log.Printf("rejected tx: %s", tx.String())
 		case tx := <-tc.ack:
-			log.Printf("ack tx: %s", tx)
+			log.Printf("ack tx: %s", tx.String())
 		case <-tc.stop:
 			return
 		}
