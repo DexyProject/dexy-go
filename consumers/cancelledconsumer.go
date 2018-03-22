@@ -73,9 +73,9 @@ func (cc *CancelledConsumer) logProcess() {
 	for {
 		select {
 		case tx := <-cc.reject:
-			log.Printf("rejected cancel: %s", tx)
+			log.Printf("rejected cancel: %s", tx.String())
 		case tx := <-cc.ack:
-			log.Printf("ack cancel: %s", tx)
+			log.Printf("ack cancel: %s", tx.String())
 		case <-cc.stop:
 			return
 		}
