@@ -39,7 +39,7 @@ func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
 	}
 
 	if !order.Signature.Verify(order.User, hash) {
-		return fmt.Errorf("signature could not be verified (hash %s)", hash)
+		return fmt.Errorf("signature could not be verified (hash %s)", hash.String())
 	}
 
 	order.Filled = types.NewInt(0)
