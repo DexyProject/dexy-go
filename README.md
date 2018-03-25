@@ -10,6 +10,13 @@ The API documentation can be found under the [docs](docs) directory.
 
 The dexy go server is made up of several components.
 
+### Setting up the database
+
+```bash
+mongo < /configs/mongo_indexes.js
+
+````
+
 ### REST 
 
 This command is used to run the rest API. This includes all endpoints documented [here](docs).
