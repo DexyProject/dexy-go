@@ -24,7 +24,7 @@ type Orders struct {
 
 type Order struct {
 	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
-	Price     string    `json:"-" bson:"price"`
+	Price     float64   `json:"-" bson:"price"`
 	Give      Trade     `json:"give" bson:"give"`
 	Get       Trade     `json:"get" bson:"get"`
 	Expires   Timestamp `json:"expires" bson:"expires"`

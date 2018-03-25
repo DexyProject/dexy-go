@@ -9,7 +9,7 @@ import (
 func TestOrder_OrderHash(t *testing.T) {
 
 	o := Order{
-		Price:    "0.1",
+		Price:    0.1,
 		Give:     Trade{Token: HexToAddress("0x0000000000000000000000000000000000000000"), Amount: NewInt(1000000000000000)},
 		Get:      Trade{Token: HexToAddress("0xbebb2325ef529e4622761498f1f796d262100768"), Amount: NewInt(10000000)},
 		Expires:  Timestamp{time.Unix(1519216353, 0)},

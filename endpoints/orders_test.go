@@ -7,16 +7,16 @@ import (
 )
 
 var pricetests = []struct {
-	expected string
+	expected float64
 	err      bool
 	give     int64
 	get      int64
 	getEth   bool
 }{
-	{"1.00000000", false, 3000000000000000000, 3000000000000000000, false},
-	{"0.33333333", false, 1000000000000000000, 3000000000000000000, false},
-	{"0.00185000", false, 67489986216600, 124856474500, true},
-	{"", true, 0, 124856474500, true},
+	{1.00000000, false, 3000000000000000000, 3000000000000000000, false},
+	{0.3333333333333333, false, 1000000000000000000, 3000000000000000000, false},
+	{0.0018499999999894799, false, 67489986216600, 124856474500, true},
+	{0, true, 0, 124856474500, true},
 }
 
 func Test_CalculatePrice(t *testing.T) {

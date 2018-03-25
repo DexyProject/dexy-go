@@ -128,9 +128,9 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 	return nil
 }
 
-func calculatePrice(order types.Order) (string, error) {
+func calculatePrice(order types.Order) (float64, error) {
 	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
-		return "", fmt.Errorf("can not divide by zero")
+		return 0, fmt.Errorf("can not divide by zero")
 	}
 
 	get := new(big.Float).SetInt(&order.Get.Amount.Int)
@@ -138,8 +138,9 @@ func calculatePrice(order types.Order) (string, error) {
 
 	price := new(big.Float)
 	if order.Get.Token.IsZero() {
-		return price.Quo(get, give).Text('f', 8), nil
+		calculated, _ := price.Quo(get, give).Float64()
+		return calculated, nil
 	}
-
-	return price.Quo(give, get).Text('f', 8), nil
+	calculated, _ := price.Quo(give, get).Float64()
+	return calculated, nil
 }
