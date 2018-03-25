@@ -148,64 +148,72 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]*types.Market, error) {
 	m := make(map[types.Address]*types.Market)
 
-	asks, err := ob.getAskMarkets(tokens)
+	markets, err := ob.getMarkets(tokens)
 	if err != nil {
 		return m, err
 	}
 
-	bids, err := ob.getBidMarkets(tokens)
-	if err != nil {
-		return m, err
-	}
+	for _, market := range markets {
+		ask := market["ask"].(bson.M)
+		bid := market["bid"].(bson.M)
 
-	for _, ask := range asks {
-		m[types.HexToAddress(ask["token"].(string))] = &types.Market{
-			Ask: types.PairAmount{Base: ask["base"].(string), Quote: ask["quote"].(string)},
+		m[types.HexToAddress(market["token"].(string))] = &types.Market{
+			Ask: types.PairAmount{Quote: ask["quote"].(string), Base: ask["base"].(string)},
+			Bid: types.PairAmount{Base: bid["base"].(string), Quote: bid["quote"].(string)},
 		}
-	}
-
-	for _, bid := range bids {
-		if m[types.HexToAddress(bid["token"].(string))] == nil {
-			m[types.HexToAddress(bid["token"].(string))] = &types.Market{}
-		}
-
-		m[types.HexToAddress(bid["token"].(string))].Bid.Base = bid["base"].(string)
-		m[types.HexToAddress(bid["token"].(string))].Bid.Quote = bid["quote"].(string)
 	}
 
 	return m, nil
 }
 
-func (ob *MongoOrderBook) getAskMarkets(tokens []types.Address) ([]bson.M, error) {
+func (ob *MongoOrderBook) getMarkets(tokens []types.Address) ([]bson.M, error) {
 	return ob.executeAggregation(
 		[]bson.M{
-			{"$match": bson.M{"give.token": bson.M{"$in": tokens}}},
-			{"$sort": bson.M{"price": 1}},
 			{
-				"$group": bson.M{
-					"_id":  "$give.token",
-					"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+				"$match": bson.M{
+					"$or": []bson.M{
+						{"give.token": bson.M{"$in": tokens}},
+						{"get.token": bson.M{"$in": tokens}},
+					},
 				},
 			},
-			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
-			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
-		},
-	)
-}
-
-func (ob *MongoOrderBook) getBidMarkets(tokens []types.Address) ([]bson.M, error) {
-	return ob.executeAggregation(
-		[]bson.M{
-			{"$match": bson.M{"get.token": bson.M{"$in": tokens}}},
-			{"$sort": bson.M{"price": -1}},
 			{
 				"$group": bson.M{
-					"_id":  "$get.token",
-					"data": bson.M{"$push": bson.M{"base": "$give.amount", "quote": "$get.amount"}},
+					"_id": bson.M{
+						"$cond": bson.M{
+							"if":   bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
+							"then": "$get.token",
+							"else": "$give.token",
+						},
+					},
+					"bids": bson.M{
+						"$push": bson.M{
+							"$cond": bson.M{
+								"if":   bson.M{"$eq": []string{"$give.token", types.ETH_ADDRESS}},
+								"then": bson.M{"base": "$give.amount", "quote": "$get.amount", "price": "$price"},
+								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
+							},
+						},
+					},
+					"asks": bson.M{
+						"$push": bson.M{
+							"$cond": bson.M{
+								"if":   bson.M{"$eq": []string{"$get.token", types.ETH_ADDRESS}},
+								"then": bson.M{"base": "$get.amount", "quote": "$give.amount", "price": "$price"},
+								"else": bson.M{"base": "0", "quote": "0", "price": "0"},
+							},
+						},
+					},
 				},
 			},
-			{"$project": bson.M{"token": "$_id", "data": bson.M{"$arrayElemAt": []interface{}{"$data", 0}}}},
-			{"$project": bson.M{"token": "$_id", "base": "$data.base", "quote": "$data.quote"}},
+			{
+				"$project": bson.M{
+					"_id":   0,
+					"token": "$_id",
+					"ask":   bson.M{"$arrayElemAt": []interface{}{"$asks", 0}},
+					"bid":   bson.M{"$arrayElemAt": []interface{}{"$bids", -1}},
+				},
+			},
 		},
 	)
 }
