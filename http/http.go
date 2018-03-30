@@ -24,8 +24,8 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type Error struct {
-	Message       string
-	Code          int
+	Message string
+	Code    int
 }
 
 func NewError(message string, code int) Error {
@@ -39,7 +39,7 @@ func (e Error) Error() string {
 func NotFound(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusNotFound)
-	rw.Write([]byte(fmt.Sprintf("{\"error\": \"%s\", \"request\": \"%s\"}", "not found", r.Method + " " + r.URL.RequestURI())))
+	rw.Write([]byte(fmt.Sprintf("{\"error\": \"%s\", \"request\": \"%s\"}", "not found", r.Method+" "+r.URL.RequestURI())))
 }
 
 func returnError(w http.ResponseWriter, err string, code int) {

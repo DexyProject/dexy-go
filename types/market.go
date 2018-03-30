@@ -1,11 +1,10 @@
 package types
 
-type PairAmount struct {
-	Quote string `json:"quote"`
-	Base  string `json:"base"`
+type Market struct {
+	Token  Address `json:"token" bson:"token"`
+	Bid    float64 `json:"bid" bson:"bid"`
+	Ask    float64 `json:"ask" bson:"ask"`
+	Volume float64 `json:"volume" bson:"volume"`
+	Last   float64 `json:"last" bson:"last"`
 }
 
-type Market struct {
-	Bid   PairAmount `json:"bid"`
-	Ask   PairAmount `json:"ask"`
-}
