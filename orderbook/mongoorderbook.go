@@ -9,7 +9,6 @@ import (
 )
 
 type MongoOrderBook struct {
-	connection string
 	session    *mgo.Session
 }
 
@@ -24,7 +23,7 @@ func NewMongoOrderBook(connection string) (*MongoOrderBook, error) {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &MongoOrderBook{connection: connection, session: session}, nil
+	return &MongoOrderBook{session: session}, nil
 }
 
 func (ob *MongoOrderBook) InsertOrder(order types.Order) error {
