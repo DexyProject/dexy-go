@@ -9,6 +9,9 @@ import (
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/DexyProject/dexy-go/builders"
+	"github.com/DexyProject/dexy-go/markets"
+	dexytypes "github.com/DexyProject/dexy-go/types"
 )
 
 func main() {
@@ -25,6 +28,9 @@ func main() {
 
 	channel := make(chan *types.Header)
 
+	mb := builders.MarketsBuilder{}
+	markets := markets.MongoMarkets{}
+
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -40,6 +46,13 @@ func main() {
 	for {
 
 		head := <-channel
+
+		// @todo
+
+		err := markets.InsertMarkets()
+		if err != nil {
+			// @todo log
+		}
 
 		// we sleep here in case transactions are still inserting, 5 seconds should probably be enough
 		time.Sleep(5 * time.Second)

@@ -10,6 +10,6 @@ type MarketsBuilder struct {
 }
 
 // @todo other type for bid/ask
-func (mb *MarketsBuilder) build(ticks []ticks.Ticks) (types.Market) {
+func (mb *MarketsBuilder) Build(ticks []ticks.Ticks) ([]types.Market) {
 	return nil // @todo
 }
