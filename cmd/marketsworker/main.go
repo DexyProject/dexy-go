@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/DexyProject/dexy-go/builders"
 	"github.com/DexyProject/dexy-go/markets"
-	dexytypes "github.com/DexyProject/dexy-go/types"
 )
 
 func main() {
@@ -29,7 +28,7 @@ func main() {
 	channel := make(chan *types.Header)
 
 	mb := builders.MarketsBuilder{}
-	markets := markets.MongoMarkets{}
+	m := markets.MongoMarkets{}
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
@@ -49,7 +48,7 @@ func main() {
 
 		// @todo
 
-		err := markets.InsertMarkets()
+		err := m.InsertMarkets()
 		if err != nil {
 			// @todo log
 		}

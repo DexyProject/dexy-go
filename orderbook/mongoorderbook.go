@@ -143,6 +143,14 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	return &order
 }
 
+func (ob *MongoOrderBook) GetLowestAsks(tokens []types.Address) {
+
+}
+
+func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) {
+
+}
+
 // @todo this is ugly, find a cleaner way at a later stage, possibly move out of OB
 //func (ob *MongoOrderBook) GetMarkets(tokens []types.Address) (map[types.Address]*types.Market, error) {
 //	m := make(map[types.Address]*types.Market)
