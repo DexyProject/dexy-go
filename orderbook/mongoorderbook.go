@@ -143,7 +143,7 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 	return &order
 }
 
-func (ob *MongoOrderBook) GetLowestAsks(tokens []types.Address) (map[types.Address]types.Price, error) {
+func (ob *MongoOrderBook) GetLowestAsks(tokens []types.Address) (types.Prices, error) {
 	return ob.getPricesForOrder(
 		bson.M{"give.token": bson.M{"$in": tokens}},
 		1,
@@ -154,7 +154,7 @@ func (ob *MongoOrderBook) GetLowestAsks(tokens []types.Address) (map[types.Addre
 	)
 }
 
-func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (map[types.Address]types.Price, error) {
+func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, error) {
 	return ob.getPricesForOrder(
 		bson.M{"get.token": bson.M{"$in": tokens}},
 		-1,
@@ -165,8 +165,8 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (map[types.Addr
 	)
 }
 
-func (ob *MongoOrderBook) getPricesForOrder(match bson.M, sort int, group bson.M) (map[types.Address]types.Price, error) {
-	p := make(map[types.Address]types.Price)
+func (ob *MongoOrderBook) getPricesForOrder(match bson.M, sort int, group bson.M) (types.Prices, error) {
+	p := make(types.Prices)
 
 	result, err := ob.executeAggregation(
 		[]bson.M{

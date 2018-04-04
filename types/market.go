@@ -12,3 +12,5 @@ type Price struct {
 	Base  string
 	Quote string
 }
+
+type Prices map[Address]Price
