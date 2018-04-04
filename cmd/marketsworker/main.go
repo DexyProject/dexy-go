@@ -24,17 +24,18 @@ func main() {
 
 	ethNode := flag.String("ethnode", "", "ethereum node address")
 	mongo := flag.String("mongo", "", "mongodb connection string")
+	path := flag.String("path", "", "path to tokens file")
 
 	flag.Parse()
 
-	if flag.NFlag() != 2 {
+	if flag.NFlag() != 3 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
 	channel := make(chan *ethtypes.Header)
 
-	tokens := loadTokens()
+	tokens := loadTokens(*path)
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
@@ -105,10 +106,8 @@ func main() {
 	}
 }
 
-func loadTokens() []types.Address {
-	filePath := "./configs/tokens.ropsten.json"
-
-	file, err := ioutil.ReadFile(filePath)
+func loadTokens(path string) []types.Address {
+	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal("", zap.Error(err))
 	}
@@ -121,7 +120,7 @@ func loadTokens() []types.Address {
 	}
 
 	if len(tokens) == 0 {
-		log.Fatal("no tokens in file", zap.String("file", filePath))
+		log.Fatal("no tokens in file", zap.String("file", path))
 	}
 
 	return tokens

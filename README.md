@@ -81,6 +81,8 @@ Usage of main.go
     	ethereum node address
   -mongo string
     	mongodb connection string
+  -path string
+    	path to tokens file
 ```
 
 ### Balance Monitor
