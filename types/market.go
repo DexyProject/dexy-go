@@ -1,11 +1,11 @@
 package types
 
 type Market struct {
-	Token  Address `json:"token" bson:"token"`
-	Bid    float64 `json:"bid" bson:"bid"`
-	Ask    float64 `json:"ask" bson:"ask"`
-	Volume float64 `json:"volume" bson:"volume"`
-	Last   float64 `json:"last" bson:"last"`
+	Token  Address `json:"token,omitempty" bson:"token,omitempty"`
+	Bid    float64 `json:"bid,omitempty" bson:"bid,omitempty"`
+	Ask    float64 `json:"ask,omitempty" bson:"ask,omitempty"`
+	Volume Int     `json:"volume,omitempty" bson:"volume,omitempty"`
+	Last   float64 `json:"last,omitempty" bson:"last,omitempty"`
 }
 
 type Price struct {
