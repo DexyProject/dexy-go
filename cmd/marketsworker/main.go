@@ -9,7 +9,9 @@ import (
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/markets"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/DexyProject/dexy-go/ticks"
+	"github.com/DexyProject/dexy-go/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"go.uber.org/zap"
 )
@@ -17,7 +19,7 @@ import (
 func main() {
 
 	ethNode := flag.String("ethnode", "", "ethereum node address")
-	//mongo := flag.String("mongo", "", "mongodb connection string")
+	mongo := flag.String("mongo", "", "mongodb connection string")
 
 	flag.Parse()
 
@@ -26,10 +28,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	channel := make(chan *types.Header)
+	channel := make(chan *ethtypes.Header)
+
+	tokens := make([]types.Address, 0)
 
 	mb := builders.MarketsBuilder{}
 	m := markets.MongoMarkets{}
+	t, err := ticks.NewMongoTicks(mongo)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
@@ -47,15 +55,22 @@ func main() {
 
 		head := <-channel
 
-		// @todo
-
-		err := m.InsertMarkets()
-		if err != nil {
-			// @todo log
-		}
-
 		// we sleep here in case transactions are still inserting, 5 seconds should probably be enough
 		time.Sleep(5 * time.Second)
 
+		ts, err := t.FetchLatestTickForTokens(tokens)
+		if err != nil {
+			log.Error("", zap.Error(err))
+			continue
+		}
+
+		ms := mb.Build(tokens, ts)
+
+		// @todo
+
+		err := m.InsertMarkets(ms)
+		if err != nil {
+			// @todo log
+		}
 	}
 }
