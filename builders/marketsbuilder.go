@@ -36,23 +36,8 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.
 			continue
 		}
 
-		if ask, ok := asks[token]; ok {
-			p, err := calculatePrice(ask.Quote, ask.Base, decimals)
-			if err != nil {
-				log.Error("failed to calculate price", zap.Error(err))
-			}
-
-			market.Ask = p
-		}
-
-		if bid, ok := bids[token]; ok {
-			p, err := calculatePrice(bid.Quote, bid.Base, decimals)
-			if err != nil {
-				log.Error("failed to calculate price", zap.Error(err))
-			}
-
-			market.Bid = p
-		}
+		market.Ask = getPrice(token, asks, decimals)
+		market.Bid = getPrice(token, bids, decimals)
 
 		//if (types.Market{}) == market {
 		//	continue
@@ -62,6 +47,20 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.
 	}
 
 	return markets
+}
+
+func getPrice(token types.Address, prices types.Prices, decimals uint8) (float64) {
+	price, ok := prices[token]
+	if !ok {
+		return 0.0
+	}
+
+	p, err := calculatePrice(price.Quote, price.Base, decimals)
+	if err != nil {
+		log.Error("failed to calculate price", zap.Error(err))
+	}
+
+	return p
 }
 
 func calculatePrice(quote string, base string, decimals uint8) (float64, error) {
