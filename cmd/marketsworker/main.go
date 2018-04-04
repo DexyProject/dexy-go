@@ -34,7 +34,7 @@ func main() {
 
 	mb := builders.MarketsBuilder{}
 	m := markets.MongoMarkets{}
-	t, err := ticks.NewMongoTicks(mongo)
+	t, err := ticks.NewMongoTicks(*mongo)
 	if err != nil {
 		log.Fatal("", zap.Error(err))
 	}
