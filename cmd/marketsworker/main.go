@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/markets"
 	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -31,22 +34,30 @@ func main() {
 
 	channel := make(chan *ethtypes.Header)
 
-	tokens := make([]types.Address, 0)
-	tokens = append(tokens, types.HexToAddress("0xbebb2325ef529e4622761498f1f796d262100768"))
+	tokens := loadTokens()
 
-	mb := builders.MarketsBuilder{}
-	m := markets.MongoMarkets{}
+	conn, err := ethclient.Dial(*ethNode)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
+
+	tr, err := repositories.NewCacheTokensRepository(*ethNode)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
+
+	mb := builders.NewMarketsBuilder(tr)
+	m, err := markets.NewMongoMarkets(*mongo)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
+
 	ob, err := orderbook.NewMongoOrderBook(*mongo)
 	if err != nil {
 		log.Fatal("", zap.Error(err))
 	}
 
 	t, err := ticks.NewMongoTicks(*mongo)
-	if err != nil {
-		log.Fatal("", zap.Error(err))
-	}
-
-	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
 		log.Fatal("", zap.Error(err))
 	}
@@ -92,4 +103,26 @@ func main() {
 
 		log.Debug("inserted markets", zap.String("block", head.Number.String()))
 	}
+}
+
+func loadTokens() []types.Address {
+	filePath := "./configs/tokens.ropsten.json"
+
+	file, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
+
+	tokens := make([]types.Address, 0)
+
+	err = json.Unmarshal(file, &tokens)
+	if err != nil {
+		log.Fatal("", zap.Error(err))
+	}
+
+	if len(tokens) == 0 {
+		log.Fatal("no tokens in file", zap.String("file", filePath))
+	}
+
+	return tokens
 }

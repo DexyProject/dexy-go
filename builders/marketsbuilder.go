@@ -17,6 +17,10 @@ type MarketsBuilder struct {
 	repo repositories.TokenRepository
 }
 
+func NewMarketsBuilder(repo repositories.TokenRepository) MarketsBuilder {
+	return MarketsBuilder{repo: repo}
+}
+
 func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.Prices, bids types.Prices) []types.Market {
 
 	markets := make([]types.Market, 0)

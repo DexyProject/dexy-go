@@ -4,6 +4,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"fmt"
 )
 
 type MongoMarkets struct {
@@ -15,8 +16,30 @@ const (
 	FileName = "markets"
 )
 
+func NewMongoMarkets(connection string) (*MongoMarkets, error) {
+	session, err := mgo.Dial(connection)
+	if err != nil {
+		return nil, fmt.Errorf("could not connect to tick database")
+	}
+
+	return &MongoMarkets{session: session}, nil
+}
+
 func (m *MongoMarkets) InsertMarkets(markets []types.Market) error {
-	panic("implement me")
+	session := m.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	// @todo insert many
+	for i := range markets {
+		err := c.Insert(markets[i])
+		if err != nil {
+			return fmt.Errorf("could not insert market data: %s", err.Error())
+		}
+	}
+
+	return nil
 }
 
 func (m *MongoMarkets) GetMarkets(tokens []types.Address) ([]types.Market, error) {
