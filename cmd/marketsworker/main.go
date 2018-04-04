@@ -2,15 +2,16 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"time"
 
+	"github.com/DexyProject/dexy-go/builders"
 	"github.com/DexyProject/dexy-go/consumers"
+	"github.com/DexyProject/dexy-go/log"
+	"github.com/DexyProject/dexy-go/markets"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/DexyProject/dexy-go/builders"
-	"github.com/DexyProject/dexy-go/markets"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -32,14 +33,14 @@ func main() {
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("", zap.Error(err))
 	}
 
 	bc := consumers.NewBlockConsumer(conn, channel)
 
 	err = bc.StartConsuming()
 	if err != nil {
-		log.Fatalf("failed to start consuming: %s", err.Error())
+		log.Fatal("failed to start consuming", zap.Error(err))
 	}
 
 	for {
