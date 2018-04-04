@@ -16,7 +16,7 @@ type Ticks struct {
 	Ticks ticks.Ticks
 }
 
-func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 	if token == types.ETH_ADDRESS {
@@ -24,10 +24,10 @@ func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
 	}
 
 	addr := types.HexToAddress(token)
-	h, err := ticks.Ticks.FetchTicks(addr)
+	h, err := ep.Ticks.FetchTicks(addr)
 	if err != nil {
-		log.Error("could not fetch ticks", zap.Error(err))
-		return dexyhttp.NewError("fetching ticks failed", http.StatusBadRequest)
+		log.Error("could not fetch ep", zap.Error(err))
+		return dexyhttp.NewError("fetching ep failed", http.StatusBadRequest)
 	}
 
 	json.NewEncoder(rw).Encode(h)

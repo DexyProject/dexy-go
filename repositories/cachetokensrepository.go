@@ -29,12 +29,12 @@ func NewCacheTokensRepository(connection string) (*CacheTokensRepository, error)
 	}, nil
 }
 
-func (repository *CacheTokensRepository) GetDecimals(token types.Address) (uint8, error) {
-	if _, ok := repository.decimals[token]; ok {
-		return repository.decimals[token], nil
+func (r *CacheTokensRepository) GetDecimals(token types.Address) (uint8, error) {
+	if _, ok := r.decimals[token]; ok {
+		return r.decimals[token], nil
 	}
 
-	erc20, err := contracts.NewERC20(token.Address, repository.connection)
+	erc20, err := contracts.NewERC20(token.Address, r.connection)
 	if err != nil {
 		return 0, fmt.Errorf("could not access contract for token")
 	}
@@ -44,6 +44,6 @@ func (repository *CacheTokensRepository) GetDecimals(token types.Address) (uint8
 		return 0, fmt.Errorf("could not get decimals() from contract")
 	}
 
-	repository.decimals[token] = decimals
+	r.decimals[token] = decimals
 	return decimals, nil
 }

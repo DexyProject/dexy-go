@@ -23,7 +23,7 @@ type Orders struct {
 	Vault            *contracts.Vault
 }
 
-func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 	limit := GetLimit(query.Get("limit"))
@@ -35,14 +35,14 @@ func (orders *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) erro
 	address := types.HexToAddress(token)
 
 	o := types.Orders{}
-	o.Asks = orders.OrderBook.Asks(address, limit)
-	o.Bids = orders.OrderBook.Bids(address, limit)
+	o.Asks = ep.OrderBook.Asks(address, limit)
+	o.Bids = ep.OrderBook.Bids(address, limit)
 
 	json.NewEncoder(rw).Encode(o)
 	return nil
 }
 
-func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 
@@ -55,15 +55,15 @@ func (orders *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 
 	address := types.HexToAddress(token)
 
-	o := orders.OrderBook.GetOrders(address, user, limit)
+	o := ep.OrderBook.GetOrders(address, user, limit)
 
 	json.NewEncoder(rw).Encode(o)
 	return nil
 }
 
-func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
-	o := orders.OrderBook.GetOrderByHash(types.NewHash(params["order"]))
+	o := ep.OrderBook.GetOrderByHash(types.NewHash(params["order"]))
 
 	if o == nil {
 		http.NotFound(rw, r)
@@ -74,7 +74,7 @@ func (orders *Orders) GetOrder(rw http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 	var o types.Order
 	err := json.NewDecoder(r.Body).Decode(&o)
 	defer r.Body.Close()
@@ -83,7 +83,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 		return dexyhttp.NewError("badly formatted order", http.StatusBadRequest)
 	}
 
-	approved, err := orders.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
+	approved, err := ep.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
 	if err != nil {
 		log.Error("checking vault approval failed", zap.Error(err))
 		return dexyhttp.NewError("vault approval failed to check", http.StatusInternalServerError)
@@ -94,7 +94,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 		return dexyhttp.NewError("vault is not approved", http.StatusBadRequest)
 	}
 
-	ok, err := orders.BalanceValidator.CheckBalance(o)
+	ok, err := ep.BalanceValidator.CheckBalance(o)
 	if err != nil {
 		log.Error("checking balance failed", zap.Error(err))
 		return dexyhttp.NewError("balance check failed", http.StatusInternalServerError)
@@ -117,7 +117,7 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 	}
 
 	o.Price = price
-	err = orders.OrderBook.InsertOrder(o)
+	err = ep.OrderBook.InsertOrder(o)
 	if err != nil {
 		log.Error("insert order failed", zap.Error(err))
 		return err

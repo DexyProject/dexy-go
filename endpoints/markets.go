@@ -13,7 +13,7 @@ type Markets struct {
 	Markets markets.Markets
 }
 
-func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
+func (ep *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query().Get("tokens")
 
 	tokens := make([]types.Address, 0)
@@ -27,7 +27,7 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("no tokens provided", http.StatusBadRequest)
 	}
 
-	ms, err := m.Markets.GetMarkets(tokens)
+	ms, err := ep.Markets.GetMarkets(tokens)
 	if err != nil {
 		return dexyhttp.NewError("error fetching Markets", http.StatusInternalServerError)
 	}

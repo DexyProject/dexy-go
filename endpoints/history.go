@@ -15,7 +15,7 @@ type History struct {
 	History history.History
 }
 
-func (history *History) Handle(rw http.ResponseWriter, r *http.Request) error {
+func (ep *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
 
@@ -28,7 +28,7 @@ func (history *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 
 	addr := types.HexToAddress(token)
 
-	h := history.History.GetHistory(addr, user, limit)
+	h := ep.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
 	return nil
 }
