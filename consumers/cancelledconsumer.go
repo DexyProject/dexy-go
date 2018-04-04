@@ -1,12 +1,13 @@
 package consumers
 
 import (
-	"log"
 	"sync"
 
 	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/event"
+	"go.uber.org/zap"
 )
 
 type CancelledConsumer struct {
@@ -73,9 +74,9 @@ func (cc *CancelledConsumer) logProcess() {
 	for {
 		select {
 		case tx := <-cc.reject:
-			log.Printf("rejected cancel: %s", tx.String())
+			log.Debug("rejected cancel", zap.String("tx", tx.String()))
 		case tx := <-cc.ack:
-			log.Printf("ack cancel: %s", tx.String())
+			log.Debug("ack cancel", zap.String("tx", tx.String()))
 		case <-cc.stop:
 			return
 		}

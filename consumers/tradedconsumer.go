@@ -2,13 +2,14 @@ package consumers
 
 import (
 	"context"
-	"log"
 
 	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/event"
+	"go.uber.org/zap"
 )
 
 type TradedConsumer struct {
@@ -76,9 +77,9 @@ func (tc *TradedConsumer) logProcess() {
 	for {
 		select {
 		case tx := <-tc.reject:
-			log.Printf("rejected tx: %s", tx.String())
+			log.Debug("rejected cancel", zap.String("tx", tx.String()))
 		case tx := <-tc.ack:
-			log.Printf("ack tx: %s", tx.String())
+			log.Debug("ack cancel", zap.String("tx", tx.String()))
 		case <-tc.stop:
 			return
 		}

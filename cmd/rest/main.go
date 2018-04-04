@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/DexyProject/dexy-go/endpoints"
 	"github.com/DexyProject/dexy-go/history"
 	dexyhttp "github.com/DexyProject/dexy-go/http"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/validators"
@@ -19,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -38,12 +39,12 @@ func main() {
 
 	v, err := setupVault(*ethNode, common.HexToAddress(*vaultaddr))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	bv, err := setupBalanceValidator(v, *mongo)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	r := mux.NewRouter()
@@ -69,14 +70,14 @@ func main() {
 
 	err = http.ListenAndServe(":9000", handlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
-		log.Fatalf("Listen: %s", err.Error())
+		log.Fatal("listen error", zap.Error(err))
 	}
 }
 
 func setupHistoryEndpoints(mongo string, r *mux.Router) {
 	h, err := history.NewMongoHistory(mongo)
 	if err != nil {
-		log.Fatal("History:", err)
+		log.Fatal("history error", zap.Error(err))
 	}
 
 	endpoint := endpoints.History{History: h}
@@ -86,7 +87,7 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *contracts.Vault, r *mux.Router) {
 	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
-		log.Fatalf("Orderbook error: %v", err.Error())
+		log.Fatal("orderbook error", zap.Error(err))
 	}
 
 	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: bv, Vault: v}
@@ -100,7 +101,7 @@ func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *co
 func setupMarketsEndpoints(mongo string, r *mux.Router) {
 	ob, err := orderbook.NewMongoOrderBook(mongo)
 	if err != nil {
-		log.Fatalf("Orderbook error: %v", err.Error())
+		log.Fatal("orderbook error", zap.Error(err))
 	}
 
 	markets := endpoints.Markets{OrderBook: ob}
@@ -111,7 +112,7 @@ func setupMarketsEndpoints(mongo string, r *mux.Router) {
 func setupTickEndpoint(mongo string, r *mux.Router) {
 	tickdb, err := ticks.NewMongoTicks(mongo)
 	if err != nil {
-		log.Fatalf("tickdb error: %s", err.Error())
+		log.Fatal("tickdb error", zap.Error(err))
 	}
 
 	t := endpoints.Ticks{Ticks: tickdb}
@@ -132,7 +133,7 @@ func setupBalanceValidator(v *contracts.Vault, mongo string) (validators.Balance
 func setupVault(ethereum string, addr common.Address) (*contracts.Vault, error) {
 	conn, err := ethclient.Dial(ethereum)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
+		return nil, fmt.Errorf("failed to connect to the ethereum client: %v", err)
 	}
 
 	return contracts.NewVault(addr, conn)

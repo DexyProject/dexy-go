@@ -21,7 +21,6 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 	err := json.Unmarshal([]byte(query), &tokens)
 
 	if err != nil {
-		log.Printf("unmarshalling json failed: %v", err.Error())
 		return dexyhttp.NewError("badly formatted token list", http.StatusBadRequest)
 	}
 
