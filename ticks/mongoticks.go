@@ -66,7 +66,22 @@ func (tq *MongoTicks) FetchLatestTickForTokens(tokens []types.Address) (map[type
 	c := session.DB(DBName).C(FileName)
 	results := make(map[types.Address]types.Tick, 0)
 
-	// @todo
+	pipe := []bson.M{
+		{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}},
+		{"$sort": bson.M{"timestamp": -1}},
+		{"$group": bson.M{"_id": "$pair.quote", "ticks": bson.M{"$push": "$$ROOT"}}},
+		{"$replaceRoot": bson.M{"newRoot": bson.M{"$arrayElemAt": []interface{}{"$ticks", 0}}}},
+	}
+
+	ticks := make([]types.Tick, 0)
+	err := c.Pipe(pipe).All(&ticks)
+	if err != nil {
+		return results, err
+	}
+
+	for _, tick := range ticks {
+		results[tick.Pair.Quote] = tick
+	}
 
 	return results, nil
 }
