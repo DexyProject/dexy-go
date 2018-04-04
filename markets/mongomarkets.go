@@ -7,7 +7,7 @@ import (
 )
 
 type MongoMarkets struct {
-	session    *mgo.Session
+	session *mgo.Session
 }
 
 const (

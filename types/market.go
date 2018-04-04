@@ -8,3 +8,7 @@ type Market struct {
 	Last   float64 `json:"last" bson:"last"`
 }
 
+type Price struct {
+	Base  string
+	Quote string
+}
