@@ -58,3 +58,15 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 
 	return results, nil
 }
+
+func (tq *MongoTicks) FetchLatestTickForTokens(tokens []types.Address) (map[types.Address]types.Tick, error) {
+	session := tq.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	results := make(map[types.Address]types.Tick, 0)
+
+	// @todo
+
+	return results, nil
+}

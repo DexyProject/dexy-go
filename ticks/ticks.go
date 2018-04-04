@@ -7,4 +7,5 @@ import (
 type Ticks interface {
 	InsertTicks(ticks []types.Tick) error
 	FetchTicks(token types.Address) ([]types.Tick, error)
+	FetchLatestTickForTokens(tokens []types.Address) (map[types.Address]types.Tick, error)
 }
