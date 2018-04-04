@@ -15,7 +15,7 @@ const (
 
 var multiToken = []types.Transaction{
 	{
-		TransactionID:    BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f4"),
+		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f4"),
 		TransactionIndex: 1,
 		OrderHash:        types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber:      4862998,
@@ -26,7 +26,7 @@ var multiToken = []types.Transaction{
 		Get:              types.Trade{Token: types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), Amount: types.NewInt(3000)},
 	},
 	{
-		TransactionID:    BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f3"),
+		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f3"),
 		TransactionIndex: 2,
 		OrderHash:        types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber:      4862998,
@@ -37,7 +37,7 @@ var multiToken = []types.Transaction{
 		Get:              types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
 	},
 	{
-		TransactionID:    BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f2"),
+		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f2"),
 		TransactionIndex: 3,
 		OrderHash:        types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber:      4862998,
@@ -48,7 +48,7 @@ var multiToken = []types.Transaction{
 		Get:              types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(3000)},
 	},
 	{
-		TransactionID:    BytesNew("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
+		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
 		TransactionIndex: 5,
 		OrderHash:        types.NewHash("0xEEAD6DBFC7340A56CAEDC044696A168870549A6A7F6F56961E84A54BD9970B8A"),
 		BlockNumber:      4862998,
@@ -84,12 +84,6 @@ func TestHistoryAggregation_AggregateTransactions(t *testing.T) {
 	}
 
 	// @todo tests need to be fixed
-}
-
-func BytesNew(bytes string) types.Bytes {
-	b := types.Bytes{}
-	b.UnmarshalText([]byte(bytes))
-	return b
 }
 
 func insertData(transactions []types.Transaction) error {

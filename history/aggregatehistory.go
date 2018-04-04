@@ -12,7 +12,6 @@ import (
 )
 
 type HistoryAggregation struct {
-	connection string
 	session    *mgo.Session
 	repository repositories.TokenRepository
 }
@@ -24,7 +23,6 @@ func NewHistoryAggregation(connection string, repository repositories.TokenRepos
 	}
 
 	return &HistoryAggregation{
-		connection: connection,
 		session:    session,
 		repository: repository,
 	}, nil

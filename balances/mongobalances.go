@@ -11,8 +11,7 @@ import (
 )
 
 type MongoBalances struct {
-	connection string
-	session    *mgo.Session
+	session *mgo.Session
 }
 
 func NewMongoBalances(connection string) (*MongoBalances, error) {
@@ -21,7 +20,7 @@ func NewMongoBalances(connection string) (*MongoBalances, error) {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &MongoBalances{connection: connection, session: session}, nil
+	return &MongoBalances{session: session}, nil
 }
 
 func (balances *MongoBalances) OnOrders(user types.Address, token types.Address) (*types.Int, error) {

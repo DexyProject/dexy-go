@@ -14,8 +14,7 @@ const (
 )
 
 type MongoTicks struct {
-	connection string
-	session    *mgo.Session
+	session *mgo.Session
 }
 
 func NewMongoTicks(connection string) (*MongoTicks, error) {
@@ -24,7 +23,7 @@ func NewMongoTicks(connection string) (*MongoTicks, error) {
 		return nil, fmt.Errorf("could not connect to tick database")
 	}
 
-	return &MongoTicks{connection: connection, session: session}, nil
+	return &MongoTicks{session: session}, nil
 }
 
 func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {

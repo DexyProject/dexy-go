@@ -14,8 +14,7 @@ const (
 )
 
 type MongoHistory struct {
-	connection string
-	session    *mgo.Session
+	session *mgo.Session
 }
 
 func NewMongoHistory(connection string) (*MongoHistory, error) {
@@ -24,7 +23,7 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 		return nil, fmt.Errorf("could not connect to mongo database")
 	}
 
-	return &MongoHistory{connection: connection, session: session}, nil
+	return &MongoHistory{session: session}, nil
 }
 
 func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
