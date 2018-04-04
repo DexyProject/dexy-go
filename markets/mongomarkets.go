@@ -1,10 +1,11 @@
 package markets
 
 import (
+	"fmt"
+
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"fmt"
 )
 
 type MongoMarkets struct {
@@ -33,7 +34,7 @@ func (m *MongoMarkets) InsertMarkets(markets []types.Market) error {
 
 	// @todo insert many
 	for i := range markets {
-		err := c.Insert(markets[i])
+		_, err := c.Upsert(bson.M{"_id": markets[i].Token}, markets[i])
 		if err != nil {
 			return fmt.Errorf("could not insert market data: %s", err.Error())
 		}
@@ -50,7 +51,7 @@ func (m *MongoMarkets) GetMarkets(tokens []types.Address) ([]types.Market, error
 
 	markets := make([]types.Market, 0)
 
-	err := c.Find(bson.M{"token": bson.M{"$in": tokens}}).All(markets)
+	err := c.Find(bson.M{"_id": bson.M{"$in": tokens}}).All(&markets)
 	if err != nil {
 		return nil, err
 	}

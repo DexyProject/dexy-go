@@ -10,7 +10,7 @@ import (
 )
 
 type Markets struct {
-	markets markets.Markets
+	Markets markets.Markets
 }
 
 func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
@@ -27,9 +27,9 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("no tokens provided", http.StatusBadRequest)
 	}
 
-	ms, err := m.markets.GetMarkets(tokens)
+	ms, err := m.Markets.GetMarkets(tokens)
 	if err != nil {
-		return dexyhttp.NewError("error fetching markets", http.StatusInternalServerError)
+		return dexyhttp.NewError("error fetching Markets", http.StatusInternalServerError)
 	}
 
 	json.NewEncoder(rw).Encode(ms)

@@ -29,6 +29,8 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.
 
 		market := types.Market{}
 
+		market.Token = token
+
 		if tick, ok := ticks[token]; ok {
 			market.Last = tick.Close
 			market.Volume = tick.Volume
