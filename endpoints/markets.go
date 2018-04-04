@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	dexyhttp "github.com/DexyProject/dexy-go/http"

@@ -8,15 +8,7 @@ import (
 var logger *zap.Logger
 
 func init() {
-	log := zap.NewExample()
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	logger = log
-	//zap.NewJSONEncoder(zap.TimeFormatter(TimestampField)),
-	//zap.Fields(zap.Int("pid", os.Getpid()),
-	//	zap.String("exe", path.Base(os.Args[0]))),
+	logger = zap.NewExample()
 }
 
 func Logger() *zap.Logger {
