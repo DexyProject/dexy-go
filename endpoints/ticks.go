@@ -3,12 +3,13 @@ package endpoints
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	dexyhttp "github.com/DexyProject/dexy-go/http"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/types"
+	"go.uber.org/zap"
 )
 
 type Ticks struct {
@@ -25,7 +26,7 @@ func (ticks *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
 	addr := types.HexToAddress(token)
 	h, err := ticks.Ticks.FetchTicks(addr)
 	if err != nil {
-		log.Printf("could not fetch ticks: %s", err)
+		log.Error("could not fetch ticks", zap.Error(err))
 		return dexyhttp.NewError("fetching ticks failed", http.StatusBadRequest)
 	}
 

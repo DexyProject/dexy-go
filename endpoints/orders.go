@@ -3,17 +3,18 @@ package endpoints
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/big"
 	"net/http"
 
 	"github.com/DexyProject/dexy-go/contracts"
 	dexyhttp "github.com/DexyProject/dexy-go/http"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
 type Orders struct {
@@ -78,35 +79,35 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 	err := json.NewDecoder(r.Body).Decode(&o)
 	defer r.Body.Close()
 	if err != nil {
-		log.Printf("unmarshalling json failed: %v", err.Error())
+		log.Debug("unmarshalling json failed", zap.Error(err))
 		return dexyhttp.NewError("badly formatted order", http.StatusBadRequest)
 	}
 
 	approved, err := orders.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
 	if err != nil {
-		log.Printf("checking vault approval failed: %v", err)
+		log.Error("checking vault approval failed", zap.Error(err))
 		return dexyhttp.NewError("vault approval failed to check", http.StatusInternalServerError)
 	}
 
 	if !approved {
-		log.Printf("vault is not approved")
+		log.Debug("vault is not approved")
 		return dexyhttp.NewError("vault is not approved", http.StatusBadRequest)
 	}
 
 	ok, err := orders.BalanceValidator.CheckBalance(o)
 	if err != nil {
-		log.Printf("checking balance failed: %v", err)
+		log.Error("checking balance failed", zap.Error(err))
 		return dexyhttp.NewError("balance check failed", http.StatusInternalServerError)
 	}
 
 	if !ok {
-		log.Print("insufficient balance to place order")
+		log.Debug("insufficient balance to place order")
 		return dexyhttp.NewError("insufficient balance to place order", http.StatusBadRequest)
 	}
 
 	err = o.Validate()
 	if err != nil {
-		log.Printf("validating order failed: %v", err)
+		log.Debug("validating order failed", zap.Error(err))
 		return dexyhttp.NewError("validation failed", http.StatusBadRequest)
 	}
 
@@ -118,11 +119,11 @@ func (orders *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error
 	o.Price = price
 	err = orders.OrderBook.InsertOrder(o)
 	if err != nil {
-		log.Printf("insert order failed: %v", err)
+		log.Error("insert order failed", zap.Error(err))
 		return err
 	}
 
-	log.Printf("inserted new order %s", o.OrderHash().String())
+	log.Info("inserted new order", zap.String("hash", o.OrderHash().String()))
 
 	rw.WriteHeader(http.StatusCreated)
 	return nil
