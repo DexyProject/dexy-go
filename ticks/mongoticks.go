@@ -58,3 +58,30 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 
 	return results, nil
 }
+
+func (tq *MongoTicks) FetchLatestTickForTokens(tokens []types.Address) (map[types.Address]types.Tick, error) {
+	session := tq.session.Clone()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	results := make(map[types.Address]types.Tick, 0)
+
+	pipe := []bson.M{
+		{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}},
+		{"$sort": bson.M{"timestamp": -1}},
+		{"$group": bson.M{"_id": "$pair.quote", "ticks": bson.M{"$push": "$$ROOT"}}},
+		{"$replaceRoot": bson.M{"newRoot": bson.M{"$arrayElemAt": []interface{}{"$ticks", 0}}}},
+	}
+
+	ticks := make([]types.Tick, 0)
+	err := c.Pipe(pipe).All(&ticks)
+	if err != nil {
+		return results, err
+	}
+
+	for _, tick := range ticks {
+		results[tick.Pair.Quote] = tick
+	}
+
+	return results, nil
+}

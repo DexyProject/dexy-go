@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	dexyhttp "github.com/DexyProject/dexy-go/http"
-	"github.com/DexyProject/dexy-go/orderbook"
+	"github.com/DexyProject/dexy-go/markets"
 	"github.com/DexyProject/dexy-go/types"
 )
 
 type Markets struct {
-	OrderBook orderbook.OrderBook
+	Markets markets.Markets
 }
 
 func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
@@ -27,11 +27,11 @@ func (m *Markets) GetMarkets(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("no tokens provided", http.StatusBadRequest)
 	}
 
-	markets, err := m.OrderBook.GetMarkets(tokens)
+	ms, err := m.Markets.GetMarkets(tokens)
 	if err != nil {
-		return dexyhttp.NewError("error fetching markets", http.StatusInternalServerError)
+		return dexyhttp.NewError("error fetching Markets", http.StatusInternalServerError)
 	}
 
-	json.NewEncoder(rw).Encode(markets)
+	json.NewEncoder(rw).Encode(ms)
 	return nil
 }

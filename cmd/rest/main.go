@@ -20,6 +20,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"github.com/DexyProject/dexy-go/markets"
 )
 
 func main() {
@@ -99,14 +100,14 @@ func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *co
 }
 
 func setupMarketsEndpoints(mongo string, r *mux.Router) {
-	ob, err := orderbook.NewMongoOrderBook(mongo)
+	m, err := markets.NewMongoMarkets(mongo)
 	if err != nil {
 		log.Fatal("orderbook error", zap.Error(err))
 	}
 
-	markets := endpoints.Markets{OrderBook: ob}
+	ms := endpoints.Markets{Markets: m}
 
-	r.Handle("/markets", dexyhttp.Handler(markets.GetMarkets)).Methods("GET", "HEAD").Queries("tokens", "")
+	r.Handle("/markets", dexyhttp.Handler(ms.GetMarkets)).Methods("GET", "HEAD").Queries("tokens", "")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {

@@ -61,7 +61,19 @@ Usage of main.go
 
 ### Ticker worker
 
-This command is monitors the blocks, and generates new ticks for every block.
+This command monitors the blocks, and generates new ticks for every block.
+
+```
+Usage of main.go
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
+
+### Markets worker
+
+This command monitors the blocks, and generates new market statistics for every block.
 
 ```
 Usage of main.go

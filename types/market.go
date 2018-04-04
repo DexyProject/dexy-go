@@ -1,11 +1,16 @@
 package types
 
-type PairAmount struct {
-	Quote string `json:"quote"`
-	Base  string `json:"base"`
+type Market struct {
+	Token  Address `json:"token" bson:"_id"`
+	Bid    float64 `json:"bid" bson:"bid"`
+	Ask    float64 `json:"ask" bson:"ask"`
+	Volume Int     `json:"volume" bson:"volume"`
+	Last   float64 `json:"last" bson:"last"`
 }
 
-type Market struct {
-	Bid   PairAmount `json:"bid"`
-	Ask   PairAmount `json:"ask"`
+type Price struct {
+	Base  string
+	Quote string
 }
+
+type Prices map[Address]Price
