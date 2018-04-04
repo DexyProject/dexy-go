@@ -3,16 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -33,29 +34,29 @@ func main() {
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("", zap.Error(err))
 	}
 
 	bc := consumers.NewBlockConsumer(conn, channel)
 
 	repo, err := repositories.NewCacheTokensRepository(*ethNode)
 	if err != nil {
-		log.Fatalf("failed to create tokens repository: %s", err.Error())
+		log.Fatal("failed to create tokens repository", zap.Error(err))
 	}
 
 	aggregation, err := history.NewHistoryAggregation(*mongo, repo)
 	if err != nil {
-		log.Fatalf("failed to create aggregation: %s", err.Error())
+		log.Fatal("failed to create aggregation", zap.Error(err))
 	}
 
 	tickdb, err := ticks.NewMongoTicks(*mongo)
 	if err != nil {
-		log.Fatalf("failed to create mongo ticks: %s", err.Error())
+		log.Fatal("failed to create mongo ticks", zap.Error(err))
 	}
 
 	err = bc.StartConsuming()
 	if err != nil {
-		log.Fatalf("failed to start consuming: %s", err.Error())
+		log.Fatal("failed to start consuming", zap.Error(err))
 	}
 
 	for {
@@ -67,19 +68,19 @@ func main() {
 
 		t, err := aggregation.AggregateTransactions(head.Number.Int64())
 		if err != nil {
-			log.Printf("failed aggregating transactions: %s", err.Error())
+			log.Error("failed aggregating transactions", zap.Error(err))
 		}
 
 		if len(t) == 0 {
-			log.Printf("no ticks for block: %s", head.Number.String())
+			log.Debug("no ticks for block", zap.String("block", head.Number.String()))
 			continue
 		}
 
-		log.Printf("inserting ticks for block: %s", head.Number.String())
+		log.Debug("inserting ticks for block", zap.String("block", head.Number.String()))
 
 		err = tickdb.InsertTicks(t)
 		if err != nil {
-			log.Printf("failed to insert ticks: %s", err.Error())
+			log.Error("failed to insert ticks", zap.Error(err))
 		}
 	}
 }

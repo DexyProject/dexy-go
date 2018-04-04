@@ -2,13 +2,14 @@ package watchers
 
 import (
 	"errors"
-	"log"
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
+	"go.uber.org/zap"
 )
 
 type TradeWatcher struct {
@@ -35,21 +36,21 @@ func (tf *TradeWatcher) Watch() {
 
 		err := tf.history.InsertTransaction(tx)
 		if err != nil {
-			log.Printf("tx rejected insert: %s", err)
+			log.Error("tx rejected insert", zap.Error(err))
 			msg.Reject()
 			continue
 		}
 
 		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
 		if err != nil {
-			log.Printf("tx rejected filled amount: %s", err)
+			log.Error("tx rejected filled amount", zap.Error(err))
 			msg.Reject()
 			continue
 		}
 
 		err = tf.handleFill(tx, filled)
 		if err != nil {
-			log.Printf("tx rejected handle: %s", err)
+			log.Error("tx rejected handle", zap.Error(err))
 			msg.Reject()
 			continue
 		}

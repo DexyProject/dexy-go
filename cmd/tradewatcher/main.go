@@ -3,16 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/DexyProject/dexy-go/consumers"
 	"github.com/DexyProject/dexy-go/contracts"
 	"github.com/DexyProject/dexy-go/history"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/watchers"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -36,12 +37,12 @@ func main() {
 
 	conn, err := ethclient.Dial(*ethNode)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("", zap.Error(err))
 	}
 
 	ob, err := orderbook.NewMongoOrderBook(*mongo)
 	if err != nil {
-		log.Fatalf("Orderbook error: %v", err.Error())
+		log.Fatal("orderbook error", zap.Error(err))
 	}
 
 	ex, err := contracts.NewExchange(types.HexToAddress(*addr).Address, conn)
@@ -53,7 +54,7 @@ func main() {
 
 	err = tc.StartConsuming()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("", zap.Error(err))
 	}
 
 	tf.Watch()
