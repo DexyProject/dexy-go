@@ -16,15 +16,15 @@ func Logger() *zap.Logger {
 }
 
 func Debug(msg string, fields ...zapcore.Field) {
-	Logger().Error(msg, fields...)
+	Logger().Debug(msg, fields...)
 }
 
 func Info(msg string, fields ...zapcore.Field) {
-	Logger().Error(msg, fields...)
+	Logger().Info(msg, fields...)
 }
 
 func Warn(msg string, fields ...zapcore.Field) {
-	Logger().Error(msg, fields...)
+	Logger().Warn(msg, fields...)
 }
 
 func Error(msg string, fields ...zapcore.Field) {
