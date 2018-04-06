@@ -4,7 +4,7 @@ type Market struct {
 	Token  Address `json:"token" bson:"_id"`
 	Bid    float64 `json:"bid" bson:"bid"`
 	Ask    float64 `json:"ask" bson:"ask"`
-	Volume Int     `json:"volume" bson:"volume"`
+	Volume float64 `json:"volume" bson:"volume"`
 	Last   float64 `json:"last" bson:"last"`
 }
 
