@@ -82,7 +82,7 @@ func calculatePrice(quote string, base string, decimals uint8) (float64, error) 
 		return 0.0, fmt.Errorf("failed to create float from base %s", base)
 	}
 
-	return (b / math.Pow(10.0, 18.0)) / (q / math.Pow(10.0, float64(decimals))), nil
+	return b / q, nil
 }
 
 func normalize(number string, pow float64) (float64, error) {
