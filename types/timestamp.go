@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Timestamp struct {
