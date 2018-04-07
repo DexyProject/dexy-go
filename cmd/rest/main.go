@@ -12,6 +12,7 @@ import (
 	"github.com/DexyProject/dexy-go/history"
 	dexyhttp "github.com/DexyProject/dexy-go/http"
 	"github.com/DexyProject/dexy-go/log"
+	"github.com/DexyProject/dexy-go/markets"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/ticks"
 	"github.com/DexyProject/dexy-go/validators"
@@ -20,7 +21,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
-	"github.com/DexyProject/dexy-go/markets"
 )
 
 func main() {
