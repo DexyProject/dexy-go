@@ -6,6 +6,7 @@ import (
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"math/big"
 )
 
 const (
@@ -59,7 +60,30 @@ func (t *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 }
 
 func (t *MongoTicks) FetchAggregateVolumeForTokens(tokens []types.Address) (map[types.Address]types.Int, error) {
-	// @todo
+	results := make(map[types.Address]types.Int, 0)
+
+	data, err := t.executeAggregation(
+		[]bson.M{
+			{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}}, // @todo match time
+			{"$sort": bson.M{"timestamp": -1}},
+			{"$group": bson.M{"_id": "$pair.quote", "volume": bson.M{"$push": "$volume"}}},
+		},
+	)
+
+	if err != nil {
+		return results, err
+	}
+
+	for _, tick := range data {
+		vol, ok := new(big.Int).SetString(tick["volume"].(string), 10)
+		if !ok {
+			return results, fmt.Errorf("could not create volume int for %s", tick["volume"].(string))
+		}
+
+		results[types.HexToAddress(tick["token"].(string))] = types.Int{Int: *vol}
+	}
+
+	return results, nil
 }
 
 
