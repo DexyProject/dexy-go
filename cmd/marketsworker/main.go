@@ -77,7 +77,14 @@ func main() {
 		//	 we sleep here in case transactions are still inserting, 5 seconds should probably be enough
 		time.Sleep(5 * time.Second)
 
-		ts, err := t.FetchLatestTickForTokens(tokens)
+		vols, err := t.FetchAggregateVolumeForTokens(tokens)
+		if err != nil {
+			log.Error("", zap.Error(err))
+			continue
+		}
+
+
+		closes, err := t.FetchLatestCloseForTokens(tokens)
 		if err != nil {
 			log.Error("", zap.Error(err))
 			continue
@@ -95,7 +102,7 @@ func main() {
 			continue
 		}
 
-		ms := mb.Build(tokens, ts, asks, bids)
+		ms := mb.Build(tokens, vols, closes, asks, bids)
 
 		err = m.InsertMarkets(ms)
 		if err != nil {

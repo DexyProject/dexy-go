@@ -2,6 +2,8 @@ package ticks
 
 import (
 	"fmt"
+	"math/big"
+	"time"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
@@ -26,8 +28,8 @@ func NewMongoTicks(connection string) (*MongoTicks, error) {
 	return &MongoTicks{session: session}, nil
 }
 
-func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {
-	session := tq.session.Clone()
+func (t *MongoTicks) InsertTicks(ticks []types.Tick) error {
+	session := t.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -43,8 +45,8 @@ func (tq *MongoTicks) InsertTicks(ticks []types.Tick) error {
 	return nil
 }
 
-func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
-	session := tq.session.Clone()
+func (t *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
+	session := t.session.Clone()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
@@ -58,29 +60,88 @@ func (tq *MongoTicks) FetchTicks(token types.Address) ([]types.Tick, error) {
 	return results, nil
 }
 
-func (tq *MongoTicks) FetchLatestTickForTokens(tokens []types.Address) (map[types.Address]types.Tick, error) {
-	session := tq.session.Clone()
-	defer session.Close()
+func (t *MongoTicks) FetchAggregateVolumeForTokens(tokens []types.Address) (map[types.Address]types.Int, error) {
+	results := make(map[types.Address]types.Int, 0)
 
-	c := session.DB(DBName).C(FileName)
-	results := make(map[types.Address]types.Tick, 0)
+	data, err := t.executeAggregation(
+		[]bson.M{
+			{
+				"$match": bson.M{
+					"pair.quote": bson.M{"$in": tokens},
+					"timestamp":  bson.M{"$gt": types.Timestamp{Time: time.Now().Add(-24 * time.Hour)}},
+				},
+			},
+			{"$sort": bson.M{"timestamp": -1}},
+			{"$group": bson.M{"_id": "$pair.quote", "volume": bson.M{"$push": "$volume"}}},
+		},
+	)
 
-	pipe := []bson.M{
-		{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}},
-		{"$sort": bson.M{"timestamp": -1}},
-		{"$group": bson.M{"_id": "$pair.quote", "ticks": bson.M{"$push": "$$ROOT"}}},
-		{"$replaceRoot": bson.M{"newRoot": bson.M{"$arrayElemAt": []interface{}{"$ticks", 0}}}},
-	}
-
-	ticks := make([]types.Tick, 0)
-	err := c.Pipe(pipe).All(&ticks)
 	if err != nil {
 		return results, err
 	}
 
-	for _, tick := range ticks {
-		results[tick.Pair.Quote] = tick
+	for _, tick := range data {
+		vol, err := calculateVolume(tick["volume"].([]interface{}))
+		if err != nil {
+			return results, err
+		}
+
+		results[types.HexToAddress(tick["_id"].(string))] = *vol
 	}
 
 	return results, nil
+}
+
+func (t *MongoTicks) FetchLatestCloseForTokens(tokens []types.Address) (map[types.Address]float64, error) {
+	results := make(map[types.Address]float64, 0)
+
+	data, err := t.executeAggregation(
+		[]bson.M{
+			{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}},
+			{"$sort": bson.M{"timestamp": -1}},
+			{"$group": bson.M{"_id": "$pair.quote", "close": bson.M{"$push": "$close"}}},
+			{"$project": bson.M{"token": "$_id", "close": bson.M{"$arrayElemAt": []interface{}{"$close", 0}}}},
+		},
+	)
+
+	if err != nil {
+		return results, err
+	}
+
+	for _, tick := range data {
+		results[types.HexToAddress(tick["token"].(string))] = tick["close"].(float64)
+	}
+
+	return results, nil
+}
+
+func (t *MongoTicks) executeAggregation(pipeline interface{}) ([]bson.M, error) {
+	session := t.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	pipe := c.Pipe(pipeline)
+
+	var result []bson.M
+	err := pipe.All(&result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func calculateVolume(vols []interface{}) (*types.Int, error) {
+	volume := new(big.Int)
+
+	for _, vol := range vols {
+		v, ok := new(big.Int).SetString(vol.(string), 10)
+		if !ok {
+			return nil, fmt.Errorf("could not create volume int for %s", vol.(string))
+		}
+
+		volume = volume.Add(volume, v)
+	}
+
+	return &types.Int{Int: *volume}, nil
 }
