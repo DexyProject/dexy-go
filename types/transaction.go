@@ -3,15 +3,15 @@ package types
 import "github.com/DexyProject/dexy-go/contracts"
 
 type Transaction struct {
-	TransactionID    Hash    `json:"tx" bson:"_id"`
-	TransactionIndex uint    `json:"index" bson:"index"`
-	OrderHash        Hash    `json:"hash" bson:"hash"`
-	BlockNumber      uint64  `json:"block" bson:"block"`
-	Timestamp        Int     `json:"timestamp" bson:"timestamp"`
-	Taker            Address `json:"taker" bson:"taker"`
-	Maker            Address `json:"maker" bson:"maker"`
-	Give             Trade   `json:"give" bson:"give"`
-	Get              Trade   `json:"get" bson:"get"`
+	TransactionID    Hash      `json:"tx" bson:"_id"`
+	TransactionIndex uint      `json:"index" bson:"index"`
+	OrderHash        Hash      `json:"hash" bson:"hash"`
+	BlockNumber      uint64    `json:"block" bson:"block"`
+	Timestamp        Timestamp `json:"timestamp" bson:"timestamp"`
+	Taker            Address   `json:"taker" bson:"taker"`
+	Maker            Address   `json:"maker" bson:"maker"`
+	Give             Trade     `json:"give" bson:"give"`
+	Get              Trade     `json:"get" bson:"get"`
 }
 
 func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
@@ -20,7 +20,7 @@ func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
 		TransactionIndex: trade.Raw.Index,
 		OrderHash:        Hash{trade.Hash},
 		BlockNumber:      trade.Raw.BlockNumber,
-		Timestamp:        timestamp,
+		Timestamp:        NewTimestampFromInt(timestamp),
 		Taker:            Address{Address: trade.Taker},
 		Maker:            Address{Address: trade.Maker},
 		Give: Trade{

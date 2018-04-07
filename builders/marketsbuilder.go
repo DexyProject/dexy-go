@@ -57,7 +57,7 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.
 	return markets
 }
 
-func getPrice(token types.Address, prices types.Prices, decimals uint8) (float64) {
+func getPrice(token types.Address, prices types.Prices, decimals uint8) float64 {
 	price, ok := prices[token]
 	if !ok {
 		return 0.0
