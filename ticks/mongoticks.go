@@ -75,6 +75,7 @@ func (t *MongoTicks) FetchAggregateVolumeForTokens(tokens []types.Address) (map[
 	}
 
 	for _, tick := range data {
+		// @todo this is fucking wrong, iterate the volume array
 		vol, ok := new(big.Int).SetString(tick["volume"].(string), 10)
 		if !ok {
 			return results, fmt.Errorf("could not create volume int for %s", tick["volume"].(string))
