@@ -11,7 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
-type Ticks map[types.Address]types.Tick
+type Volumes map[types.Address]types.Int
+type Closes map[types.Address]float64
 
 type MarketsBuilder struct {
 	repo repositories.TokenRepository
@@ -21,7 +22,7 @@ func NewMarketsBuilder(repo repositories.TokenRepository) MarketsBuilder {
 	return MarketsBuilder{repo: repo}
 }
 
-func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.Prices, bids types.Prices) []types.Market {
+func (mb *MarketsBuilder) Build(tokens []types.Address, vols Volumes, closes Closes, asks types.Prices, bids types.Prices) []types.Market {
 
 	markets := make([]types.Market, 0)
 
@@ -31,10 +32,12 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, ticks Ticks, asks types.
 
 		market.Token = token
 
-		if tick, ok := ticks[token]; ok {
-			market.Last = tick.Close
+		if c, ok := closes[token]; ok {
+			market.Last = c
+		}
 
-			vol, _ := normalize(tick.Volume.String(), 18.0)
+		if v, ok := vols[token]; ok {
+			vol, _ := normalize(v.String(), 18.0)
 			market.Volume = vol
 		}
 

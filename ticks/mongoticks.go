@@ -2,11 +2,12 @@ package ticks
 
 import (
 	"fmt"
+	"math/big"
+	"time"
 
 	"github.com/DexyProject/dexy-go/types"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"math/big"
 )
 
 const (
@@ -64,7 +65,12 @@ func (t *MongoTicks) FetchAggregateVolumeForTokens(tokens []types.Address) (map[
 
 	data, err := t.executeAggregation(
 		[]bson.M{
-			{"$match": bson.M{"pair.quote": bson.M{"$in": tokens}}}, // @todo match time
+			{
+				"$match": bson.M{
+					"pair.quote": bson.M{"$in": tokens},
+					"timestamp":  bson.M{"$gt": types.Timestamp{Time: time.Now().Add(-24 * time.Hour)}},
+				},
+			},
 			{"$sort": bson.M{"timestamp": -1}},
 			{"$group": bson.M{"_id": "$pair.quote", "volume": bson.M{"$push": "$volume"}}},
 		},
@@ -75,18 +81,16 @@ func (t *MongoTicks) FetchAggregateVolumeForTokens(tokens []types.Address) (map[
 	}
 
 	for _, tick := range data {
-		// @todo this is fucking wrong, iterate the volume array
-		vol, ok := new(big.Int).SetString(tick["volume"].(string), 10)
-		if !ok {
-			return results, fmt.Errorf("could not create volume int for %s", tick["volume"].(string))
+		vol, err := calculateVolume(tick["volume"].([]interface{}))
+		if err != nil {
+			return results, err
 		}
 
-		results[types.HexToAddress(tick["token"].(string))] = types.Int{Int: *vol}
+		results[types.HexToAddress(tick["_id"].(string))] = *vol
 	}
 
 	return results, nil
 }
-
 
 func (t *MongoTicks) FetchLatestCloseForTokens(tokens []types.Address) (map[types.Address]float64, error) {
 	results := make(map[types.Address]float64, 0)
@@ -125,4 +129,19 @@ func (t *MongoTicks) executeAggregation(pipeline interface{}) ([]bson.M, error) 
 	}
 
 	return result, nil
+}
+
+func calculateVolume(vols []interface{}) (*types.Int, error) {
+	volume := new(big.Int)
+
+	for _, vol := range vols {
+		v, ok := new(big.Int).SetString(vol.(string), 10)
+		if !ok {
+			return nil, fmt.Errorf("could not create volume int for %s", vol.(string))
+		}
+
+		volume = volume.Add(volume, v)
+	}
+
+	return &types.Int{Int: *volume}, nil
 }
