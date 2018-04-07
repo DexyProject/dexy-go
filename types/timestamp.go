@@ -10,6 +10,10 @@ type Timestamp struct {
 	time.Time
 }
 
+func NewTimestampFromInt(t Int) Timestamp {
+	return Timestamp{time.Unix(t.Int64(), 0)}
+}
+
 func (t Timestamp) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprint(t.Unix())), nil
 }
