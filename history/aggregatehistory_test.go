@@ -22,8 +22,8 @@ var multiToken = []types.Transaction{
 		Timestamp:        types.NewInt(1515233752),
 		Taker:            types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
 		Maker:            types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
-		Give:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
-		Get:              types.Trade{Token: types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), Amount: types.NewInt(3000)},
+		Make:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Take:             types.Trade{Token: types.HexToAddress("09dfd26114cd6EE289AccF82350c8d8487fedB8A0C"), Amount: types.NewInt(3000)},
 	},
 	{
 		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f3"),
@@ -33,8 +33,8 @@ var multiToken = []types.Transaction{
 		Timestamp:        types.NewInt(1515233752),
 		Taker:            types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
 		Maker:            types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
-		Give:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
-		Get:              types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
+		Make:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Take:             types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
 	},
 	{
 		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f2"),
@@ -44,8 +44,8 @@ var multiToken = []types.Transaction{
 		Timestamp:        types.NewInt(1515233752),
 		Taker:            types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
 		Maker:            types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
-		Give:             types.Trade{Token: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), Amount: types.NewInt(300)},
-		Get:              types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(3000)},
+		Make:             types.Trade{Token: types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"), Amount: types.NewInt(300)},
+		Take:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(3000)},
 	},
 	{
 		TransactionID:    types.NewHash("0x87012a0d870d47c3c93526c05c4a2f494054c3f4dd8584e94af7d8dd90a535f8"),
@@ -55,8 +55,8 @@ var multiToken = []types.Transaction{
 		Timestamp:        types.NewInt(1515233752),
 		Taker:            types.HexToAddress("0x997919a608788621dd48b3896f78dcda682fe91d"),
 		Maker:            types.HexToAddress("0x9f612fcb422d1971c1be7416c37e3ebc77c0de19"),
-		Give:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
-		Get:              types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
+		Make:             types.Trade{Token: types.HexToAddress("0x0000000000000000000000000000000000000000"), Amount: types.NewInt(300)},
+		Take:             types.Trade{Token: types.HexToAddress("0xd26114cd6EE289AccF82350c8d8487fedB8A0C07"), Amount: types.NewInt(3000)},
 	},
 }
 

@@ -51,7 +51,7 @@ func (ep *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	}
 
 	limit := GetLimit(query.Get("limit"))
-	user := GetUser(query.Get("user"))
+	user := GetUser(query.Get("maker"))
 
 	address := types.HexToAddress(token)
 
@@ -83,7 +83,7 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("badly formatted order", http.StatusBadRequest)
 	}
 
-	approved, err := ep.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
+	approved, err := ep.Vault.IsApproved(nil, o.Maker.Address, o.Exchange.Address)
 	if err != nil {
 		log.Error("checking vault approval failed", zap.Error(err))
 		return dexyhttp.NewError("vault approval failed to check", http.StatusInternalServerError)
@@ -130,15 +130,15 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 }
 
 func calculatePrice(order types.Order) (float64, error) {
-	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
+	if order.Take.Amount.Sign() <= 0 || order.Make.Amount.Sign() <= 0 {
 		return 0, fmt.Errorf("can not divide by zero")
 	}
 
-	get := new(big.Float).SetInt(&order.Get.Amount.Int)
-	give := new(big.Float).SetInt(&order.Give.Amount.Int)
+	get := new(big.Float).SetInt(&order.Take.Amount.Int)
+	give := new(big.Float).SetInt(&order.Make.Amount.Int)
 
 	price := new(big.Float)
-	if order.Get.Token.IsZero() {
+	if order.Take.Token.IsZero() {
 		calculated, _ := price.Quo(get, give).Float64()
 		return calculated, nil
 	}

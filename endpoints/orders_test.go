@@ -24,15 +24,15 @@ func Test_CalculatePrice(t *testing.T) {
 	for _, tt := range pricetests {
 		order := types.Order{}
 
-		order.Get.Amount = types.NewInt(tt.get)
-		order.Give.Amount = types.NewInt(tt.give)
+		order.Take.Amount = types.NewInt(tt.get)
+		order.Make.Amount = types.NewInt(tt.give)
 
 		if tt.getEth {
-			order.Get.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
-			order.Give.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
+			order.Take.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
+			order.Make.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
 		} else {
-			order.Give.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
-			order.Get.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
+			order.Make.Token = types.HexToAddress("0x0000000000000000000000000000000000000000")
+			order.Take.Token = types.HexToAddress("0xaaa21488d380648c240a6444996b8ee81fb5b762")
 		}
 
 		price, err := calculatePrice(order)

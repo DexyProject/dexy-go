@@ -41,7 +41,7 @@ func (tf *TradeWatcher) Watch() {
 			continue
 		}
 
-		filled, err := tf.orderFilledAmount(tx.Maker, tx.OrderHash)
+		filled, err := tf.orderFilledAmount(tx.OrderHash)
 		if err != nil {
 			log.Error("tx rejected filled amount", zap.Error(err))
 			msg.Reject()
@@ -74,11 +74,11 @@ func (tf *TradeWatcher) handleFill(tx types.Transaction, filled types.Int) error
 
 func (tf *TradeWatcher) isOrderFilled(order types.Hash, amount types.Int) bool {
 	o := tf.orderbook.GetOrderByHash(order)
-	return o.Get.Amount.Cmp(&amount.Int) == 0
+	return o.Take.Amount.Cmp(&amount.Int) == 0
 }
 
-func (tf *TradeWatcher) orderFilledAmount(maker types.Address, order types.Hash) (types.Int, error) {
-	f, err := tf.exchange.Filled(nil, maker.Address, order.Hash)
+func (tf *TradeWatcher) orderFilledAmount(order types.Hash) (types.Int, error) {
+	f, err := tf.exchange.Filled(nil, order.Hash)
 	if err != nil {
 		return types.Int{}, err
 	}

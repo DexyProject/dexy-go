@@ -7,7 +7,7 @@ Returns trades for a specified ```token```
 ### Parameters
 * **token [string]** ```required``` - Returns all trades where ```token``` in either side of the trade is equal to the address. 
 * **limit [int]** ```Default: 100``` - Amount of trades. 
-* **user [string]** ```optional``` - Returns all trades where ```user``` equals to specified address
+* **user [maker]** ```optional``` - Returns all trades where ```maker``` equals to specified address
 
 ```json
 [
@@ -18,11 +18,11 @@ Returns trades for a specified ```token```
     "timestamp": "1515233752",
     "taker": "0x997919a608788621dd48b3896f78dcda682fe91d",
     "maker": "0x9f612fcb422d1971c1be7416c37e3ebc77c0de19",
-    "get": {
+    "take": {
       "token": "0x0000000000000000000000000000000000000000",
       "amount": "3000000000000000000"
     },
-    "give": {
+    "make": {
       "token": "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07",
       "amount": "300000000000000000000"
     }

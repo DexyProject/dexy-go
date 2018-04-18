@@ -24,7 +24,7 @@ func (ep *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 	}
 
 	limit := GetLimit(query.Get("limit"))
-	user := GetUser(query.Get("user"))
+	user := GetUser(query.Get("maker"))
 
 	addr := types.HexToAddress(token)
 

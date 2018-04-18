@@ -10,8 +10,8 @@ type Transaction struct {
 	Timestamp        Timestamp `json:"timestamp" bson:"timestamp"`
 	Taker            Address   `json:"taker" bson:"taker"`
 	Maker            Address   `json:"maker" bson:"maker"`
-	Give             Trade     `json:"give" bson:"give"`
-	Get              Trade     `json:"get" bson:"get"`
+	Make             Trade     `json:"make" bson:"make"`
+	Take             Trade     `json:"take" bson:"take"`
 }
 
 func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
@@ -23,13 +23,13 @@ func NewTransaction(trade contracts.ExchangeTraded, timestamp Int) Transaction {
 		Timestamp:        NewTimestampFromInt(timestamp),
 		Taker:            Address{Address: trade.Taker},
 		Maker:            Address{Address: trade.Maker},
-		Give: Trade{
-			Token:  Address{Address: trade.TokenGive},
-			Amount: Int{Int: *trade.AmountGive},
+		Make: Trade{
+			Token:  Address{Address: trade.MakerToken},
+			Amount: Int{Int: *trade.MakerTokenAmount},
 		},
-		Get: Trade{
-			Token:  Address{Address: trade.TokenGet},
-			Amount: Int{Int: *trade.AmountGet},
+		Take: Trade{
+			Token:  Address{Address: trade.TakerToken},
+			Amount: Int{Int: *trade.TakerTokenAmount},
 		},
 	}
 }
