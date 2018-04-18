@@ -29,7 +29,7 @@ type Order struct {
 	Take      Trade     `json:"take" bson:"take"`
 	Expires   Timestamp `json:"expires" bson:"expires"`
 	Nonce     int64     `json:"nonce" bson:"nonce"`
-	User      Address   `json:"user" bson:"user"`
+	Maker     Address   `json:"maker" bson:"maker"`
 	Exchange  Address   `json:"exchange" bson:"exchange"`
 	Signature EC        `json:"signature" bson:"signature"`
 	Filled    Int       `json:"filled,omitempty" bson:"filled"`
@@ -52,7 +52,7 @@ func (o *Order) generateHash() {
 	hash.Write(o.Make.Amount.U256()[:])
 	hash.Write(NewInt(o.Expires.Unix()).U256()[:])
 	hash.Write(NewInt(o.Nonce).U256()[:])
-	hash.Write(o.User.Address[:])
+	hash.Write(o.Maker.Address[:])
 	hash.Write(o.Exchange.Address[:])
 
 	sha := sha3.NewKeccak256()

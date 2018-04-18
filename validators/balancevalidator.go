@@ -26,7 +26,7 @@ func NewRPCBalanceValidator(vault *contracts.Vault, balances balances.Balances) 
 }
 
 func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
-	balance, err := b.vault.BalanceOf(nil, o.Make.Token.Address, o.User.Address)
+	balance, err := b.vault.BalanceOf(nil, o.Make.Token.Address, o.Maker.Address)
 	if err != nil {
 		return false, fmt.Errorf("could not get balance from contract: %s", err.Error())
 	}
@@ -35,7 +35,7 @@ func (b *RPCBalanceValidator) CheckBalance(o types.Order) (bool, error) {
 		return false, nil
 	}
 
-	onOrders, err := b.balances.OnOrders(o.User, o.Make.Token)
+	onOrders, err := b.balances.OnOrders(o.Maker, o.Make.Token)
 	if err != nil {
 		return false, fmt.Errorf("balances error: %v", err.Error())
 	}

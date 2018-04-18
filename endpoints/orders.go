@@ -83,7 +83,7 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("badly formatted order", http.StatusBadRequest)
 	}
 
-	approved, err := ep.Vault.IsApproved(nil, o.User.Address, o.Exchange.Address)
+	approved, err := ep.Vault.IsApproved(nil, o.Maker.Address, o.Exchange.Address)
 	if err != nil {
 		log.Error("checking vault approval failed", zap.Error(err))
 		return dexyhttp.NewError("vault approval failed to check", http.StatusInternalServerError)
