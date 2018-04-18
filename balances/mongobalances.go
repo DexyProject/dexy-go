@@ -30,21 +30,21 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 	c := session.DB(orderbook.DBName).C(orderbook.FileName)
 
 	var result []struct {
-		Give struct {
+		Make struct {
 			Amount types.Int `bson:"amount"`
 		} `bson:"give"`
 	}
 
 	// we solved it like this because mongos $sum function requires values to be numbers, in our case however they are
 	// strings.
-	err := c.Find(bson.M{"user": user, "give.token": token}).Select(bson.M{"give.amount": 1}).All(&result)
+	err := c.Find(bson.M{"user": user, "make.token": token}).Select(bson.M{"make.amount": 1}).All(&result)
 	if err != nil {
 		return nil, err
 	}
 
 	i := new(big.Int)
 	for _, r := range result {
-		i = i.Add(i, &r.Give.Amount.Int)
+		i = i.Add(i, &r.Make.Amount.Int)
 	}
 
 	return &types.Int{Int: *i}, nil

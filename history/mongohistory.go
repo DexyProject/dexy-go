@@ -34,8 +34,8 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 
 	q := bson.M{
 		"$or": []bson.M{
-			{"give.token": token},
-			{"get.token": token},
+			{"make.token": token},
+			{"take.token": token},
 		},
 	}
 

@@ -78,10 +78,10 @@ func (history *HistoryAggregation) calcVolume(transactions []types.Transaction) 
 	volume := new(big.Int)
 	for _, tt := range transactions {
 		switch types.HexToAddress(types.ETH_ADDRESS) {
-		case tt.Give.Token:
-			volume.Add(volume, &tt.Give.Amount.Int)
-		case tt.Get.Token:
-			volume.Add(volume, &tt.Get.Amount.Int)
+		case tt.Make.Token:
+			volume.Add(volume, &tt.Make.Amount.Int)
+		case tt.Take.Token:
+			volume.Add(volume, &tt.Take.Amount.Int)
 		}
 	}
 
@@ -138,10 +138,10 @@ func (history *HistoryAggregation) getPair(token types.Address) types.Pair {
 func (history *HistoryAggregation) groupTokens(transactions []types.Transaction) map[types.Address][]types.Transaction {
 	m := make(map[types.Address][]types.Transaction)
 	for _, t := range transactions {
-		if t.Get.Token == types.HexToAddress(types.ETH_ADDRESS) {
-			m[t.Give.Token] = append(m[t.Give.Token], t)
+		if t.Take.Token == types.HexToAddress(types.ETH_ADDRESS) {
+			m[t.Make.Token] = append(m[t.Make.Token], t)
 		} else {
-			m[t.Get.Token] = append(m[t.Get.Token], t)
+			m[t.Take.Token] = append(m[t.Take.Token], t)
 		}
 	}
 
@@ -149,17 +149,17 @@ func (history *HistoryAggregation) groupTokens(transactions []types.Transaction)
 }
 
 func (history *HistoryAggregation) calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
-	if t.Give.Amount.Sign() <= 0 || t.Get.Amount.Sign() <= 0 {
+	if t.Make.Amount.Sign() <= 0 || t.Take.Amount.Sign() <= 0 {
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
 
-	give, _ := new(big.Float).SetInt(&t.Give.Amount.Int).Float64()
-	get, _ := new(big.Float).SetInt(&t.Get.Amount.Int).Float64()
+	give, _ := new(big.Float).SetInt(&t.Make.Amount.Int).Float64()
+	get, _ := new(big.Float).SetInt(&t.Take.Amount.Int).Float64()
 
 	baseAmount := give
 	quoteAmount := get
 
-	if t.Get.Token == base {
+	if t.Take.Token == base {
 		baseAmount = get
 		quoteAmount = give
 	}

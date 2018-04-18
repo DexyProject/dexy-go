@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
-var ORDER_HASH_SCHEME = NewHash("0xa8da5e6ea8c46a0516b3a2e3b010f264e8334214f4b37ff5f2bc8a2dd3f32be1")
+var ORDER_HASH_SCHEME = NewHash("0xb9caf644225739cd2bda9073346357ae4a0c3d71809876978bd81cc702b7fdc7")
 
 type Trade struct {
 	Token  Address `json:"token" bson:"token"`
@@ -25,8 +25,8 @@ type Orders struct {
 type Order struct {
 	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
 	Price     float64   `json:"-" bson:"price"`
-	Give      Trade     `json:"give" bson:"give"`
-	Get       Trade     `json:"get" bson:"get"`
+	Make      Trade     `json:"make" bson:"make"`
+	Take      Trade     `json:"take" bson:"take"`
 	Expires   Timestamp `json:"expires" bson:"expires"`
 	Nonce     int64     `json:"nonce" bson:"nonce"`
 	User      Address   `json:"user" bson:"user"`
@@ -46,10 +46,10 @@ func (o *Order) OrderHash() Hash {
 func (o *Order) generateHash() {
 
 	hash := sha3.NewKeccak256()
-	hash.Write(o.Get.Token.Address[:])
-	hash.Write(o.Get.Amount.U256()[:])
-	hash.Write(o.Give.Token.Address[:])
-	hash.Write(o.Give.Amount.U256()[:])
+	hash.Write(o.Take.Token.Address[:])
+	hash.Write(o.Take.Amount.U256()[:])
+	hash.Write(o.Make.Token.Address[:])
+	hash.Write(o.Make.Amount.U256()[:])
 	hash.Write(NewInt(o.Expires.Unix()).U256()[:])
 	hash.Write(NewInt(o.Nonce).U256()[:])
 	hash.Write(o.User.Address[:])
@@ -63,11 +63,11 @@ func (o *Order) generateHash() {
 }
 
 func (o *Order) Validate() error {
-	if !common.IsHexAddress(o.Get.Token.String()) || !common.IsHexAddress(o.Give.Token.String()) {
+	if !common.IsHexAddress(o.Take.Token.String()) || !common.IsHexAddress(o.Make.Token.String()) {
 		return fmt.Errorf("address is not valid hex")
 	}
 
-	if strings.ToLower(o.Give.Token.String()) == strings.ToLower(o.Get.Token.String()) {
+	if strings.ToLower(o.Make.Token.String()) == strings.ToLower(o.Take.Token.String()) {
 		return fmt.Errorf("token addresses are identical")
 	}
 
@@ -76,7 +76,7 @@ func (o *Order) Validate() error {
 	}
 
 	zero := new(big.Int).SetInt64(0)
-	if o.Get.Amount.Cmp(zero) == 0 || o.Give.Amount.Cmp(zero) == 0 {
+	if o.Take.Amount.Cmp(zero) == 0 || o.Make.Amount.Cmp(zero) == 0 {
 		return fmt.Errorf("amounts are not allowed to be 0")
 	}
 

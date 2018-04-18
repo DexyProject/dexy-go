@@ -130,15 +130,15 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 }
 
 func calculatePrice(order types.Order) (float64, error) {
-	if order.Get.Amount.Sign() <= 0 || order.Give.Amount.Sign() <= 0 {
+	if order.Take.Amount.Sign() <= 0 || order.Make.Amount.Sign() <= 0 {
 		return 0, fmt.Errorf("can not divide by zero")
 	}
 
-	get := new(big.Float).SetInt(&order.Get.Amount.Int)
-	give := new(big.Float).SetInt(&order.Give.Amount.Int)
+	get := new(big.Float).SetInt(&order.Take.Amount.Int)
+	give := new(big.Float).SetInt(&order.Make.Amount.Int)
 
 	price := new(big.Float)
-	if order.Get.Token.IsZero() {
+	if order.Take.Token.IsZero() {
 		calculated, _ := price.Quo(get, give).Float64()
 		return calculated, nil
 	}

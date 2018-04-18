@@ -72,13 +72,13 @@ func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, li
 
 	q := bson.M{
 		"$or": []bson.M{
-			{"give.token": token},
-			{"get.token": token},
+			{"make.token": token},
+			{"take.token": token},
 		},
 	}
 
 	if user != nil {
-		q["user"] = user
+		q["maker"] = user
 	}
 
 	orders := make([]types.Order, 0)
@@ -93,7 +93,7 @@ func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"get.token": token}
+	q := bson.M{"take.token": token}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -107,7 +107,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"give.token": token}
+	q := bson.M{"make.token": token}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
@@ -145,22 +145,22 @@ func (ob *MongoOrderBook) GetOrderByHash(hash types.Hash) *types.Order {
 
 func (ob *MongoOrderBook) GetLowestAsks(tokens []types.Address) (types.Prices, error) {
 	return ob.getPricesForOrder(
-		bson.M{"give.token": bson.M{"$in": tokens}},
+		bson.M{"make.token": bson.M{"$in": tokens}},
 		1,
 		bson.M{
-			"_id":  "$give.token",
-			"data": bson.M{"$push": bson.M{"base": "$get.amount", "quote": "$give.amount"}},
+			"_id":  "$make.token",
+			"data": bson.M{"$push": bson.M{"base": "$take.amount", "quote": "$make.amount"}},
 		},
 	)
 }
 
 func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, error) {
 	return ob.getPricesForOrder(
-		bson.M{"get.token": bson.M{"$in": tokens}},
+		bson.M{"take.token": bson.M{"$in": tokens}},
 		-1,
 		bson.M{
-			"_id":  "$get.token",
-			"data": bson.M{"$push": bson.M{"base": "$give.amount", "quote": "$get.amount"}},
+			"_id":  "$take.token",
+			"data": bson.M{"$push": bson.M{"base": "$make.amount", "quote": "$take.amount"}},
 		},
 	)
 }
