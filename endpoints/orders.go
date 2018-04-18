@@ -51,7 +51,7 @@ func (ep *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	}
 
 	limit := GetLimit(query.Get("limit"))
-	user := GetUser(query.Get("user"))
+	user := GetUser(query.Get("maker"))
 
 	address := types.HexToAddress(token)
 
