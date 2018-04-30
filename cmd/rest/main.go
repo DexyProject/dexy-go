@@ -51,10 +51,12 @@ func main() {
 	r := mux.NewRouter()
 	r.NotFoundHandler = http.HandlerFunc(dexyhttp.NotFound)
 
-	setupOrderBookEndpoints(*mongo, bv, v, r)
-	setupMarketsEndpoints(*mongo, r)
-	setupHistoryEndpoints(*mongo, r)
-	setupTickEndpoint(*mongo, r)
+	s := r.PathPrefix("/v1").Subrouter()
+
+	setupOrderBookEndpoints(*mongo, bv, v, s)
+	setupMarketsEndpoints(*mongo, s)
+	setupHistoryEndpoints(*mongo, s)
+	setupTickEndpoint(*mongo, s)
 	http.Handle("/", r)
 
 	headersOk := handlers.AllowedHeaders([]string{
