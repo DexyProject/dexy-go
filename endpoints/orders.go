@@ -29,7 +29,7 @@ func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 	limit := GetLimit(query.Get("limit"))
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", types.ETH_ADDRESS), http.StatusBadRequest)
+		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
 	}
 
 	address := types.HexToAddress(token)
@@ -47,7 +47,7 @@ func (ep *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	token := query.Get("token")
 
 	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", types.ETH_ADDRESS), http.StatusBadRequest)
+		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
 	}
 
 	limit := GetLimit(query.Get("limit"))

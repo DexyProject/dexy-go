@@ -19,6 +19,7 @@ type Ticks struct {
 func (ep *Ticks) GetTicks(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
 	token := query.Get("token")
+
 	if token == types.ETH_ADDRESS {
 		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", types.ETH_ADDRESS), http.StatusBadRequest)
 	}
