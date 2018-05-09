@@ -2,7 +2,7 @@ package types
 
 type Tick struct {
 	Pair      Pair      `json:"pair" bson:"pair"`
-	Block     int64     `json:"block" bson:"block"`
+	Block     uint64    `json:"block" bson:"block"`
 	Volume    Int       `json:"volume" bson:"volume"`
 	Open      float64   `json:"open" bson:"open"`
 	Close     float64   `json:"close" bson:"close"`
