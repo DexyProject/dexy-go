@@ -1,10 +1,10 @@
 package builders
 
 import (
-	"fmt"
+	"github.com/DexyProject/dexy-go/math"
 	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/DexyProject/dexy-go/math"
+	"github.com/pkg/errors"
 )
 
 type HistoryBuilder struct {
@@ -123,7 +123,7 @@ func (hb *HistoryBuilder) groupTokens(transactions []types.Transaction) map[type
 
 func (hb *HistoryBuilder) calcPrice(t types.Transaction, base types.Address, decimals uint8) (float64, error) {
 	if t.Make.Amount.Sign() <= 0 || t.Take.Amount.Sign() <= 0 {
-		return 0.0, fmt.Errorf("can not divide by zero")
+		return 0.0, errors.New("can not divide by zero")
 	}
 
 	b := t.Make.Amount
