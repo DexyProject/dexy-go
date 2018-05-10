@@ -126,15 +126,15 @@ func (hb *HistoryBuilder) calcPrice(t types.Transaction, base types.Address, dec
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
 
-	baseAmount := t.Make.Amount
-	quoteAmount := t.Take.Amount
+	b := t.Make.Amount
+	q := t.Take.Amount
 
 	if t.Take.Token == base {
-		baseAmount = t.Take.Amount
-		quoteAmount = t.Make.Amount
+		b = t.Take.Amount
+		q = t.Make.Amount
 	}
 
-	return math.ToUnitAmount(baseAmount, 18.0) / math.ToUnitAmount(quoteAmount, decimals), nil
+	return math.ToUnitAmount(b, 18.0) / math.ToUnitAmount(q, decimals), nil
 }
 
 func (hb *HistoryBuilder) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
