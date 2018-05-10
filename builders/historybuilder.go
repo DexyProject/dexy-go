@@ -2,11 +2,9 @@ package builders
 
 import (
 	"fmt"
-	"math"
-	"math/big"
-
 	"github.com/DexyProject/dexy-go/repositories"
 	"github.com/DexyProject/dexy-go/types"
+	"github.com/DexyProject/dexy-go/math"
 )
 
 type HistoryBuilder struct {
@@ -128,23 +126,20 @@ func (hb *HistoryBuilder) calcPrice(t types.Transaction, base types.Address, dec
 		return 0.0, fmt.Errorf("can not divide by zero")
 	}
 
-	give, _ := new(big.Float).SetInt(&t.Make.Amount.Int).Float64()
-	get, _ := new(big.Float).SetInt(&t.Take.Amount.Int).Float64()
-
-	baseAmount := give
-	quoteAmount := get
+	baseAmount := t.Make.Amount
+	quoteAmount := t.Take.Amount
 
 	if t.Take.Token == base {
-		baseAmount = get
-		quoteAmount = give
+		baseAmount = t.Take.Amount
+		quoteAmount = t.Make.Amount
 	}
 
-	return (baseAmount / math.Pow(10.0, 18.0)) / (quoteAmount / math.Pow(10.0, float64(decimals))), nil
+	return math.ToUnitAmount(baseAmount, 18.0) / math.ToUnitAmount(quoteAmount, decimals), nil
 }
 
 func (hb *HistoryBuilder) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
-	var prices []float64
-	var txindex []uint
+	prices := make([]float64, 0)
+	txindex := make([]uint, 0)
 	for _, tt := range transactions {
 		newPrice, _ := hb.calcPrice(tt, types.HexToAddress(types.ETH_ADDRESS), decimals)
 		prices = append(prices, newPrice)
