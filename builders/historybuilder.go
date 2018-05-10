@@ -134,7 +134,7 @@ func (hb *HistoryBuilder) calcPrice(t types.Transaction, base types.Address, dec
 		q = t.Make.Amount
 	}
 
-	return math.ToUnitAmount(b, 18.0) / math.ToUnitAmount(q, decimals), nil
+	return math.ToUnitAmount(b, 18) / math.ToUnitAmount(q, decimals), nil
 }
 
 func (hb *HistoryBuilder) getPrices(transactions []types.Transaction, decimals uint8) ([]float64, []uint) {
