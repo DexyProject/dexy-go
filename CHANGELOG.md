@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Go dep, package management.
 
+### Changed
+ - Renamed ```cmd/rest``` to ```cmd/api```
+
 ## [1.0.0] - 2018-05-02
 
 ### Added

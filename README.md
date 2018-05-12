@@ -17,7 +17,7 @@ mongo < /configs/mongo_indexes.js
 
 ````
 
-### REST 
+### API
 
 This command is used to run the rest API. This includes all endpoints documented [here](docs).
 
