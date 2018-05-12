@@ -111,6 +111,10 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("validation failed", http.StatusBadRequest)
 	}
 
+	if !o.Signature.Verify(o.Maker, o.OrderHash()) {
+		return dexyhttp.NewError("signature validation failed", http.StatusBadRequest)
+	}
+
 	price, err := calculatePrice(o)
 	if err != nil {
 		return dexyhttp.NewError("price error", http.StatusBadRequest)
