@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Go dep, package management.
+ 
+### Changed
+ - Int type as string in json rather than number when reading.
 
 ## [1.0.0] - 2018-05-02
 
