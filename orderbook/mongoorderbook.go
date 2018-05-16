@@ -161,6 +161,27 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, 
 	)
 }
 
+func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bool, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+	c := session.DB(DBName).C(FileName)
+
+	q := bson.M{
+		"maker": user,
+		"$or": []bson.M{
+			{"make.token": token},
+			{"take.token": token},
+		},
+	}
+
+	count, err := c.Find(q).Count()
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func (ob *MongoOrderBook) getPricesForOrder(match bson.M, sort int, group bson.M) (types.Prices, error) {
 	p := make(types.Prices)
 

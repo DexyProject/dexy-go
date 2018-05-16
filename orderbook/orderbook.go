@@ -12,5 +12,6 @@ type OrderBook interface {
 	UpdateOrderFilledAmount(hash types.Hash, amount types.Int) error
 	GetOrderByHash(hash types.Hash) *types.Order
 	GetOrders(token types.Address, user *types.Address, limit int) []types.Order
+	HasOrders(token types.Address, user types.Address) (bool, error)
 	//GetMarkets(tokens []types.Address) (map[types.Address]*types.Market, error)
 }
