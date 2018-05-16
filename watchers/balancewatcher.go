@@ -19,10 +19,10 @@ type BalanceWatcher struct {
 	ob    orderbook.OrderBook
 	vault *contracts.Vault
 
-	in <-chan *Balance
+	in <-chan Balance
 }
 
-func NewBalanceWatcher(ob *orderbook.MongoOrderBook, v *contracts.Vault, in <- chan *Balance) BalanceWatcher {
+func NewBalanceWatcher(ob *orderbook.MongoOrderBook, v *contracts.Vault, in <- chan Balance) BalanceWatcher {
 	return BalanceWatcher{
 		ob: ob,
 		vault: v,
@@ -37,7 +37,7 @@ func (bw *BalanceWatcher) Watch() {
 	}
 }
 
-func (bw *BalanceWatcher) handle(b *Balance) {
+func (bw *BalanceWatcher) handle(b Balance) {
 	hasOrders, err := bw.ob.HasOrders(b.Token, b.User)
 	if err != nil {
 		log.Error("order check failed", zap.Error(err))
