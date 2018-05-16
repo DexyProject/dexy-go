@@ -5,9 +5,10 @@ import (
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"math/big"
+	"github.com/DexyProject/dexy-go/log"
+	"go.uber.org/zap"
 )
 
-// @todo maybe a new name
 type Balance struct {
 	User  types.Address
 	Token types.Address
@@ -30,7 +31,7 @@ func (bw *BalanceWatcher) Watch() {
 func (bw *BalanceWatcher) handle(b *Balance) {
 	hasOrders, err := bw.ob.HasOrders(b.Token, b.User)
 	if err != nil {
-		// @todo log
+		log.Error("order check failed", zap.Error(err))
 		return
 	}
 
@@ -40,7 +41,7 @@ func (bw *BalanceWatcher) handle(b *Balance) {
 
 	balance, err := bw.vault.BalanceOf(nil, b.Token.Address, b.User.Address)
 	if err != nil {
-		// @todo log
+		log.Error("balance call failed", zap.Error(err))
 		return
 	}
 
@@ -49,8 +50,8 @@ func (bw *BalanceWatcher) handle(b *Balance) {
 		status = types.OPEN
 	}
 
-	err := bw.ob.SetOrderStatuses(b.Token, b.User, status)
+	err = bw.ob.SetOrderStatuses(b.Token, b.User, status)
 	if err != nil {
-		// @todo log
+		log.Error("updating order status failed", zap.Error(err))
 	}
 }
