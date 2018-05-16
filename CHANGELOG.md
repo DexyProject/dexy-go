@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [unreleased]
 
+### Changed
+ - Added flags to orders to ensure they are not ```UNDER_FUNDED``` when no tokens are present in the vault.
+
 ## [1.0.1] - 2018-05-12
 
 ### Added
