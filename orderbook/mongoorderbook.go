@@ -191,7 +191,7 @@ func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Addre
 		"make.token": token,
 	}
 
-	_, err := c.UpdateAll(q, bson.M{"status": status})
+	_, err := c.UpdateAll(q, bson.M{"$set": bson.M{"status": status}})
 	return err
 }
 

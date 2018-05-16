@@ -42,7 +42,7 @@ func main() {
 	c := make(chan watchers.Balance)
 	bw := watchers.NewBalanceWatcher(ob, v, c)
 
-	bw.Watch()
+	go bw.Watch()
 
 	ds := make(chan *contracts.VaultDeposited)
 	_, err = v.WatchDeposited(nil, ds, nil)
