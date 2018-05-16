@@ -44,10 +44,13 @@ func (bw *BalanceWatcher) handle(b *Balance) {
 		return
 	}
 
+	status := types.UNDER_FUNDED
 	if balance.Cmp(big.NewInt(0)) > 0 {
-		// set STATUS OPEN
-		return
+		status = types.OPEN
 	}
 
-	// set STATUS UNDERFUNDED
+	err := bw.ob.SetOrderStatuses(b.Token, b.User, status)
+	if err != nil {
+		// @todo log
+	}
 }

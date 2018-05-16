@@ -166,12 +166,10 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
+	// we are only looking for orders we made
 	q := bson.M{
 		"maker": user,
-		"$or": []bson.M{
-			{"make.token": token},
-			{"take.token": token},
-		},
+		"make.token": token,
 	}
 
 	count, err := c.Find(q).Count()
@@ -180,6 +178,21 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 	}
 
 	return count > 0, nil
+}
+
+func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) (error) {
+	session := ob.session.Copy()
+	defer session.Close()
+	c := session.DB(DBName).C(FileName)
+
+	// we are only looking for orders we made
+	q := bson.M{
+		"maker": user,
+		"make.token": token,
+	}
+
+	_, err := c.UpdateAll(q, bson.M{"status": status})
+	return err
 }
 
 func (ob *MongoOrderBook) getPricesForOrder(match bson.M, sort int, group bson.M) (types.Prices, error) {
