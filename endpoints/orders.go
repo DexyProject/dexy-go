@@ -120,6 +120,7 @@ func (ep *Orders) CreateOrder(rw http.ResponseWriter, r *http.Request) error {
 		return dexyhttp.NewError("price error", http.StatusBadRequest)
 	}
 
+	o.Status = types.OPEN
 	o.Price = price
 	err = ep.OrderBook.InsertOrder(o)
 	if err != nil {

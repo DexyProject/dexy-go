@@ -89,7 +89,7 @@ func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"take.token": token}
+	q := bson.M{"take.token": token, "status": types.OPEN}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -103,7 +103,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"make.token": token}
+	q := bson.M{"make.token": token, "status": types.OPEN}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
