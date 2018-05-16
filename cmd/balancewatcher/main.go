@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"go.uber.org/zap"
+	"github.com/DexyProject/dexy-go/orderbook"
 )
 
 func main() {
@@ -29,11 +30,18 @@ func main() {
 
 	v, err := setupVault(*ethNode, common.HexToAddress(*addr))
 	if err != nil {
-		log.Fatal("", zap.Error(err))
+		log.Fatal("vault error", zap.Error(err))
 	}
 
-	bw := watchers.NewBalanceWatcher()
+	ob, err := orderbook.NewMongoOrderBook(*mongo)
+	if err != nil {
+		log.Fatal("orderbook error", zap.Error(err))
+	}
 
+	c := make(chan *watchers.Balance)
+	bw := watchers.NewBalanceWatcher(ob, v, c)
+
+	bw.Watch()
 }
 
 func setupVault(ethereum string, addr common.Address) (*contracts.Vault, error) {
