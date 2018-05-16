@@ -1,11 +1,12 @@
 package watchers
 
 import (
+	"math/big"
+
 	"github.com/DexyProject/dexy-go/contracts"
+	"github.com/DexyProject/dexy-go/log"
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
-	"math/big"
-	"github.com/DexyProject/dexy-go/log"
 	"go.uber.org/zap"
 )
 
@@ -19,6 +20,14 @@ type BalanceWatcher struct {
 	vault *contracts.Vault
 
 	in <-chan *Balance
+}
+
+func NewBalanceWatcher(ob *orderbook.MongoOrderBook, v *contracts.Vault, in <- chan *Balance) BalanceWatcher {
+	return BalanceWatcher{
+		ob: ob,
+		vault: v,
+		in: in,
+	}
 }
 
 func (bw *BalanceWatcher) Watch() {
