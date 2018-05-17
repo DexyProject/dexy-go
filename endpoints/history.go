@@ -17,16 +17,19 @@ type History struct {
 
 func (ep *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
-	token := query.Get("token")
+	quote := query.Get("quote")
+	base := query.Get("base")
 
-	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
+	// @todo check if base is valid
+
+	if quote == types.ETH_ADDRESS || !common.IsHexAddress(quote) {
+		return dexyhttp.NewError(fmt.Sprintf("invalid quote: %s", quote), http.StatusBadRequest)
 	}
 
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("maker"))
 
-	addr := types.HexToAddress(token)
+	addr := types.HexToAddress(quote)
 
 	h := ep.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
