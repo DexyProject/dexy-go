@@ -17,22 +17,30 @@ type Trade struct {
 	Amount Int     `json:"amount" bson:"amount"`
 }
 
+type OrderStatus string
+
+const (
+	UNDER_FUNDED OrderStatus = "UNDER_FUNDED"
+	OPEN                     = "OPEN"
+)
+
 type Orders struct {
 	Asks []Order `json:"asks"`
 	Bids []Order `json:"bids"`
 }
 
 type Order struct {
-	Hash      Hash      `json:"hash,omitempty" bson:"_id"`
-	Price     float64   `json:"-" bson:"price"`
-	Make      Trade     `json:"make" bson:"make"`
-	Take      Trade     `json:"take" bson:"take"`
-	Expires   Timestamp `json:"expires" bson:"expires"`
-	Nonce     int64     `json:"nonce" bson:"nonce"`
-	Maker     Address   `json:"maker" bson:"maker"`
-	Exchange  Address   `json:"exchange" bson:"exchange"`
-	Signature EC        `json:"signature" bson:"signature"`
-	Filled    Int       `json:"filled,omitempty" bson:"filled"`
+	Hash      Hash        `json:"hash,omitempty" bson:"_id"`
+	Price     float64     `json:"-" bson:"price"`
+	Make      Trade       `json:"make" bson:"make"`
+	Take      Trade       `json:"take" bson:"take"`
+	Expires   Timestamp   `json:"expires" bson:"expires"`
+	Nonce     int64       `json:"nonce" bson:"nonce"`
+	Maker     Address     `json:"maker" bson:"maker"`
+	Exchange  Address     `json:"exchange" bson:"exchange"`
+	Signature EC          `json:"signature" bson:"signature"`
+	Filled    Int         `json:"filled,omitempty" bson:"filled"`
+	Status    OrderStatus `json:"-" bson:"status"`
 }
 
 func (o *Order) OrderHash() Hash {
@@ -44,7 +52,6 @@ func (o *Order) OrderHash() Hash {
 }
 
 func (o *Order) generateHash() {
-
 	hash := sha3.NewKeccak256()
 	hash.Write(o.Take.Token.Address[:])
 	hash.Write(o.Take.Amount.U256()[:])

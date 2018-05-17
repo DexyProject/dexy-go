@@ -89,7 +89,7 @@ func (ob *MongoOrderBook) Bids(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"take.token": token}
+	q := bson.M{"take.token": token, "status": types.OPEN}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("-price").Limit(limit).All(&orders)
@@ -103,7 +103,7 @@ func (ob *MongoOrderBook) Asks(token types.Address, limit int) []types.Order {
 
 	c := session.DB(DBName).C(FileName)
 
-	q := bson.M{"make.token": token}
+	q := bson.M{"make.token": token, "status": types.OPEN}
 
 	orders := make([]types.Order, 0)
 	c.Find(q).Sort("price").Limit(limit).All(&orders)
@@ -159,6 +159,40 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, 
 			"data": bson.M{"$push": bson.M{"base": "$make.amount", "quote": "$take.amount"}},
 		},
 	)
+}
+
+func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bool, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+	c := session.DB(DBName).C(FileName)
+
+	// we are only looking for orders we made
+	q := bson.M{
+		"maker": user,
+		"make.token": token,
+	}
+
+	count, err := c.Find(q).Count()
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) (error) {
+	session := ob.session.Copy()
+	defer session.Close()
+	c := session.DB(DBName).C(FileName)
+
+	// we are only looking for orders we made
+	q := bson.M{
+		"maker": user,
+		"make.token": token,
+	}
+
+	_, err := c.UpdateAll(q, bson.M{"$set": bson.M{"status": status}})
+	return err
 }
 
 func (ob *MongoOrderBook) getPricesForOrder(match bson.M, sort int, group bson.M) (types.Prices, error) {
