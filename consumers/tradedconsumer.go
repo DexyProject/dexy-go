@@ -77,9 +77,9 @@ func (tc *TradedConsumer) logProcess() {
 	for {
 		select {
 		case tx := <-tc.reject:
-			log.Debug("rejected cancel", zap.String("tx", tx.String()))
+			log.Debug("rejected trade", zap.String("tx", tx.String()))
 		case tx := <-tc.ack:
-			log.Debug("ack cancel", zap.String("tx", tx.String()))
+			log.Debug("ack trade", zap.String("tx", tx.String()))
 		case <-tc.stop:
 			return
 		}
