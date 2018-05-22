@@ -161,6 +161,15 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, 
 	)
 }
 
+func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]types.Int, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+	
+	return nil, nil
+}
+
 func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bool, error) {
 	session := ob.session.Copy()
 	defer session.Close()
