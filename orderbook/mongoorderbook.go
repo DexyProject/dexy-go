@@ -166,7 +166,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
-	
+
 	return nil, nil
 }
 
