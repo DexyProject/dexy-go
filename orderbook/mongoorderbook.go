@@ -167,6 +167,19 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 
 	c := session.DB(DBName).C(FileName)
 
+	err := c.Find(
+		bson.M{
+			"$or": []bson.M{
+				{"make.token": bson.M{"$in": tokens}},
+				{"take.token": bson.M{"$in": tokens}},
+			},
+		},
+	).Select(bson.M{"make": 1, "take": 1})
+
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
@@ -177,7 +190,7 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 
 	// we are only looking for orders we made
 	q := bson.M{
-		"maker": user,
+		"maker":      user,
 		"make.token": token,
 	}
 
@@ -189,14 +202,14 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 	return count > 0, nil
 }
 
-func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) (error) {
+func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) error {
 	session := ob.session.Copy()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
 	// we are only looking for orders we made
 	q := bson.M{
-		"maker": user,
+		"maker":      user,
 		"make.token": token,
 	}
 
