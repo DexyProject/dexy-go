@@ -174,7 +174,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 				{"take.token": bson.M{"$in": tokens}},
 			},
 		},
-	).Select(bson.M{"make": 1, "take": 1})
+	).Select(bson.M{"make": 1, "take": 1}).All()
 
 	if err != nil {
 		return nil, err
