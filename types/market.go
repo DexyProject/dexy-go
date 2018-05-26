@@ -6,6 +6,7 @@ type Market struct {
 	Ask    float64 `json:"ask" bson:"ask"`
 	Volume float64 `json:"volume" bson:"volume"`
 	Last   float64 `json:"last" bson:"last"`
+	Depth  Int     `json:"depth" bson:"depth"`
 }
 
 type Price struct {

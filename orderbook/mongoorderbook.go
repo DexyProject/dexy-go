@@ -167,6 +167,17 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 
 	c := session.DB(DBName).C(FileName)
 
+	var result []struct {
+		Make struct {
+			Token  types.Address `bson:"token"`
+			Amount types.Int `bson:"amount"`
+		} `bson:"give"`
+		Take struct {
+			Token  types.Address `bson:"token"`
+			Amount types.Int `bson:"amount"`
+		} `bson:"give"`
+	}
+
 	err := c.Find(
 		bson.M{
 			"$or": []bson.M{
@@ -174,7 +185,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 				{"take.token": bson.M{"$in": tokens}},
 			},
 		},
-	).Select(bson.M{"make": 1, "take": 1}).All()
+	).Select(bson.M{"make": 1, "take": 1}).All(result)
 
 	if err != nil {
 		return nil, err
