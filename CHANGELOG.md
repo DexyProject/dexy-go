@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [unreleased]
 
+### Fixed
+ - Fixed onOrders query
+
 ## [1.0.2] - 2018-05-17
 
 ### Changed
