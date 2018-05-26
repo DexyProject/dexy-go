@@ -200,6 +200,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 
 		if _, ok := r[addr]; !ok {
 			r[addr] = value
+			continue
 		}
 
 		r[addr] = r[addr].Add(value)
