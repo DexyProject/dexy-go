@@ -12,6 +12,16 @@ type MongoOrderBook struct {
 	session *mgo.Session
 }
 
+type DepthResult struct {
+	Make struct {
+		Token  types.Address `bson:"token"`
+		Amount types.Int     `bson:"amount"`
+	} `bson:"give"`
+	Take struct {
+		Token  types.Address `bson:"token"`
+		Amount types.Int     `bson:"amount"`
+	} `bson:"give"`
+}
 const (
 	DBName   = "dexy"
 	FileName = "orders"
@@ -161,22 +171,16 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, 
 	)
 }
 
+// this is ugly
 func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]types.Int, error) {
 	session := ob.session.Copy()
 	defer session.Close()
 
 	c := session.DB(DBName).C(FileName)
 
-	var result []struct {
-		Make struct {
-			Token  types.Address `bson:"token"`
-			Amount types.Int `bson:"amount"`
-		} `bson:"give"`
-		Take struct {
-			Token  types.Address `bson:"token"`
-			Amount types.Int `bson:"amount"`
-		} `bson:"give"`
-	}
+	r := make(map[types.Address]types.Int)
+
+	var dr []DepthResult
 
 	err := c.Find(
 		bson.M{
@@ -185,13 +189,23 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 				{"take.token": bson.M{"$in": tokens}},
 			},
 		},
-	).Select(bson.M{"make": 1, "take": 1}).All(result)
+	).Select(bson.M{"make": 1, "take": 1}).All(dr)
 
 	if err != nil {
-		return nil, err
+		return r, err
 	}
 
-	return nil, nil
+	for _, d := range dr {
+		addr, value := getTokenAndDepth(d)
+
+		if _, ok := r[addr]; !ok {
+			r[addr] = value
+		}
+
+		r[addr] = r[addr].Add(value)
+	}
+
+	return r, nil
 }
 
 func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bool, error) {
@@ -270,4 +284,13 @@ func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, er
 	}
 
 	return result, nil
+}
+
+// this is ugly but whatever
+func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
+	if dr.Take.Token.String() == types.ETH_ADDRESS {
+		return dr.Make.Token, dr.Take.Amount
+	}
+
+	return dr.Take.Token, dr.Make.Amount
 }

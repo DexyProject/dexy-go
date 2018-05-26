@@ -102,7 +102,13 @@ func main() {
 			continue
 		}
 
-		ms := mb.Build(tokens, vols, closes, asks, bids)
+		depths, err := ob.GetDepths(tokens)
+		if err != nil {
+			log.Error("", zap.Error(err))
+			continue
+		}
+
+		ms := mb.Build(tokens, vols, closes, depths, asks, bids)
 
 		err = m.InsertMarkets(ms)
 		if err != nil {
