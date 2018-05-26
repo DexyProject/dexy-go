@@ -16,11 +16,11 @@ type DepthResult struct {
 	Make struct {
 		Token  types.Address `bson:"token"`
 		Amount types.Int     `bson:"amount"`
-	} `bson:"give"`
+	} `bson:"make"`
 	Take struct {
 		Token  types.Address `bson:"token"`
 		Amount types.Int     `bson:"amount"`
-	} `bson:"give"`
+	} `bson:"take"`
 }
 const (
 	DBName   = "dexy"
@@ -180,7 +180,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 
 	r := make(map[types.Address]types.Int)
 
-	var dr []DepthResult
+	dr := make([]DepthResult, 0)
 
 	err := c.Find(
 		bson.M{
@@ -189,7 +189,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 				{"take.token": bson.M{"$in": tokens}},
 			},
 		},
-	).Select(bson.M{"make": 1, "take": 1}).All(dr)
+	).Select(bson.M{"make": 1, "take": 1}).All(&dr)
 
 	if err != nil {
 		return r, err
