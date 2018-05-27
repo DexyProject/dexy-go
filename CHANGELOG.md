@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [unreleased]
 
+## Added
+ - ```depth``` field added to ```/markets``` endpoint.
+
 ### Fixed
  - Fixed onOrders query
 

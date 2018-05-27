@@ -12,6 +12,7 @@ import (
 )
 
 type Volumes map[types.Address]types.Int
+type Depths map[types.Address]types.Int
 type Closes map[types.Address]float64
 
 type MarketsBuilder struct {
@@ -22,7 +23,14 @@ func NewMarketsBuilder(repo repositories.TokenRepository) MarketsBuilder {
 	return MarketsBuilder{repo: repo}
 }
 
-func (mb *MarketsBuilder) Build(tokens []types.Address, vols Volumes, closes Closes, asks types.Prices, bids types.Prices) []types.Market {
+func (mb *MarketsBuilder) Build(
+	tokens []types.Address,
+	vols Volumes,
+	closes Closes,
+	depths Depths,
+	asks types.Prices,
+	bids types.Prices,
+) []types.Market {
 
 	markets := make([]types.Market, 0)
 
@@ -34,6 +42,10 @@ func (mb *MarketsBuilder) Build(tokens []types.Address, vols Volumes, closes Clo
 
 		if c, ok := closes[token]; ok {
 			market.Last = c
+		}
+
+		if d, ok := depths[token]; ok {
+			market.Depth = d
 		}
 
 		if v, ok := vols[token]; ok {
