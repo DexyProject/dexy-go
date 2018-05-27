@@ -2,13 +2,10 @@ package endpoints
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/DexyProject/dexy-go/history"
-	dexyhttp "github.com/DexyProject/dexy-go/http"
 	"github.com/DexyProject/dexy-go/types"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 type History struct {
@@ -21,10 +18,9 @@ func (ep *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 	base := query.Get("base")
 
 	// @todo check if base is valid
-
-	if quote == types.ETH_ADDRESS || !common.IsHexAddress(quote) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid quote: %s", quote), http.StatusBadRequest)
-	}
+	//if quote == types.ETH_ADDRESS || !common.IsHexAddress(quote) {
+	//	return dexyhttp.NewError(fmt.Sprintf("invalid quote: %s", quote), http.StatusBadRequest)
+	//}
 
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("maker"))
