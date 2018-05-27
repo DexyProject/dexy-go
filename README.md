@@ -85,7 +85,19 @@ Usage of main.go
     	path to tokens file
 ```
 
-### Balance Monitor
+### Balance Watcher
+
+This command is responsible for monitoring balances, to ensure no underfunded orders are present in the orderbook.
+
+```
+Usage of main.go
+  -addr string
+    	vault address
+  -ethnode string
+    	ethereum node address
+  -mongo string
+    	mongodb connection string
+```
 
 ## Authors
 
