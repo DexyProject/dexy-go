@@ -60,7 +60,7 @@ func (ob *MongoOrderBook) RemoveOrder(hash types.Hash) bool {
 	return true
 }
 
-func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, limit int) []types.Order {
+func (ob *MongoOrderBook) GetOrders(pair types.Pair, user *types.Address, limit int) []types.Order {
 	session := ob.session.Copy()
 	defer session.Close()
 
@@ -68,8 +68,8 @@ func (ob *MongoOrderBook) GetOrders(token types.Address, user *types.Address, li
 
 	q := bson.M{
 		"$or": []bson.M{
-			{"make.token": token},
-			{"take.token": token},
+			{"make.token": pair.Quote, "take.token": pair.Base},
+			{"make.token": pair.Base, "take.token": pair.Quote},
 		},
 	}
 

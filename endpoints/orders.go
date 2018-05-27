@@ -12,7 +12,6 @@ import (
 	"github.com/DexyProject/dexy-go/orderbook"
 	"github.com/DexyProject/dexy-go/types"
 	"github.com/DexyProject/dexy-go/validators"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -36,8 +35,6 @@ func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 	//	return dexyhttp.NewError(fmt.Sprintf("invalid quote: %s", quote), http.StatusBadRequest)
 	//}
 
-	address := types.HexToAddress(quote)
-
 	ob := types.OrderBook{}
 	ob.Asks = ep.OrderBook.Asks(
 		types.Pair{Quote: types.HexToAddress(quote), Base: types.HexToAddress(base)},
@@ -55,18 +52,23 @@ func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 
 func (ep *Orders) GetOrders(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
-	token := query.Get("token")
 
-	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
-	}
+	quote := query.Get("quote")
+	base := query.Get("base")
+
+	// @todo this needs to change, we need to check that the base is a valid base
+	//if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
+	//	return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
+	//}
 
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("maker"))
 
-	address := types.HexToAddress(token)
-
-	o := ep.OrderBook.GetOrders(address, user, limit)
+	o := ep.OrderBook.GetOrders(
+		types.Pair{Quote: types.HexToAddress(quote), Base: types.HexToAddress(base)},
+		user,
+		limit,
+	)
 
 	json.NewEncoder(rw).Encode(o)
 	return nil
