@@ -29,9 +29,13 @@ func (ep *History) Handle(rw http.ResponseWriter, r *http.Request) error {
 	limit := GetLimit(query.Get("limit"))
 	user := GetUser(query.Get("maker"))
 
-	addr := types.HexToAddress(quote)
+	h := ep.History.GetHistory(
+		types.HexToAddress(quote),
+		types.HexToAddress(base),
+		user,
+		limit,
+	)
 
-	h := ep.History.GetHistory(addr, user, limit)
 	json.NewEncoder(rw).Encode(h)
 	return nil
 }

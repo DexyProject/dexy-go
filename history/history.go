@@ -5,6 +5,6 @@ import (
 )
 
 type History interface {
-	GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction
+	GetHistory(quote types.Address, base types.Address, user *types.Address, limit int) []types.Transaction
 	InsertTransaction(transaction types.Transaction) error
 }

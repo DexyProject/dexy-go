@@ -26,7 +26,7 @@ func NewMongoHistory(connection string) (*MongoHistory, error) {
 	return &MongoHistory{session: session}, nil
 }
 
-func (history *MongoHistory) GetHistory(token types.Address, user *types.Address, limit int) []types.Transaction {
+func (history *MongoHistory) GetHistory(quote types.Address, base types.Address, user *types.Address, limit int) []types.Transaction {
 	session := history.session.Copy()
 	defer session.Close()
 
@@ -34,8 +34,8 @@ func (history *MongoHistory) GetHistory(token types.Address, user *types.Address
 
 	q := bson.M{
 		"$or": []bson.M{
-			{"make.token": token},
-			{"take.token": token},
+			{"make.token": quote, "take.token": base},
+			{"make.token": base, "take.token": quote},
 		},
 	}
 
