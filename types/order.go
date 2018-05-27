@@ -24,7 +24,7 @@ const (
 	OPEN                     = "OPEN"
 )
 
-type Orders struct {
+type OrderBook struct {
 	Asks []Order `json:"asks"`
 	Bids []Order `json:"bids"`
 }

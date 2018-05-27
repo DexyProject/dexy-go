@@ -34,11 +34,11 @@ func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 
 	address := types.HexToAddress(token)
 
-	o := types.Orders{}
-	o.Asks = ep.OrderBook.Asks(address, limit)
-	o.Bids = ep.OrderBook.Bids(address, limit)
+	ob := types.OrderBook{}
+	ob.Asks = ep.OrderBook.Asks(address, limit)
+	ob.Bids = ep.OrderBook.Bids(address, limit)
 
-	json.NewEncoder(rw).Encode(o)
+	json.NewEncoder(rw).Encode(ob)
 	return nil
 }
 
