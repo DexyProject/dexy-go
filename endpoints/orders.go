@@ -25,18 +25,29 @@ type Orders struct {
 
 func (ep *Orders) GetOrderBook(rw http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query()
-	token := query.Get("token")
+
+	quote := query.Get("quote")
+	base := query.Get("base")
+
 	limit := GetLimit(query.Get("limit"))
 
-	if token == types.ETH_ADDRESS || !common.IsHexAddress(token) {
-		return dexyhttp.NewError(fmt.Sprintf("invalid token: %s", token), http.StatusBadRequest)
-	}
+	// @todo this needs to change, we need to check that the base is a valid base
+	//if quote == types.ETH_ADDRESS || !common.IsHexAddress(quote) {
+	//	return dexyhttp.NewError(fmt.Sprintf("invalid quote: %s", quote), http.StatusBadRequest)
+	//}
 
-	address := types.HexToAddress(token)
+	address := types.HexToAddress(quote)
 
 	ob := types.OrderBook{}
-	ob.Asks = ep.OrderBook.Asks(address, limit)
-	ob.Bids = ep.OrderBook.Bids(address, limit)
+	ob.Asks = ep.OrderBook.Asks(
+		types.Pair{Quote: types.HexToAddress(quote), Base: types.HexToAddress(base)},
+		limit,
+	)
+
+	ob.Bids = ep.OrderBook.Bids(
+		types.Pair{Quote: types.HexToAddress(quote), Base: types.HexToAddress(base)},
+		limit,
+	)
 
 	json.NewEncoder(rw).Encode(ob)
 	return nil
