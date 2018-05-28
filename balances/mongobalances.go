@@ -32,7 +32,7 @@ func (balances *MongoBalances) OnOrders(user types.Address, token types.Address)
 	var result []struct {
 		Make struct {
 			Amount types.Int `bson:"amount"`
-		} `bson:"give"`
+		} `bson:"make"`
 	}
 
 	// we solved it like this because mongos $sum function requires values to be numbers, in our case however they are

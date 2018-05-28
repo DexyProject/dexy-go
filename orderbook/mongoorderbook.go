@@ -12,6 +12,16 @@ type MongoOrderBook struct {
 	session *mgo.Session
 }
 
+type DepthResult struct {
+	Make struct {
+		Token  types.Address `bson:"token"`
+		Amount types.Int     `bson:"amount"`
+	} `bson:"make"`
+	Take struct {
+		Token  types.Address `bson:"token"`
+		Amount types.Int     `bson:"amount"`
+	} `bson:"take"`
+}
 const (
 	DBName   = "dexy"
 	FileName = "orders"
@@ -161,6 +171,44 @@ func (ob *MongoOrderBook) GetHighestBids(tokens []types.Address) (types.Prices, 
 	)
 }
 
+// this is ugly
+func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]types.Int, error) {
+	session := ob.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	r := make(map[types.Address]types.Int)
+
+	dr := make([]DepthResult, 0)
+
+	err := c.Find(
+		bson.M{
+			"$or": []bson.M{
+				{"make.token": bson.M{"$in": tokens}},
+				{"take.token": bson.M{"$in": tokens}},
+			},
+		},
+	).Select(bson.M{"make": 1, "take": 1}).All(&dr)
+
+	if err != nil {
+		return r, err
+	}
+
+	for _, d := range dr {
+		addr, value := getTokenAndDepth(d)
+
+		if _, ok := r[addr]; !ok {
+			r[addr] = value
+			continue
+		}
+
+		r[addr] = r[addr].Add(value)
+	}
+
+	return r, nil
+}
+
 func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bool, error) {
 	session := ob.session.Copy()
 	defer session.Close()
@@ -168,7 +216,7 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 
 	// we are only looking for orders we made
 	q := bson.M{
-		"maker": user,
+		"maker":      user,
 		"make.token": token,
 	}
 
@@ -180,14 +228,14 @@ func (ob *MongoOrderBook) HasOrders(token types.Address, user types.Address) (bo
 	return count > 0, nil
 }
 
-func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) (error) {
+func (ob *MongoOrderBook) SetOrderStatuses(token types.Address, user types.Address, status types.OrderStatus) error {
 	session := ob.session.Copy()
 	defer session.Close()
 	c := session.DB(DBName).C(FileName)
 
 	// we are only looking for orders we made
 	q := bson.M{
-		"maker": user,
+		"maker":      user,
 		"make.token": token,
 	}
 
@@ -237,4 +285,13 @@ func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, er
 	}
 
 	return result, nil
+}
+
+// this is ugly but whatever
+func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
+	if dr.Take.Token.String() == types.ETH_ADDRESS {
+		return dr.Make.Token, dr.Take.Amount
+	}
+
+	return dr.Take.Token, dr.Make.Amount
 }
