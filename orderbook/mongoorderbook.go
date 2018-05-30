@@ -13,6 +13,7 @@ type MongoOrderBook struct {
 }
 
 type DepthResult struct {
+	Filled types.Int `bson:"filled"`
 	Make struct {
 		Token  types.Address `bson:"token"`
 		Amount types.Int     `bson:"amount"`
@@ -22,6 +23,7 @@ type DepthResult struct {
 		Amount types.Int     `bson:"amount"`
 	} `bson:"take"`
 }
+
 const (
 	DBName   = "dexy"
 	FileName = "orders"
@@ -290,7 +292,7 @@ func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, er
 // this is ugly but whatever
 func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
 	if dr.Take.Token.String() == types.ETH_ADDRESS {
-		return dr.Make.Token, dr.Take.Amount
+		return dr.Make.Token, dr.Take.Amount.Sub(dr.Filled)
 	}
 
 	return dr.Take.Token, dr.Make.Amount

@@ -21,6 +21,10 @@ func (x Int) Add(y Int) (Int) {
 	return Int{*x.Int.Add(&x.Int, &y.Int)}
 }
 
+func (x Int) Sub(y Int) (Int) {
+	return Int{*x.Int.Sub(&x.Int, &y.Int)}
+}
+
 func (x Int) GetBSON() (interface{}, error) {
 	return x.Int.String(), nil
 }
