@@ -295,5 +295,6 @@ func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
 		return dr.Make.Token, dr.Take.Amount.Sub(dr.Filled)
 	}
 
-	return dr.Take.Token, dr.Make.Amount.Sub(dr.Make.Amount.Mul(dr.Filled).Div(dr.Take.Amount))
+	//return dr.Take.Token, dr.Make.Amount.Sub(dr.Make.Amount.Mul(dr.Filled).Div(dr.Take.Amount))
+	return dr.Take.Token, dr.Make.Amount.Sub(dr.Filled)
 }
