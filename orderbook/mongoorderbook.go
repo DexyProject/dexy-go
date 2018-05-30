@@ -191,7 +191,7 @@ func (ob *MongoOrderBook) GetDepths(tokens []types.Address) (map[types.Address]t
 				{"take.token": bson.M{"$in": tokens}},
 			},
 		},
-	).Select(bson.M{"make": 1, "take": 1}).All(&dr)
+	).Select(bson.M{"make": 1, "take": 1, "filled": 1}).All(&dr)
 
 	if err != nil {
 		return r, err
@@ -295,6 +295,5 @@ func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
 		return dr.Make.Token, dr.Take.Amount.Sub(dr.Filled)
 	}
 
-	//return dr.Take.Token, dr.Make.Amount.Sub(dr.Make.Amount.Mul(dr.Filled).Div(dr.Take.Amount))
-	return dr.Take.Token, dr.Make.Amount.Sub(dr.Filled)
+	return dr.Take.Token, dr.Make.Amount.Sub(dr.Make.Amount.Mul(dr.Filled).Div(dr.Take.Amount))
 }
