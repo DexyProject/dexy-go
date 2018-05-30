@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [unreleased]
 
+### Fixed
+ - Accounting for ```filled``` in ```depth```
+
 ## [1.1.0] - 2018-05-27
 
 ### Added
