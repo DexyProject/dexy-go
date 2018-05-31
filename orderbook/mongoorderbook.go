@@ -291,12 +291,9 @@ func (ob *MongoOrderBook) executeAggregation(pipeline interface{}) ([]bson.M, er
 
 // this is ugly but whatever
 func getTokenAndDepth(dr DepthResult) (types.Address, types.Int) {
-	takeFilled := dr.Filled
-	makeFilled := takeFilled.Div(dr.Take.Amount).Mul(dr.Make.Amount)
-
 	if dr.Take.Token.String() == types.ETH_ADDRESS {
-		return dr.Make.Token, dr.Take.Amount.Sub(takeFilled)
+		return dr.Make.Token, dr.Take.Amount.Sub(dr.Filled)
 	}
 
-	return dr.Take.Token, dr.Make.Amount.Sub(makeFilled)
+	return dr.Take.Token, dr.Make.Amount.Sub(dr.Filled.Div(dr.Take.Amount).Mul(dr.Make.Amount))
 }
