@@ -84,7 +84,9 @@ func setupHistoryEndpoints(mongo string, r *mux.Router) {
 	}
 
 	endpoint := endpoints.History{History: h}
-	r.Handle("/trades", dexyhttp.Handler(endpoint.Handle)).Methods("GET").Queries("token", "")
+	r.Handle("/trades", dexyhttp.Handler(endpoint.Handle)).
+		Methods("GET").
+		Queries("quote", "", "base", "")
 }
 
 func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *contracts.Vault, r *mux.Router) {
@@ -95,8 +97,14 @@ func setupOrderBookEndpoints(mongo string, bv validators.BalanceValidator, v *co
 
 	orders := endpoints.Orders{OrderBook: ob, BalanceValidator: bv, Vault: v}
 
-	r.Handle("/orderbook", dexyhttp.Handler(orders.GetOrderBook)).Methods("GET", "HEAD").Queries("token", "")
-	r.Handle("/orders", dexyhttp.Handler(orders.GetOrders)).Methods("GET", "HEAD").Queries("token", "")
+	r.Handle("/orderbook", dexyhttp.Handler(orders.GetOrderBook)).
+		Methods("GET", "HEAD").
+		Queries("quote", "", "base", "")
+
+	r.Handle("/orders", dexyhttp.Handler(orders.GetOrders)).
+		Methods("GET", "HEAD").
+		Queries("quote", "", "base", "")
+
 	r.Handle("/orders", dexyhttp.Handler(orders.CreateOrder)).Methods("POST")
 	r.Handle("/orders/{order}", dexyhttp.Handler(orders.GetOrder)).Methods("GET", "HEAD")
 }
@@ -109,7 +117,9 @@ func setupMarketsEndpoints(mongo string, r *mux.Router) {
 
 	ms := endpoints.Markets{Markets: m}
 
-	r.Handle("/markets", dexyhttp.Handler(ms.GetMarkets)).Methods("GET", "HEAD").Queries("tokens", "")
+	r.Handle("/markets", dexyhttp.Handler(ms.GetMarkets)).
+		Methods("GET", "HEAD").
+		Queries("quote", "", "base", "")
 }
 
 func setupTickEndpoint(mongo string, r *mux.Router) {
@@ -120,7 +130,9 @@ func setupTickEndpoint(mongo string, r *mux.Router) {
 
 	t := endpoints.Ticks{Ticks: tickdb}
 
-	r.Handle("/ticks", dexyhttp.Handler(t.GetTicks)).Methods("GET", "HEAD").Queries("token", "")
+	r.Handle("/ticks", dexyhttp.Handler(t.GetTicks)).
+		Methods("GET", "HEAD").
+		Queries("quote", "", "base", "")
 }
 
 func setupBalanceValidator(v *contracts.Vault, mongo string) (validators.BalanceValidator, error) {
