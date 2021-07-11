@@ -65,3 +65,15 @@ func (history *MongoHistory) InsertTransaction(transaction types.Transaction) er
 
 	return nil
 }
+
+func (history *MongoHistory) GetTransactionsInBlock(block uint64) ([]types.Transaction, error) {
+	session := history.session.Copy()
+	defer session.Close()
+
+	c := session.DB(DBName).C(FileName)
+
+	transactions := make([]types.Transaction, 0)
+
+	err := c.Find(bson.M{"$match": bson.M{"block": block}}).All(&transactions)
+	return transactions, err
+}
